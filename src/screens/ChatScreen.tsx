@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { View, TextInput, Button, FlatList, Text, StyleSheet } from "react-native";
+import React, { useEffect, useLayoutEffect, useState } from "react";
+import { View, TextInput, Button, FlatList, Text, StyleSheet, Alert } from "react-native";
 import socket from "../services/socket";
 import { Message } from "../types/Message";
 import { RouteProp } from "@react-navigation/native";
@@ -12,55 +12,88 @@ type ChatRouteProp = RouteProp<RootStackParamList, "Chat">;
 
 interface Props {
   route: ChatRouteProp;
+  navigation: any;
 }
 
-const ChatScreen: React.FC<Props> = ({ route }) => {
+const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
   const { username } = route.params;
-  console.log('first username:', username);
+
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
-
-  useEffect(() => {
-    console.log('uef')
-    if (socket.connected) {
-      console.log("✅ Already connected to server chatscreen");
-      socket.emit("load_all_messages");
-    }
-    socket.on("connect", () => {
-      console.log("✅ Connected to server chatscreen");
-      // Yêu cầu tải lại toàn bộ tin nhắn khi vừa kết nối
-      socket.emit("load_all_messages");
+  const [toUser, setToUser] = useState("user2");
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: `${username}`,
     });
-    socket.on("load_messages", (msgs: Message[]) => {
+  }, [navigation, username]);
+
+  // 1️⃣ Register user & setup listeners
+  useEffect(() => {
+    socket.emit("register_user", username);
+
+    socket.on("connect", () => {
+      console.log("✅ Connected to server");
+    });
+
+    // Lắng nghe tin nhắn load 1-1
+    const handleLoadMessages = (msgs: Message[]) => {
       console.log("📜 Loaded messages:", msgs);
       setMessages(msgs);
-    });
-    socket.on("receive_message", (data: Message) => {
-      console.log("💬 Received message:", data);
-      setMessages((prev) => [...prev, data]);
-    });
+    };
+
+    // Lắng nghe tin nhắn realtime
+    const handleReceiveMessage = (msg: Message) => {
+      if (
+        (msg.user === username && msg.to === toUser) ||
+        (msg.user === toUser && msg.to === username)
+      ) {
+        setMessages((prev) => [...prev, msg]);
+      }
+    };
+
+    socket.on("load_messages", handleLoadMessages);
+    socket.on("receive_message", handleReceiveMessage);
 
     return () => {
-      socket.off("receive_message");
-      socket.off("load_messages");
+      socket.off("load_messages", handleLoadMessages);
+      socket.off("receive_message", handleReceiveMessage);
+      socket.off("connect");
     };
-  }, []);
+  }, [username, toUser]); // toUser cần để filter realtime messages
 
+  // 2️⃣ Load tin nhắn khi thay đổi người nhận
+  useEffect(() => {
+    const to = toUser.trim();
+    if (!to) return;
+
+    setMessages([]); // reset trước khi load
+    console.log("🔄 Loading chat messages for:", to);
+    socket.emit("load_chat_messages", { username, chatWith: to });
+  }, [toUser, username]);
+
+  // 3️⃣ Gửi tin nhắn
   const sendMessage = () => {
-    console.log('sendMessage called with message:', message);
+    const to = toUser.trim();
+    if (!to) return Alert.alert("Info", "You must fill name receive user");
     if (!message.trim()) return;
-    const msgData: Message = { user: username, text: message };
-    console.log('first msgData:', msgData);
+
+    const msgData: Message = {
+      user: username,
+      text: message,
+      to,
+    };
+
     socket.emit("send_message", msgData);
     setMessage("");
   };
+ 
   const renderItem = ({ item }: { item: Message }) => {
     const isMine = item.user === username;
     const time = item.createdAt
       ? new Date(item.createdAt).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
+        hour: "2-digit",
+        minute: "2-digit",
+      })
       : "";
 
     return (
@@ -83,12 +116,20 @@ const ChatScreen: React.FC<Props> = ({ route }) => {
       </View>
     );
   };
+  console.log('toUser state:', toUser);
   return (
     <View style={styles.container}>
+      <TextInput
+        placeholder="To (optional)"
+        value={toUser}
+        onChangeText={setToUser}
+        style={styles.input}
+      />
       <FlatList
         data={messages}
         keyExtractor={(_, i) => i.toString()}
         renderItem={renderItem}
+     
       />
       <TextInput
         value={message}
@@ -154,7 +195,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   input: {
-   
+
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 20,

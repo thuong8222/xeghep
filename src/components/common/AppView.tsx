@@ -1,0 +1,96 @@
+import { View, ViewStyle } from 'react-native';
+import React from 'react';
+
+import { scale, verticalScale } from 'react-native-size-matters';
+
+import { autoScale } from '../../utils/Helper';
+import { BaseViewProps } from '../base/types/baseViewProps';
+
+const AppView: React.FC<BaseViewProps> = ({
+  justifyContent,
+  alignItems,
+  backgroundColor,
+  paddingVertical,
+  paddingHorizontal,
+  paddingRight,
+  paddingBottom,
+  marginTop,
+  marginHorizontal,
+  paddingLeft,
+  marginBottom,
+  height,
+  width,
+  minHeight,
+  radius,
+  flex,
+  paddingTop,
+  padding,
+  margin,
+  borderColor,
+  borderTopEndRadius,
+  borderTopLeftRadius,
+  gap,
+  borderWidth,
+  borderTopWidth,
+  borderTopColor,
+  borderBottomColor,
+  borderBottomWidth,
+  borderLeftColor,
+  borderLeftWidth,
+  borderRightColor,
+  borderRightWidth,
+  style,
+  children,
+  row,
+  position,
+  flexWrap,top,
+  bottom,
+  left,
+  right,alignSelf,
+}) => {
+  const viewStyle: ViewStyle = {
+     justifyContent,
+     alignItems,
+     backgroundColor,
+     paddingRight,
+     paddingBottom,
+     marginTop,
+     marginHorizontal,
+     paddingLeft,
+     marginBottom,
+     height,
+     minHeight,
+     width,
+     padding,
+     paddingVertical,
+     paddingHorizontal,
+     margin,
+     borderRadius:radius,
+     borderTopEndRadius,
+     borderTopLeftRadius,
+     gap,
+     borderColor,
+     borderWidth,
+     borderTopWidth,
+     borderTopColor,
+     borderBottomColor,
+     borderBottomWidth,
+     borderLeftColor,
+     borderLeftWidth,
+     borderRightColor,
+     borderRightWidth,
+     flexWrap,
+     flex,  paddingTop,
+
+     top,
+     bottom,
+     left,
+     right,
+     position,
+     ...(row && { flexDirection: 'row' }),
+   };
+
+  return <View style={[viewStyle, style]}>{children}</View>;
+};
+
+export default AppView;
