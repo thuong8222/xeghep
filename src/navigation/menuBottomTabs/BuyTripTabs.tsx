@@ -1,10 +1,10 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import BuyTripScreen from '../../screens/buyTrip/BuyTripScreen';
+import GroupAreaScreen from '../../screens/buyTrip/GroupAreaScreen';
 
 export type BuyTripStackParamList ={
-    BuyTripScreen: undefined;
+  GroupArea: undefined;
   
 }
 
@@ -13,7 +13,7 @@ export type BuyTripStackParamList ={
    return (
      <Stack.Navigator screenOptions={{ headerShown: false }}>
 
-     <Stack.Screen name="BuyTripScreen" component={BuyTripScreen} />
+     <Stack.Screen name="GroupArea" component={GroupAreaScreen} />
         
    </Stack.Navigator>
    )

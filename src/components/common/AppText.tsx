@@ -2,6 +2,8 @@ import React from 'react';
 import { Text, TextStyle, TextProps, Platform } from 'react-native';
 import { scale } from 'react-native-size-matters';
 import { Typography } from '../base/types/typography';
+import { Color } from 'react-native/types_generated/Libraries/Animated/AnimatedExports';
+import { ColorsGlobal } from '../base/Colors/ColorsGlobal';
 
 
 
@@ -17,13 +19,15 @@ export  interface CustomTextProps extends TextProps {
   children?: React.ReactNode;
   variant?: keyof typeof Typography; 
   backgroundColor?: TextStyle['backgroundColor'];
-  alignSelf?: TextStyle['alignSelf']
+  alignSelf?: TextStyle['alignSelf'];
+  lineHeight?: number;
 }
 
 const AppText: React.FC<CustomTextProps> = ({
-  color = '#000',
+  color = ColorsGlobal.textDark,
   fontWeight,
-  fontSize = 14,
+  fontSize = 16,
+  lineHeight=24,
   textAlign,fontStyle, backgroundColor,
   title,
   style,  variant,
@@ -31,16 +35,14 @@ const AppText: React.FC<CustomTextProps> = ({
   textDecorationLine,
   ...restProps
 }) => {
-  const baseStyle: TextStyle = variant ? Typography[variant] : {};
-
   const textStyles: TextStyle = {
-    ...baseStyle,
+  
     color, textDecorationLine,
-    fontWeight: fontWeight ?? baseStyle.fontWeight,
-    fontSize: fontSize ? scale(fontSize) : baseStyle.fontSize,
+    fontWeight: fontWeight,
+    fontSize: fontSize ,
     textAlign, backgroundColor,
     flexWrap: 'wrap',
-    fontFamily: Platform.OS === 'ios' ? 'SF Pro Display' : 'Roboto',
+    
   };
 
   return (

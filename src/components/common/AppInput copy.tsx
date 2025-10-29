@@ -5,7 +5,6 @@ import AppButton from './AppButton';
 import { ColorsGlobal } from '../base/Colors/ColorsGlobal';
 import { scale } from '../../utils/Helper';
 import AppText from './AppText';
-import { StyleGlobal } from '../base/StyleGlobal';
 
 interface CustomInputProps extends TextInputProps {
     label: string;
@@ -38,38 +37,46 @@ const AppInput: React.FC<CustomInputProps> = ({
         }).start();
     }, [isFocused, value]);
 
+    const labelStyle = {
+        position: "absolute",
+        left: 20,
+        top: animated.interpolate({
+            inputRange: [0, 1],
+            outputRange: [18, -8],
+        }),
+        fontSize: animated.interpolate({
+            inputRange: [0, 1],
+            outputRange: [14, 12],
+        }),
+        color: "#007927",
+        opacity: animated, // 👈 Fade in/out mượt
+        backgroundColor: "#fff",
+        paddingHorizontal: 4,
+        zIndex: 3,
+    };
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={[{ marginTop }]}>
+            <View style={[ { marginTop }]}>
+                <View style={{ position: 'relative' }}>
+                    {/* Animated Text label */}
+                    <Animated.Text style={labelStyle}>{label}</Animated.Text>
 
-                <Text
-                    style={[
-                        {
-                            fontSize: 14, lineHeight: 20, fontWeight: '400',
-                            marginBottom: 6,
-                            color: isFocused ? ColorsGlobal.main2 : ColorsGlobal.textDark,
-                        },
-                    ]}
-                >
-                    {label}
-                </Text>
-
-                <TextInput
-                    style={[
-                        styles.input,
-                        { borderColor: isFocused ? ColorsGlobal.main2 : ColorsGlobal.borderColor },
-                    ]}
-                    value={value}
-                    onChangeText={onChangeText}
-                    keyboardType={keyboardType}
-                    placeholderTextColor={ColorsGlobal.placeholderText}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                    editable={!isLoading}
-                    {...rest}
-                />
-
+                    <TextInput
+                        style={[
+                            styles.input,
+                            { borderColor: isFocused ? '#007927' : '#ccc' },
+                        ]}
+                        value={value}
+                        onChangeText={onChangeText}
+                        keyboardType={keyboardType}
+                        placeholderTextColor="#999"
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setIsFocused(false)}
+                        editable={!isLoading}
+                        {...rest}
+                    />
+                </View>
             </View>
         </TouchableWithoutFeedback>
     );
@@ -78,13 +85,19 @@ export default AppInput;
 const styles = StyleSheet.create({
     inputWrapper: {
         marginBottom: 15,
-        gap: 4
     },
     labelFocused: {
         color: '#007927',
     },
     inputLabel: {
-        fontSize: 18, lineHeight: 26, fontWeight: 500, marginBottom: 6
+        position: 'absolute',
+        top: -8,          // đẩy label lên một chút
+        left: 20,         // canh vị trí
+        fontSize: 12,
+        color: '#5C5C5C',
+        zIndex: 2,
+        paddingHorizontal: 4, // để tạo khoảng trống nhỏ giữa border
+        backgroundColor: 'transparent', // không cần nền
     },
     inputLabelPass: {
         width: 70,
@@ -92,7 +105,7 @@ const styles = StyleSheet.create({
     input: {
         backgroundColor: 'white',
         color: '#000',
-        height: 50,
+        height: 52,
         padding: 10,
         paddingLeft: 20,
         borderWidth: 1,

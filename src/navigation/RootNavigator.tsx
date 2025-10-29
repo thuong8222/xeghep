@@ -2,12 +2,12 @@ import { View, Text } from 'react-native'
 import React from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MenuBottomTabs from './MenuBottomTabs';
-import Authnavigator from './AuthNavigator';
+
 import ChatScreen from '../screens/ChatScreen';
 
 export type RootStackParamList = {
     BottomTabs: undefined;
-    AuthNavigator: undefined;
+  
     ChatScreen: { username: string };
    
   };
@@ -16,7 +16,7 @@ export default function RootNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="BottomTabs" component={MenuBottomTabs} />
-    <Stack.Screen name="AuthNavigator" component={Authnavigator} options={{ headerShown: false }} />
+ 
     <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerShown: false }} />
    
 

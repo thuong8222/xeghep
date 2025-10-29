@@ -9,14 +9,14 @@ import 'react-native-gesture-handler';
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import LoginScreen from "./src/screens/auth/LoginScreen";
-import ChatScreen from "./src/screens/ChatScreen";
+
 import RootNavigator from './src/navigation/RootNavigator';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+import AuthNavigator from './src/navigation/AuthNavigator';
 
 export type RootStackParamList = {
   RootNavigator: undefined;
-  Login: undefined;
+  Auth: undefined;
   Chat: { username: string };
 };
 
@@ -27,9 +27,9 @@ const App = () => {
 
     <NavigationContainer>
    
-      <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
-
-        <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Navigator initialRouteName="Auth" screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Auth" component={AuthNavigator} />
+        
         <Stack.Screen name="RootNavigator" component={RootNavigator} />
       
       </Stack.Navigator>

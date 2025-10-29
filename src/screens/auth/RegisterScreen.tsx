@@ -12,35 +12,31 @@ import { logo } from "../../assets/images";
 import { RootStackParamList } from "../../navigation/RootNavigator";
 import { StyleGlobal } from "../../components/base/StyleGlobal";
 import { ColorsGlobal } from "../../components/base/Colors/ColorsGlobal";
+import { Text } from "react-native-gesture-handler";
 import { AuthStackParamList } from "../../navigation/AuthNavigator";
 
 
-type RootNavProp = StackNavigationProp<RootStackParamList>;
-type AuthNavProp = StackNavigationProp<AuthStackParamList>;
-type LoginParamList = AuthNavProp & RootNavProp;
+type RegisterScreenNavProp = StackNavigationProp<AuthStackParamList, "LoginScreen">;
 
 interface Props {
-  navigation: LoginParamList;
+  navigation: RegisterScreenNavProp;
 }
 
-const LoginScreen: React.FC<Props> = ({ navigation }) => {
+const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setloading] = useState();
   const [isFormValid, setIsFocused] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const handleLogin = () => {
-
-    navigation.navigate('RootNavigator', { screen: 'BottomTabs' });
+    // Giả sử xác thực thành công
+    navigation.navigate("ChatScreen", { username });
+  };
+  const gotoLogin = () => {
+   navigation.navigate("LoginScreen");
 
   };
-  const gotoRegiste = () => {
-    navigation.navigate("RegisterScreen");
 
-  };
-  const ForgotPassword = () => {
-    setIsOpenModal(true);
-  }
   const gotoTerms = () => { }
   const gotoPolicy = () => { }
   return (
@@ -49,13 +45,13 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       <View style={styles.container}>
         <AppView flex={1} justifyContent="center" >
 
-          <AppView justifyContent="center" alignItems="center" marginBottom={20} gap={16}>
-         
+          <AppView justifyContent="center" alignItems="center" gap={16}>
+            {/* <FastImage source={logo} styles={styles.logo}  /> */}
             <Image source={logo} style={styles.logo} />
             <AppView gap={6}>
               <AppText
                 style={StyleGlobal.title1}>
-                {'Đăng nhập'}
+                {'Đăng ký'}
               </AppText>
               <AppText
                 style={StyleGlobal.textNormal}>
@@ -65,10 +61,20 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
           </AppView>
           <AppView gap={16} marginTop={32}>
+          <AppInput label="Tên hiển thị"
+              value={username}
+              onChangeText={setUsername}
+              placeholder="Nhập tên hiển thị"
+            />
             <AppInput label="Số điện thoại"
               value={username}
               onChangeText={setUsername}
               placeholder="Nhập số điện thoại"
+            />
+              <AppInput label="Khu vực (chọn tỉnh/thành)"
+              value={username}
+              onChangeText={setUsername}
+              placeholder="Khu vực (chọn tỉnh/thành)"
             />
             <AppInput label="Mật khẩu"
               value={password}
@@ -76,34 +82,28 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
               placeholder="Nhập mật khẩu"
               secureTextEntry
             />
+               <AppInput label="Xác nhận mật khẩu"
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Xác nhận mật khẩu"
+              secureTextEntry
+            />
           </AppView>
-          <AppView row justifyContent="space-between" marginTop={18}  alignItems="center">
-            <TouchableOpacity onPress={ForgotPassword} disabled={loading}>
-              <AppText fontSize={18} lineHeight={26} >
-                Đăng nhập bằng vân tay
-              </AppText>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={ForgotPassword} disabled={loading}>
-              <AppText fontSize={18} lineHeight={26}
-                style={{ color: ColorsGlobal.main, textDecorationLine: 'underline' }}>
-                Quên mật khẩu
-              </AppText>
-            </TouchableOpacity>
-          </AppView>
+        
 
-          <ButtonSubmit title="Đăng nhập" 
+          <ButtonSubmit title="Đăng ký"
             isLoading={loading}
             onPress={handleLogin}
-         />
+            disabled={!isFormValid} />
           <AppView marginTop={24} justifyContent="center" alignItems="center" row gap={12}>
 
             <AppText  >
-              Bạn chưa có tài khoản?
+              Bạn đã có tài khoản?
             </AppText>
-            <TouchableOpacity onPress={gotoRegiste} disabled={loading}>
+            <TouchableOpacity onPress={gotoLogin} disabled={loading}>
               <AppText
-                style={{ textDecorationLine: 'underline' ,fontWeight:600 }}>
-                Đăng ký ngay
+                style={{ textDecorationLine: 'underline', fontWeight:600 }}>
+                Đăng nhập
               </AppText>
             </TouchableOpacity>
           </AppView>
@@ -113,7 +113,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           <TouchableOpacity onPress={gotoTerms} disabled={loading}>
             <AppText
               style={{ color: ColorsGlobal.textLight }}>
-               Điều khoản sử dụng   |
+              Điều khoản sử dụng   |
             </AppText>
           </TouchableOpacity>
           <TouchableOpacity onPress={gotoPolicy} disabled={loading}>
@@ -131,14 +131,13 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   );
 };
 
-export default LoginScreen;
+export default RegisterScreen;
 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: "center", padding: 20, backgroundColor: ColorsGlobal.backgroundWhite },
   logo: {
     height: 68,
     width: 180,
-
     alignSelf: 'center',
 
   },

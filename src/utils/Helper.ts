@@ -30,7 +30,7 @@ const navbarHeight =
   (StatusBar.currentHeight || 0);
 const scale = (size: number) => {
   const w = _screen_width < _screen_height ? _screen_width : _screen_height;
-  return (size * w) / (Platform.OS === 'ios' ? 390 : 390);
+  return (size * w) / (Platform.OS === 'ios' ? 440 : 440);
 };
 
 const isAndroid = Platform.OS === 'android';

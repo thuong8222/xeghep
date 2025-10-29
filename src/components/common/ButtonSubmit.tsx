@@ -18,11 +18,11 @@ interface ButtonSubmitProps {
 }
 
 const ButtonSubmit: React.FC<ButtonSubmitProps> = ({
-  title = "XÁC NHẬN",
+  title,
   onPress,
   isLoading = false,
   disabled = false,
-  colorBackground = ColorsGlobal.main || "#007927",
+  colorBackground = ColorsGlobal.main,
   colorText = "#fff",
 }) => {
   return (
@@ -30,27 +30,19 @@ const ButtonSubmit: React.FC<ButtonSubmitProps> = ({
       activeOpacity={0.8}
       style={[
         styles.buttonInner,
-        {
-          backgroundColor: disabled
-            ? "#B0B0B0"
-            : isLoading
-            ? "#6da87b"
-            : colorBackground,
-        },
+
       ]}
       onPress={!isLoading && !disabled ? onPress : undefined}
       disabled={isLoading || disabled}
     >
-      {isLoading ? (
-        <View style={styles.content}>
-          <ActivityIndicator color={colorText} size="small" />
-          <Text style={[styles.textInner, { color: colorText, marginLeft: 10 }]}>
-            ĐANG XỬ LÝ...
-          </Text>
-        </View>
-      ) : (
+
+      <View style={styles.content}>
+        {isLoading && <ActivityIndicator color={colorText} size="small" />}
+
         <Text style={[styles.textInner, { color: colorText }]}>{title}</Text>
-      )}
+      </View>
+
+
     </TouchableOpacity>
   );
 };
@@ -63,14 +55,18 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: ColorsGlobal.main,
+    marginTop: 32,
   },
   content: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+  
   },
   textInner: {
     fontSize: 16,
+    lineHeight: 24,
     fontWeight: "bold",
     textAlign: "center",
   },
