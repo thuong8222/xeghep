@@ -51,5 +51,8 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSFaceIDUsageDescription</key>
+<string>Đăng nhập nhanh bằng Face ID, Touch ID để bảo mật tài khoản</string>
+
 </dict>
 </plist>

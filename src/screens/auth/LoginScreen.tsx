@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, TextInput, Button, StyleSheet, TouchableOpacity, SafeAreaView, Image, ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, TextInput, Button, StyleSheet, TouchableOpacity, SafeAreaView, Image, ScrollView, Alert } from "react-native";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AppButton from "../../components/common/AppButton";
 import AppInput from "../../components/common/AppInput";
@@ -14,6 +14,8 @@ import { StyleGlobal } from "../../components/base/StyleGlobal";
 import { ColorsGlobal } from "../../components/base/Colors/ColorsGlobal";
 import { AuthStackParamList } from "../../navigation/AuthNavigator";
 import IconTouch from "../../assets/icons/IconTouch";
+import ReactNativeBiometrics, { BiometryTypes } from 'react-native-biometrics'
+
 
 
 type RootNavProp = createNativeStackNavigator<RootStackParamList>;
@@ -30,6 +32,10 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [loading, setloading] = useState();
   const [isFormValid, setIsFocused] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
+
+  const rnBiometrics = new ReactNativeBiometrics()
+
+
   const handleLogin = () => {
 
     navigation.navigate('RootNavigator', { screen: 'BottomTabs' });
@@ -44,6 +50,33 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   }
   const gotoTerms = () => { }
   const gotoPolicy = () => { }
+
+  const handleLoginWithBiometric = async () => {
+    try {
+      // kiểm tra thiết bị có hỗ trợ biometrics không
+      const {available, biometryType} = await rnBiometrics.isSensorAvailable();
+      if (!available) {
+        Alert.alert('Không hỗ trợ biometric trên thiết bị này');
+        return;
+      }
+
+      // hiện prompt
+      const {success, error} = await rnBiometrics.simplePrompt({
+        promptMessage: 'Xác thực để đăng nhập',
+      });
+
+      if (success) {
+        // authenticated locally — bạn có thể set local session/token
+        Alert.alert('Xác thực thành công — đăng nhập!');
+        // gọi API backend để lấy token nếu cần, hoặc unlock local data
+      } else {
+        Alert.alert('Xác thực thất bại hoặc bị hủy');
+      }
+    } catch (e) {
+      console.warn(e);
+      Alert.alert('Lỗi khi xác thực biometric', e.message || String(e));
+    }
+  };
   return (
 
     <ScrollView style={{ flexGrow: 1 }} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
@@ -79,7 +112,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             />
           </AppView>
           <AppView row justifyContent="space-between" marginTop={18}  alignItems="center">
-            <AppButton onPress={ForgotPassword} disabled={loading} row gap={6}>
+            <AppButton onPress={handleLoginWithBiometric} disabled={loading} row gap={6}>
               <IconTouch />
               <AppText fontSize={18} lineHeight={26} >
                 Đăng nhập bằng vân tay
