@@ -21,6 +21,9 @@ export  interface CustomTextProps extends TextProps {
   backgroundColor?: TextStyle['backgroundColor'];
   alignSelf?: TextStyle['alignSelf'];
   lineHeight?: number;
+  paddingVertical?: TextStyle['paddingVertical'];
+  borderBottomWidth?: TextStyle['borderBottomWidth']
+  borderBottomColor?: TextStyle['borderBottomColor']
 }
 
 const AppText: React.FC<CustomTextProps> = ({
@@ -29,7 +32,7 @@ const AppText: React.FC<CustomTextProps> = ({
   fontSize = 16,
   lineHeight=24,
   textAlign,fontStyle, backgroundColor,
-  title,
+  title,borderBottomWidth,borderBottomColor,paddingVertical,
   style,  variant,
   children,
   textDecorationLine,
@@ -42,6 +45,7 @@ const AppText: React.FC<CustomTextProps> = ({
     fontSize: fontSize ,
     textAlign, backgroundColor,
     flexWrap: 'wrap',
+    fontStyle
     
   };
 

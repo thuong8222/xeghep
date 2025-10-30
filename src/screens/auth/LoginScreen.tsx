@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, TextInput, Button, StyleSheet, TouchableOpacity, SafeAreaView, Image, ScrollView } from "react-native";
-import { StackNavigationProp } from "@react-navigation/stack";
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AppButton from "../../components/common/AppButton";
 import AppInput from "../../components/common/AppInput";
 import ButtonSubmit from "../../components/common/ButtonSubmit";
@@ -13,10 +13,11 @@ import { RootStackParamList } from "../../navigation/RootNavigator";
 import { StyleGlobal } from "../../components/base/StyleGlobal";
 import { ColorsGlobal } from "../../components/base/Colors/ColorsGlobal";
 import { AuthStackParamList } from "../../navigation/AuthNavigator";
+import IconTouch from "../../assets/icons/IconTouch";
 
 
-type RootNavProp = StackNavigationProp<RootStackParamList>;
-type AuthNavProp = StackNavigationProp<AuthStackParamList>;
+type RootNavProp = createNativeStackNavigator<RootStackParamList>;
+type AuthNavProp = createNativeStackNavigator<AuthStackParamList>;
 type LoginParamList = AuthNavProp & RootNavProp;
 
 interface Props {
@@ -78,11 +79,12 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             />
           </AppView>
           <AppView row justifyContent="space-between" marginTop={18}  alignItems="center">
-            <TouchableOpacity onPress={ForgotPassword} disabled={loading}>
+            <AppButton onPress={ForgotPassword} disabled={loading} row gap={6}>
+              <IconTouch />
               <AppText fontSize={18} lineHeight={26} >
                 Đăng nhập bằng vân tay
               </AppText>
-            </TouchableOpacity>
+            </AppButton>
             <TouchableOpacity onPress={ForgotPassword} disabled={loading}>
               <AppText fontSize={18} lineHeight={26}
                 style={{ color: ColorsGlobal.main, textDecorationLine: 'underline' }}>

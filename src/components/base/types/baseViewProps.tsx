@@ -5,7 +5,7 @@ export interface BaseViewProps {
   alignItems?: ViewStyle['alignItems'];
   row?: boolean;
 
-
+zIndex?:ViewStyle['zIndex'];
   height?: number | 'auto' | string;
   minHeight?: number | 'auto';
   width?: number | 'auto';
@@ -18,8 +18,8 @@ export interface BaseViewProps {
   margin?: number;
   marginBottom?: number;
   marginHorizontal?: number;
-  marginLeft?: number;
-  marginRight?: number;
+  marginLeft?: ViewStyle['marginLeft'];
+  marginRight?:ViewStyle['marginRight'];
   marginTop?: number;
   padding?: number;
   paddingHorizontal?: number;

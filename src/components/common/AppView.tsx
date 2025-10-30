@@ -8,7 +8,7 @@ import { BaseViewProps } from '../base/types/baseViewProps';
 
 const AppView: React.FC<BaseViewProps> = ({
   justifyContent,
-  alignItems,
+  alignItems,zIndex,
   backgroundColor,
   paddingVertical,
   paddingHorizontal,
@@ -54,7 +54,7 @@ const AppView: React.FC<BaseViewProps> = ({
      backgroundColor,
      paddingRight,
      paddingBottom,
-     marginTop,
+     marginTop,zIndex,
      marginHorizontal,
      paddingLeft,
      marginBottom,

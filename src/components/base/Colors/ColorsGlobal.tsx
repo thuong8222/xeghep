@@ -4,11 +4,12 @@ export const ColorsGlobal = {
     placeholderText: '#BDBDC2',
     textDark: '#1A1A1A',
     textBlack: '#000000',
+    colorIconNoActive: '#949494',
     textLight: '#5A5A5F',
-
+textNote: '#666666',
     borderColor: '#EBEAEA',
 
-
+    backgroundTrip: "#FBFBFB",
     backgroundWhite: '#FFFFFF',
     backgroundLight: '#EEEEEE',
     backgroundGray: '#F0F0F0',

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, TextInput, Button, StyleSheet, TouchableOpacity, SafeAreaView, Image, ScrollView } from "react-native";
-import { StackNavigationProp } from "@react-navigation/stack";
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AppButton from "../../components/common/AppButton";
 import AppInput from "../../components/common/AppInput";
 import ButtonSubmit from "../../components/common/ButtonSubmit";
@@ -16,7 +16,7 @@ import { Text } from "react-native-gesture-handler";
 import { AuthStackParamList } from "../../navigation/AuthNavigator";
 
 
-type RegisterScreenNavProp = StackNavigationProp<AuthStackParamList, "LoginScreen">;
+type RegisterScreenNavProp = createNativeStackNavigator<AuthStackParamList, "LoginScreen">;
 
 interface Props {
   navigation: RegisterScreenNavProp;
