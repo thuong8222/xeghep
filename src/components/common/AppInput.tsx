@@ -6,6 +6,9 @@ import { ColorsGlobal } from '../base/Colors/ColorsGlobal';
 import { scale } from '../../utils/Helper';
 import AppText from './AppText';
 import { StyleGlobal } from '../base/StyleGlobal';
+import IconEyeOff from '../../assets/icons/iconEyeOff';
+import IconEye from '../../assets/icons/iconEyeOpen';
+import IconArowDown from '../../assets/icons/IconArowDown';
 
 interface CustomInputProps extends TextInputProps {
     label: string;
@@ -14,6 +17,8 @@ interface CustomInputProps extends TextInputProps {
     isLoading?: boolean;
     keyboardType?: TextInputProps['keyboardType'];
     marginTop?: number;
+    type?: 'number' | 'email' | 'text' | 'phone' | 'password' | 'select';
+    error?: string;
 }
 const AppInput: React.FC<CustomInputProps> = ({
     label,
@@ -22,13 +27,15 @@ const AppInput: React.FC<CustomInputProps> = ({
     isLoading = false,
     keyboardType = 'default',
     marginTop = 0,
+    type, error,
+
     ...rest
 
 }) => {
 
     const [isFocused, setIsFocused] = useState(false);
     const animated = useRef(new Animated.Value(value ? 1 : 0)).current;
-
+    const [secureTextEntry, setSecureTextEntry] = useState(type === 'password');
     useEffect(() => {
         Animated.timing(animated, {
             toValue: isFocused || value ? 1 : 0,
@@ -37,11 +44,14 @@ const AppInput: React.FC<CustomInputProps> = ({
             useNativeDriver: false,
         }).start();
     }, [isFocused, value]);
+    const toggleShowPassword = () => {
+        setSecureTextEntry(prev => !prev);
+    };
 
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={[{ marginTop }, { flex: 1, marginTop: 10 }]}>
+            <View style={[{ marginTop }, { flex: 1, marginTop: 10, flexDirection: 'row', alignItems: 'center' }]}>
 
                 <Text
                     style={[
@@ -68,6 +78,25 @@ const AppInput: React.FC<CustomInputProps> = ({
                     editable={!isLoading}
                     {...rest}
                 />
+                {type === 'password' && (
+                    <AppButton onPress={toggleShowPassword} position={'absolute'} right={13}>
+                        {secureTextEntry ?
+                            <IconEyeOff size={24} /> : <IconEye size={24} />
+                        }
+                    </AppButton>
+
+                )}
+                {type === 'select' && (
+                    <AppButton onPress={toggleShowPassword} position={'absolute'} right={13}>
+                        <IconArowDown />
+                    </AppButton>
+
+                )}
+
+
+                {error ? (
+                    <AppText color={'red'} style={{ marginTop: 4, fontSize: 12 }}>{error}</AppText>
+                ) : null}
 
             </View>
         </TouchableWithoutFeedback>

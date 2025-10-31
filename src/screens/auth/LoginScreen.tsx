@@ -101,10 +101,12 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           <AppView gap={16} marginTop={32}>
             <AppInput label="Số điện thoại"
               value={username}
+              keyboardType={'decimal-pad'}
               onChangeText={setUsername}
               placeholder="Nhập số điện thoại"
             />
             <AppInput label="Mật khẩu"
+            type={'password'}
               value={password}
               onChangeText={setPassword}
               placeholder="Nhập mật khẩu"

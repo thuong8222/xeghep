@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, TextInput, Button, StyleSheet, TouchableOpacity, SafeAreaView, Image, ScrollView } from "react-native";
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createNativeStackNavigator, NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppButton from "../../components/common/AppButton";
 import AppInput from "../../components/common/AppInput";
 import ButtonSubmit from "../../components/common/ButtonSubmit";
@@ -16,7 +16,7 @@ import { Text } from "react-native-gesture-handler";
 import { AuthStackParamList } from "../../navigation/AuthNavigator";
 
 
-type RegisterScreenNavProp = createNativeStackNavigator<AuthStackParamList, "LoginScreen">;
+type RegisterScreenNavProp = NativeStackNavigationProp<AuthStackParamList, "LoginScreen">;
 
 interface Props {
   navigation: RegisterScreenNavProp;
@@ -28,11 +28,8 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   const [loading, setloading] = useState();
   const [isFormValid, setIsFocused] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
+
   const handleLogin = () => {
-    // Giả sử xác thực thành công
-    navigation.navigate("ChatScreen", { username });
-  };
-  const gotoLogin = () => {
    navigation.navigate("LoginScreen");
 
   };
@@ -68,11 +65,13 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             />
             <AppInput label="Số điện thoại"
               value={username}
+              keyboardType='decimal-pad'
               onChangeText={setUsername}
               placeholder="Nhập số điện thoại"
             />
               <AppInput label="Khu vực (chọn tỉnh/thành)"
               value={username}
+              type="select"
               onChangeText={setUsername}
               placeholder="Khu vực (chọn tỉnh/thành)"
             />
@@ -81,12 +80,15 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
               onChangeText={setPassword}
               placeholder="Nhập mật khẩu"
               secureTextEntry
+              type={'password'}
             />
                <AppInput label="Xác nhận mật khẩu"
               value={password}
               onChangeText={setPassword}
               placeholder="Xác nhận mật khẩu"
               secureTextEntry
+              type={'password'}
+
             />
           </AppView>
         
@@ -101,7 +103,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             <AppText  >
               Bạn đã có tài khoản?
             </AppText>
-            <TouchableOpacity onPress={gotoLogin} disabled={loading}>
+            <TouchableOpacity onPress={handleLogin} disabled={loading}>
               <AppText
                 style={{ textDecorationLine: 'underline', fontWeight:600 }}>
                 Đăng nhập
