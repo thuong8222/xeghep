@@ -13,12 +13,18 @@ import ButtonSubmit from '../../common/ButtonSubmit'
 interface ModalBuyTripProps {
   visible?: boolean;
   onRequestClose?: () => void;
+  onApplyFilter?: (filters: { direction: string; time: string }) => void;
 }
 
-export default function ModalBuyTrip({ visible, onRequestClose }: ModalBuyTripProps) {
+export default function ModalBuyTrip({ visible, onRequestClose ,onApplyFilter}: ModalBuyTripProps) {
   const [selectedDirection, setSelectedDirection] = useState<'all' | 'go' | 'back'>('all');
   const [selectedTime, setSelectedTime] = useState<'now' | 'today' | 'tomorrow' | 'custom'>('now');
-
+  const handleOk = () => {
+    onApplyFilter?.({
+      direction: selectedDirection,
+      time: selectedTime,
+    });
+  };
   return (
     <Modal
       transparent
@@ -120,7 +126,7 @@ export default function ModalBuyTrip({ visible, onRequestClose }: ModalBuyTripPr
           </ScrollView>
 
           {/* Nút OK */}
-          <ButtonSubmit title="OK" onPress={onRequestClose} />
+          <ButtonSubmit title="OK" onPress={handleOk}  />
         </AppView>
       </AppView>
     </Modal>

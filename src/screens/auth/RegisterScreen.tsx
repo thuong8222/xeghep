@@ -90,11 +90,12 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             />
           </AppView>
         
-
+          <AppView marginTop={32}>
           <ButtonSubmit title="Đăng ký"
             isLoading={loading}
             onPress={handleLogin}
             disabled={!isFormValid} />
+                 </AppView>
           <AppView marginTop={24} justifyContent="center" alignItems="center" row gap={12}>
 
             <AppText  >

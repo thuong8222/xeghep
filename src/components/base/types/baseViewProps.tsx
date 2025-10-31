@@ -6,9 +6,9 @@ export interface BaseViewProps {
   row?: boolean;
 
 zIndex?:ViewStyle['zIndex'];
-  height?: number | 'auto' | string;
+  height?: ViewStyle['height'];
   minHeight?: number | 'auto';
-  width?: number | 'auto';
+  width?: ViewStyle['width'];
   top?: number;
   bottom?: number;
   right?: number;
@@ -60,7 +60,7 @@ zIndex?:ViewStyle['zIndex'];
 export interface CustomButtonProps extends BaseViewProps {
   onPress?: (event: GestureResponderEvent) => void;
   disabled?: boolean;
-  activeOpacity?: number | undefined;
+  activeOpacity?: number | undefined|string;
 }
 export interface CustomButtonSubmitProps extends CustomButtonProps {
   titleText?: number | string;

@@ -1,5 +1,5 @@
 import { Alert, FlatList, StyleSheet, Text, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import AppView from '../../components/common/AppView'
 import { listTrips } from '../../dataDemoJson'
 import AppButton from '../../components/common/AppButton'
@@ -9,10 +9,30 @@ import moment from 'moment';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import ModalBuyTrip from '../../components/component/modals/ModalBuyTrip'
 import ArrowRight from '../../assets/icons/ArrowRight'
+import IconPlus from '../../assets/icons/IconPlus'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { buyTripEmitter, BuyTripStackParamList } from '../../navigation/menuBottomTabs/BuyTripTabs'
+import IconChevronLeftDouble from '../../assets/icons/IconChevronLeftDouble'
+import Trip from '../../components/component/Trip'
 
-export default function BuyTripScreen() {
+type BuyTripProps = NativeStackNavigationProp<BuyTripStackParamList>;
+ interface Props {
+    navigation:BuyTripProps;
+ }
+export default function BuyTripScreen({navigation}:Props) {
 const [isOpenModalBuyTrip, setIsOpenModalBuyTrip] = useState(false);
+useEffect(() => {
+    const listener = (newFilters: any) => {
+      console.log('Filters changed:', newFilters)
+      // Xử lý filter ở đây
+    }
 
+    buyTripEmitter.on('onFilterChanged', listener)
+
+    return () => {
+      buyTripEmitter.off('onFilterChanged', listener)
+    }
+  }, [])
     const renderItem_trip = ({ item }) => {
         return (<Trip data={item} />)
     }
@@ -31,6 +51,9 @@ const [isOpenModalBuyTrip, setIsOpenModalBuyTrip] = useState(false);
         setIsOpenModalBuyTrip(true)
 
     };
+    const SaleTrips = ()=>{
+        navigation.navigate('SaleTrip')
+    }
     const renderHiddenItem = (data, rowMap) => (
         <View style={styles.rowBack}>
             <AppButton style={[styles.backBtn, styles.backBtnRight]} onPress={() => buyTrip(rowMap, data.item.key)}>
@@ -47,54 +70,10 @@ const [isOpenModalBuyTrip, setIsOpenModalBuyTrip] = useState(false);
                 rightOpenValue={-131}
                 disableRightSwipe={false}
                 onRowDidOpen={rowKey => console.log(`Hàng ${rowKey} đã mở`)} />
-            <AppButton position={'absolute'} right={16} bottom={37} width={48} height={48} radius={999} backgroundColor={ColorsGlobal.main} justifyContent='center' alignItems='center'><AppText color={'#fff'} fontSize={45}>{'+'}</AppText>
+            <AppButton onPress={SaleTrips} position={'absolute'} right={16} bottom={37} width={48} height={48} radius={999} backgroundColor={ColorsGlobal.main} justifyContent='center' alignItems='center'>
+                <IconPlus />
             </AppButton>
             <ModalBuyTrip  visible={isOpenModalBuyTrip} onRequestClose={()=>setIsOpenModalBuyTrip(false)}/>
-        </AppView>
-    )
-}
-const Trip = (props) => {
-
-    const renderExpandedNotes = () => {
-        return (
-            <AppView paddingTop={12} borderTopWidth={1} borderTopColor={ColorsGlobal.borderColor}>
-                {props.data.Trip.note && <AppText color={ColorsGlobal.textNote} fontSize={14} lineHeight={20} fontStyle={'italic'} fontWeight={400}>{props.data.Trip.note}</AppText>}
-                {props.data.Trip.price_note && <AppText color={ColorsGlobal.textNote} fontSize={14} lineHeight={20} fontStyle={'italic'} fontWeight={400}>{props.data.Trip.price_note}</AppText>}
-                {props.data.Trip.service_note1 && <AppText color={ColorsGlobal.textNote} fontSize={14} lineHeight={20} fontStyle={'italic'} fontWeight={400}>{props.data.Trip.service_note1}</AppText>}
-                {props.data.Trip.service_note2 && <AppText color={ColorsGlobal.textNote} fontSize={14} lineHeight={20} fontStyle={'italic'} fontWeight={400}>{props.data.Trip.service_note2}</AppText>}
-                {props.data.Trip.service_note3 && <AppText color={ColorsGlobal.textNote} fontSize={14} lineHeight={20} fontStyle={'italic'} fontWeight={400}>{props.data.Trip.service_note3}</AppText>}
-
-            </AppView>
-        );
-    };
-
-    return (
-        <AppView padding={16} gap={12} radius={12} borderWidth={1} borderColor={ColorsGlobal.borderColor} backgroundColor={ColorsGlobal.backgroundTrip}>
-            <AppView row justifyContent={'space-between'}>
-                <AppText fontWeight={600}>{props.data.Trip.full_name_guest}</AppText>
-                <AppView row gap={8}>
-                    <AppText fontWeight={600}>{moment(props.data.Trip.time_sell).format('hh:mm')}</AppText>
-                    <AppText color={ColorsGlobal.main2}>{`+15'`}</AppText>
-                </AppView>
-            </AppView>
-            <AppView row >
-                <AppView borderColor={ColorsGlobal.borderColor} borderWidth={1} radius={6} padding={10} paddingLeft={14} flex={1}>
-                    <AppText fontSize={14} lineHeight={20}>{props.data.Trip.place_start}</AppText>
-                </AppView>
-                <AppView marginLeft={-12} zIndex={3} marginRight={-12} alignItems='center' justifyContent='center'  >
-                <ArrowRight />
-                </AppView>
-            
-                <AppView borderColor={ColorsGlobal.borderColor} borderWidth={1} radius={6} padding={10} paddingLeft={14} flex={1}>
-                    <AppText fontSize={14} lineHeight={20}>{props.data.Trip.place_end}</AppText>
-                </AppView>
-            </AppView>
-            <AppView row justifyContent={'space-between'}>
-                <AppText color={ColorsGlobal.main} fontWeight={700}>{props.data.Trip.price_sell + "K"}</AppText>
-                <AppText fontWeight={700}>{'-1đ'}</AppText>
-                <AppText fontWeight={600}>{'1 khách'}</AppText>
-            </AppView>
-            {renderExpandedNotes()}
         </AppView>
     )
 }

@@ -25,13 +25,16 @@ export default function MenuBottomTabs() {
     return (
         <Tabs.Navigator  screenOptions={({ route }) => 
         ({
+          
             tabBarActiveTintColor: ColorsGlobal.main,
             tabBarInactiveTintColor: ColorsGlobal.colorIconNoActive,
 
         })} >
             <Tabs.Screen name="BuyTripTabs" component={BuyTripTabs} 
             options={{ tabBarLabel: 'Mua chuyến',
-            tabBarIcon: ({ color, size, focused })=> <IconMenu color={color} />
+            tabBarIcon: ({ color, size, focused })=> <IconMenu color={color} 
+          />,
+          headerShown:false
             }} />
             <Tabs.Screen name="ReceivingScheduleTabs" component={ReceivingScheduleTabs} options={{ tabBarLabel: 'Lịch nhận',
                    tabBarIcon: ({ color, size, focused })=> <IconReceiveHistory color={color}  />

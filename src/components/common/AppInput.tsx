@@ -41,15 +41,14 @@ const AppInput: React.FC<CustomInputProps> = ({
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={[{ marginTop }]}>
+            <View style={[{ marginTop }, { flex: 1, marginTop: 10 }]}>
 
                 <Text
                     style={[
                         {
-                            fontSize: 14, lineHeight: 20, fontWeight: '400',
-                            marginBottom: 6,
                             color: isFocused ? ColorsGlobal.main2 : ColorsGlobal.textDark,
                         },
+                        styles.inputLabel
                     ]}
                 >
                     {label}
@@ -84,7 +83,8 @@ const styles = StyleSheet.create({
         color: '#007927',
     },
     inputLabel: {
-        fontSize: 18, lineHeight: 26, fontWeight: 500, marginBottom: 6
+        fontSize: 14, lineHeight: 20, fontWeight: '400',
+        marginBottom: 6, position: 'absolute', top: -10, left: 20, zIndex: 4, paddingHorizontal: 6, backgroundColor: ColorsGlobal.backgroundWhite,
     },
     inputLabelPass: {
         width: 70,
@@ -96,9 +96,9 @@ const styles = StyleSheet.create({
         padding: 10,
         paddingLeft: 20,
         borderWidth: 1,
-        marginBottom: 5,
+
         width: '100%',
         borderRadius: 6,
-
+        position: 'relative'
     },
 });

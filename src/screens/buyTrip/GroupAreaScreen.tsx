@@ -9,6 +9,7 @@ import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal';
 import AppButton from '../../components/common/AppButton';
 import { BuyTripStackParamList } from '../../navigation/menuBottomTabs/BuyTripTabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { groupsArea } from '../../dataDemoJson';
 
 type GroupAreaNavProp = createNativeStackNavigator<BuyTripStackParamList, "BuyTrip">;
 
@@ -20,12 +21,7 @@ interface Props {
 
 export default function GroupAreaScreen({ navigation }: Props) {
 
-  const groupsArea = [
-    { id: 1, name: 'tiii', area: 'Hai duong', sumNews: 34, isRead: true },
-    { id: 2, name: 'tiii', area: 'Hai duong', sumNews: 34, isRead: false },
-    { id: 3, name: 'tiii', area: 'Hai duong', sumNews: 34, isRead: false },
 
-  ]
   const gotoDetailArea = () => {
     navigation.navigate('BuyTrip')
   }
@@ -35,7 +31,7 @@ export default function GroupAreaScreen({ navigation }: Props) {
     )
   }
   return (
-    <AppView backgroundColor='#fff' flex={1}>
+    <AppView backgroundColor='#fff' flex={1} padding={16}>
       <FlatList data={groupsArea} renderItem={renderItem_groupArea}
 
         ItemSeparatorComponent={() => <AppView height={1} backgroundColor={ColorsGlobal.borderColor} />}
@@ -51,11 +47,11 @@ const Area = (props) => {
   return (
     <AppButton onPress={detailArea} gap={8} row width={400} alignItems='center' paddingVertical={16} paddingLeft={12}>
       <AppView height={scale(42)} width={scale(42)} radius={9999} backgroundColor={ColorsGlobal.backgroundLight} alignItems='center' justifyContent='center'>
-        <AppText fontSize={18} lineHeight={26} fontWeight={700}>{props.data.sumNews}</AppText>
+        <AppText fontSize={18} lineHeight={26} fontWeight={700}>{props.data.count>99 ? '99+': props.data.count}</AppText>
       </AppView>
       <AppView>
-        <AppText color={props.data.isRead ? ColorsGlobal.main : ColorsGlobal.textLight} fontSize={16} fontWeight={700}>{props.data.name}</AppText>
-        <AppText color={props.data.isRead ? ColorsGlobal.main : ColorsGlobal.textLight} fontSize={12}>{'Khu vực ' + props.data.area}</AppText>
+        <AppText color={props.data.is_read ? ColorsGlobal.textLight : ColorsGlobal.main} fontSize={16} fontWeight={700}>{props.data.type_car}</AppText>
+        <AppText color={props.data.is_read ? ColorsGlobal.textLight : ColorsGlobal.main} fontSize={12}>{'Khu vực ' + props.data.area}</AppText>
       </AppView>
     </AppButton>
   )

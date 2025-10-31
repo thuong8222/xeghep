@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, TextInput, Button, StyleSheet, TouchableOpacity, SafeAreaView, Image, ScrollView, Alert } from "react-native";
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppButton from "../../components/common/AppButton";
 import AppInput from "../../components/common/AppInput";
 import ButtonSubmit from "../../components/common/ButtonSubmit";
@@ -18,8 +18,8 @@ import ReactNativeBiometrics, { BiometryTypes } from 'react-native-biometrics'
 
 
 
-type RootNavProp = createNativeStackNavigator<RootStackParamList>;
-type AuthNavProp = createNativeStackNavigator<AuthStackParamList>;
+type RootNavProp = NativeStackNavigationProp<RootStackParamList>;
+type AuthNavProp = NativeStackNavigationProp<AuthStackParamList>;
 type LoginParamList = AuthNavProp & RootNavProp;
 
 interface Props {
@@ -125,11 +125,14 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
               </AppText>
             </TouchableOpacity>
           </AppView>
-
-          <ButtonSubmit title="Đăng nhập" 
+<AppView marginTop={32}>
+<ButtonSubmit title="Đăng nhập" 
             isLoading={loading}
             onPress={handleLogin}
+            
          />
+</AppView>
+          
           <AppView marginTop={24} justifyContent="center" alignItems="center" row gap={12}>
 
             <AppText  >

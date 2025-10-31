@@ -14,6 +14,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import RootNavigator from './src/navigation/RootNavigator';
 
 import AuthNavigator from './src/navigation/AuthNavigator';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export type RootStackParamList = {
   RootNavigator: undefined;
@@ -26,6 +27,9 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const App = () => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+
+
+     
     <NavigationContainer>
    
       <Stack.Navigator initialRouteName="Auth" screenOptions={{ headerShown: false }}>
@@ -36,6 +40,7 @@ const App = () => {
       </Stack.Navigator>
  
     </NavigationContainer>
+
     </GestureHandlerRootView>
   );
 };

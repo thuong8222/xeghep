@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: ColorsGlobal.main,
-    marginTop: 32,
+   
   },
   content: {
     flexDirection: "row",
