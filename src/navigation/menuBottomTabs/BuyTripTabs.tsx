@@ -38,21 +38,25 @@ export default function BuyTripTabs() {
   return (
     <>
       <Stack.Navigator
-        screenOptions={{
+
+      >
+        <Stack.Group screenOptions={{
           headerShown: true,
           headerRight: HeaderRightButton, // ✅ Pass component reference
-        }}
-      >
-        <Stack.Screen
-          name="GroupArea"
-          component={GroupAreaScreen}
-          options={{ headerTitle: 'Nhóm khu vực' }}
-        />
-        <Stack.Screen
-          name="BuyTrip"
-          component={BuyTripScreen}
-          options={{ headerTitle: 'Mua chuyến' }}
-        />
+        }}>
+
+
+          <Stack.Screen
+            name="GroupArea"
+            component={GroupAreaScreen}
+            options={{ headerTitle: 'Nhóm khu vực' }}
+          />
+          <Stack.Screen
+            name="BuyTrip"
+            component={BuyTripScreen}
+            options={{ headerTitle: 'Mua chuyến' }}
+          />
+        </Stack.Group>
         <Stack.Screen
           name="SaleTrip"
           component={SaleTripsScreen}

@@ -56,8 +56,9 @@ export const  listTrips =
     [
         {
             "Trip": {
-                "id": 10072608,
+                "id": 100726078,
                 "trip_status": 0,
+                'sold':1,
                 "is_vat": 0,
                 "direction":1, //1:go, 2:back
                 "full_name_guest":"Nguyen Dung",
@@ -87,9 +88,7 @@ export const  listTrips =
                 "super_vip_drivers": "",
                 "note": "Đón đúng giờ",
                 "price_note": "Giá trên đã bao gồm phí cao tốc, phí ra vào SB",
-                "service_note1": "",
-                "service_note2": "",
-                "service_note3": "",
+             
                 "buy_button": false,
                 "display": true,
                 "is_waitting": true,
@@ -104,6 +103,7 @@ export const  listTrips =
             "Trip": {
                 "id": 10068539,
                 "trip_status": 0,
+                'sold':0,
                 "is_vat": 1,
                 "direction":2,
                 "guests":1,
@@ -148,8 +148,8 @@ export const  listTrips =
         },
         {
             "Trip": {
-                "id": 10072639,
-                "trip_status": 0,
+                "id": 100726359,
+                "trip_status": 0, 'sold':0,
                 "is_vat": 0,
                 "guests":4,
                 "direction":2,
@@ -194,8 +194,8 @@ export const  listTrips =
         },
         {
             "Trip": {
-                "id": 10072525,
-                "trip_status": 0,
+                "id": 100725825,
+                "trip_status": 0, 'sold':0,
                 "is_vat": 0,
                 "guests":2,
                 "direction":1,
@@ -240,8 +240,8 @@ export const  listTrips =
         },
         {
             "Trip": {
-                "id": 10068539,
-                "trip_status": 0,
+                "id": 100685539,
+                "trip_status": 0, 'sold':0,
                 "is_vat": 1,
                 "direction":2,
                 "guests":1,
@@ -286,9 +286,9 @@ export const  listTrips =
         },
         {
             "Trip": {
-                "id": 10072639,
+                "id": 100722639,
                 "trip_status": 0,
-                "is_vat": 0,
+                "is_vat": 0, 'sold':0,
                 "guests":4,
                 "direction":2,
                 "full_name_guest":"Nguyen DUng",

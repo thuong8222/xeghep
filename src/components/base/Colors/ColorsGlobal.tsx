@@ -8,8 +8,10 @@ export const ColorsGlobal = {
     textLight: '#5A5A5F',
 textNote: '#666666',
     borderColor: '#EBEAEA',
+    borderColorDark:    '#BDBDC2',
 
     backgroundTrip: "#FBFBFB",
+    backgroundTripSold:"#EEEEEE",
     backgroundWhite: '#FFFFFF',
     backgroundLight: '#EEEEEE',
     backgroundGray: '#F0F0F0',

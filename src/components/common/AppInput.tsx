@@ -11,7 +11,7 @@ import IconEye from '../../assets/icons/iconEyeOpen';
 import IconArowDown from '../../assets/icons/IconArowDown';
 
 interface CustomInputProps extends TextInputProps {
-    label: string;
+    label?: string;
     value: string;
     onChangeText: (text: string) => void;
     isLoading?: boolean;
@@ -52,7 +52,7 @@ const AppInput: React.FC<CustomInputProps> = ({
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={[{ marginTop }, { flex: 1, marginTop: 10, flexDirection: 'row', alignItems: 'center' }]}>
-
+{label && 
                 <Text
                     style={[
                         {
@@ -63,7 +63,7 @@ const AppInput: React.FC<CustomInputProps> = ({
                 >
                     {label}
                 </Text>
-
+            }
                 <TextInput
                     style={[
                         styles.input,

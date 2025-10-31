@@ -6,7 +6,7 @@ import AppButton from '../../components/common/AppButton'
 import AppText from '../../components/common/AppText'
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal'
 import moment from 'moment';
-import { SwipeListView } from 'react-native-swipe-list-view';
+import { SwipeListView, SwipeRow } from 'react-native-swipe-list-view';
 import ModalBuyTrip from '../../components/component/modals/ModalBuyTrip'
 import ArrowRight from '../../assets/icons/ArrowRight'
 import IconPlus from '../../assets/icons/IconPlus'
@@ -16,25 +16,31 @@ import IconChevronLeftDouble from '../../assets/icons/IconChevronLeftDouble'
 import Trip from '../../components/component/Trip'
 
 type BuyTripProps = NativeStackNavigationProp<BuyTripStackParamList>;
- interface Props {
-    navigation:BuyTripProps;
- }
-export default function BuyTripScreen({navigation}:Props) {
-const [isOpenModalBuyTrip, setIsOpenModalBuyTrip] = useState(false);
-useEffect(() => {
-    const listener = (newFilters: any) => {
-      console.log('Filters changed:', newFilters)
-      // Xử lý filter ở đây
-    }
+interface Props {
+    navigation: BuyTripProps;
+}
+export default function BuyTripScreen({ navigation }: Props) {
+    const [isOpenModalBuyTrip, setIsOpenModalBuyTrip] = useState(false);
+    useEffect(() => {
+        const listener = (newFilters: any) => {
+            console.log('Filters changed:', newFilters)
+            // Xử lý filter ở đây
+        }
 
-    buyTripEmitter.on('onFilterChanged', listener)
+        buyTripEmitter.on('onFilterChanged', listener)
 
-    return () => {
-      buyTripEmitter.off('onFilterChanged', listener)
-    }
-  }, [])
+        return () => {
+            buyTripEmitter.off('onFilterChanged', listener)
+        }
+    }, [])
     const renderItem_trip = ({ item }) => {
-        return (<Trip data={item} />)
+        console.log('item', item)
+        return (
+       
+            <Trip data={item} />
+        
+        
+    )
     }
     const closeRow = (rowMap, rowKey) => {
         if (rowMap[rowKey]) {
@@ -48,32 +54,46 @@ useEffect(() => {
         // newData.splice(prevIndex, 1);
         // setListData(newData);
         Alert.alert('thanh cong', `Mua Chuyến thanh cong`);
-        setIsOpenModalBuyTrip(true)
+
 
     };
-    const SaleTrips = ()=>{
+    const SaleTrips = () => {
         navigation.navigate('SaleTrip')
     }
-    const renderHiddenItem = (data, rowMap) => (
-        <View style={styles.rowBack}>
-            <AppButton style={[styles.backBtn, styles.backBtnRight]} onPress={() => buyTrip(rowMap, data.item.key)}>
-                <Text style={styles.backBtnText}>{'Mua chuyến'}</Text>
-            </AppButton>
-        </View>
-    );
+    const renderHiddenItem = (data, rowMap) => {
+        console.log('data', data)
+        if (data.item.Trip.sold===1) return null;
+        return (
+      
+            <View style={styles.rowBack}>
+                 <AppButton style={[styles.backBtn, styles.backBtnRight, { backgroundColor: ColorsGlobal.main }]} onPress={() => buyTrip(rowMap, data.item.Trip.id)}>
+                 <Text style={styles.backBtnText}>{'Mua chuyến'}</Text>
+                      </AppButton>
+            </View>
+      
+        )
+    };
     return (
         <AppView flex={1} backgroundColor='#fff' padding={16} position='relative'>
             <SwipeListView
                 data={listTrips}
+                keyExtractor={(item) => item.Trip.id.toString()}
+                showsVerticalScrollIndicator={false}
                 renderItem={renderItem_trip} ItemSeparatorComponent={() => <AppView height={16} />}
                 renderHiddenItem={renderHiddenItem}
-                rightOpenValue={-131}
-                disableRightSwipe={false}
+                rightOpenValue={-116}
+                leftOpenValue={0}              // Tắt vuốt sang phải
+                disableRightSwipe={true}       // Chỉ vuốt trái
+                swipeToOpenPercent={10}
+                directionalDistanceChangeThreshold={2}
+                friction={8}
+                tension={50}
+
                 onRowDidOpen={rowKey => console.log(`Hàng ${rowKey} đã mở`)} />
             <AppButton onPress={SaleTrips} position={'absolute'} right={16} bottom={37} width={48} height={48} radius={999} backgroundColor={ColorsGlobal.main} justifyContent='center' alignItems='center'>
                 <IconPlus />
             </AppButton>
-            <ModalBuyTrip  visible={isOpenModalBuyTrip} onRequestClose={()=>setIsOpenModalBuyTrip(false)}/>
+            <ModalBuyTrip visible={isOpenModalBuyTrip} onRequestClose={() => setIsOpenModalBuyTrip(false)} />
         </AppView>
     )
 }
@@ -93,7 +113,8 @@ const styles = StyleSheet.create({
     },
     rowBack: {
         alignItems: 'center',
-
+        backgroundColor: ColorsGlobal.main,
+        borderRadius: 12,
         flex: 1,
         flexDirection: 'row',
         justifyContent: 'flex-end',
@@ -104,10 +125,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         position: 'absolute',
         top: 0,
-        width: 131,
+        width: 116,
     },
     backBtnRight: {
-        backgroundColor: ColorsGlobal.main,
+       
         borderTopRightRadius: 12,
         borderBottomRightRadius: 12,
         right: 0,
