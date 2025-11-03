@@ -8,10 +8,12 @@ import AppText from '../../components/common/AppText';
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal';
 import AppButton from '../../components/common/AppButton';
 import { BuyTripStackParamList } from '../../navigation/menuBottomTabs/BuyTripTabs';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createNativeStackNavigator, NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { groupsArea } from '../../dataDemoJson';
+import IconSort from '../../assets/icons/IconSort';
+import ModalBuyTrip from '../../components/component/modals/ModalBuyTrip';
 
-type GroupAreaNavProp = createNativeStackNavigator<BuyTripStackParamList, "BuyTrip">;
+type GroupAreaNavProp = NativeStackNavigationProp<BuyTripStackParamList, "BuyTrip">;
 
 interface Props {
   navigation: GroupAreaNavProp;
@@ -20,14 +22,37 @@ interface Props {
 
 
 export default function GroupAreaScreen({ navigation }: Props) {
+   const [isModalVisible, setIsModalVisible] = useState(false)
+  const HeaderRightButton = () => (
+    <AppView row>
+    <AppButton onPress={() => setIsModalVisible(true)}>
+      <IconSort />
+    </AppButton>
+    
+    </AppView>
+  )
+  React.useEffect(() => {
+    // Use `setOptions` to update the button that we previously specified
+    // Now the button includes an `onPress` handler to update the count
+    navigation.setOptions({
+      headerTitle: () => (
+        <AppView justifyContent={'center'} alignItems={'center'}>
+          <AppText fontWeight={700}>{'Nhóm khu vực'}</AppText>
+          <AppText fontSize={12} lineHeight={16} color={ColorsGlobal.textLight}>{'300 thành viên'}</AppText>
+        </AppView>
+      ),
+      headerRight: HeaderRightButton, 
+    });
+  }, [navigation]);
 
 
-  const gotoDetailArea = () => {
-    navigation.navigate('BuyTrip')
+  const gotoDetailArea = (props) => {
+
+  navigation.navigate('BuyTrip', {nameGroup: props.area + ' - '+ props.type_car, countMember: props.count})
   }
   const renderItem_groupArea = ({ item, index }) => {
     return (
-      <Area data={item} gotoDetailAreaPress={gotoDetailArea} />
+      <Area data={item} gotoDetailAreaPress={()=>gotoDetailArea(item)} />
     )
   }
   return (
@@ -36,6 +61,7 @@ export default function GroupAreaScreen({ navigation }: Props) {
 
         ItemSeparatorComponent={() => <AppView height={1} backgroundColor={ColorsGlobal.borderColor} />}
       />
+      <ModalBuyTrip visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)} />
     </AppView>
 
   )
@@ -47,7 +73,7 @@ const Area = (props) => {
   return (
     <AppButton onPress={detailArea} gap={8} row width={400} alignItems='center' paddingVertical={16} paddingLeft={12}>
       <AppView height={scale(42)} width={scale(42)} radius={9999} backgroundColor={ColorsGlobal.backgroundLight} alignItems='center' justifyContent='center'>
-        <AppText fontSize={18} lineHeight={26} fontWeight={700}>{props.data.count>99 ? '99+': props.data.count}</AppText>
+        <AppText fontSize={18} lineHeight={26} fontWeight={700}>{props.data.count > 99 ? '99+' : props.data.count}</AppText>
       </AppView>
       <AppView>
         <AppText color={props.data.is_read ? ColorsGlobal.textLight : ColorsGlobal.main} fontSize={16} fontWeight={700}>{props.data.type_car}</AppText>

@@ -44,7 +44,8 @@ export default function MenuBottomTabs() {
                    tabBarIcon: ({ color, size, focused })=> <IconTranferPoint color={color}  />
             }} />
             <Tabs.Screen name="AccountTabs" component={AccountTabs} options={{ tabBarLabel: 'Tài khoản',
-                   tabBarIcon: ({ color, size, focused })=> <IconUser color={color} />
+                   tabBarIcon: ({ color, size, focused })=> <IconUser color={color} />, 
+              
              }} />
         </Tabs.Navigator>
     );

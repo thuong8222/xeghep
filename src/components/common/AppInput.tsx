@@ -9,6 +9,7 @@ import { StyleGlobal } from '../base/StyleGlobal';
 import IconEyeOff from '../../assets/icons/iconEyeOff';
 import IconEye from '../../assets/icons/iconEyeOpen';
 import IconArowDown from '../../assets/icons/IconArowDown';
+import IconUploadIcloud from '../../assets/icons/IconUploadIcloud';
 
 interface CustomInputProps extends TextInputProps {
     label?: string;
@@ -17,7 +18,7 @@ interface CustomInputProps extends TextInputProps {
     isLoading?: boolean;
     keyboardType?: TextInputProps['keyboardType'];
     marginTop?: number;
-    type?: 'number' | 'email' | 'text' | 'phone' | 'password' | 'select';
+    type?: 'number' | 'email' | 'text' | 'phone' | 'password' | 'select'|'upload';
     error?: string;
 }
 const AppInput: React.FC<CustomInputProps> = ({
@@ -27,15 +28,14 @@ const AppInput: React.FC<CustomInputProps> = ({
     isLoading = false,
     keyboardType = 'default',
     marginTop = 0,
-    type, error,
-
+    type, 
+    error,
     ...rest
-
 }) => {
-
     const [isFocused, setIsFocused] = useState(false);
     const animated = useRef(new Animated.Value(value ? 1 : 0)).current;
     const [secureTextEntry, setSecureTextEntry] = useState(type === 'password');
+    
     useEffect(() => {
         Animated.timing(animated, {
             toValue: isFocused || value ? 1 : 0,
@@ -44,66 +44,79 @@ const AppInput: React.FC<CustomInputProps> = ({
             useNativeDriver: false,
         }).start();
     }, [isFocused, value]);
+    
     const toggleShowPassword = () => {
         setSecureTextEntry(prev => !prev);
     };
-
+    
+    const toggleSelect = () => {
+        console.log('toggleSelect')
+    }
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={[{ marginTop }, { flex: 1, marginTop: 10, flexDirection: 'row', alignItems: 'center' }]}>
-{label && 
-                <Text
-                    style={[
-                        {
-                            color: isFocused ? ColorsGlobal.main2 : ColorsGlobal.textDark,
-                        },
-                        styles.inputLabel
-                    ]}
-                >
-                    {label}
-                </Text>
-            }
-                <TextInput
-                    style={[
-                        styles.input,
-                        { borderColor: isFocused ? ColorsGlobal.main2 : ColorsGlobal.borderColor },
-                    ]}
-                    value={value}
-                    onChangeText={onChangeText}
-                    keyboardType={keyboardType}
-                    placeholderTextColor={ColorsGlobal.placeholderText}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                    editable={!isLoading}
-                    {...rest}
-                />
-                {type === 'password' && (
-                    <AppButton onPress={toggleShowPassword} position={'absolute'} right={13}>
-                        {secureTextEntry ?
-                            <IconEyeOff size={24} /> : <IconEye size={24} />
-                        }
-                    </AppButton>
-
-                )}
-                {type === 'select' && (
-                    <AppButton onPress={toggleShowPassword} position={'absolute'} right={13}>
-                        <IconArowDown />
-                    </AppButton>
-
-                )}
-
-
+            {/* Thêm View container bên ngoài */}
+            <View style={[styles.container, { marginTop }]}>
+                <View style={styles.inputContainer}>
+                    {label && (
+                        <Text
+                            style={[
+                                styles.inputLabel,
+                                {
+                                    color: isFocused ? ColorsGlobal.main2 : ColorsGlobal.textDark,
+                                }
+                            ]}
+                        >
+                            {label}
+                        </Text>
+                    )}
+                    <TextInput
+                        style={[
+                            styles.input,
+                            { borderColor: isFocused ? ColorsGlobal.main2 : ColorsGlobal.borderColor },
+                        ]}
+                        value={value}
+                        onChangeText={onChangeText}
+                        keyboardType={keyboardType}
+                        placeholderTextColor={ColorsGlobal.placeholderText}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setIsFocused(false)}
+                        editable={!isLoading}
+                        secureTextEntry={secureTextEntry}
+                        {...rest}
+                    />
+                    {type === 'password' && (
+                        <AppButton onPress={toggleShowPassword} position={'absolute'} right={13} top={12}>
+                            {secureTextEntry ? <IconEyeOff size={24} /> : <IconEye size={24} />}
+                        </AppButton>
+                    )}
+                    {type === 'select' && (
+                        <AppButton onPress={toggleSelect} position={'absolute'} right={13} top={12}>
+                            <IconArowDown />
+                        </AppButton>
+                    )}
+                    {type === 'upload' && (
+                        <AppButton onPress={toggleSelect} position={'absolute'} right={13} top={12}>
+                            <IconUploadIcloud />
+                        </AppButton>
+                    )}
+                </View>
                 {error ? (
                     <AppText color={'red'} style={{ marginTop: 4, fontSize: 12 }}>{error}</AppText>
                 ) : null}
-
             </View>
         </TouchableWithoutFeedback>
     );
 }
 export default AppInput;
 const styles = StyleSheet.create({
+    container: {
+        flex: 1, height:'auto'
+    },
+    inputContainer: {
+        position: 'relative',
+        width: '100%',
+    },
     inputWrapper: {
         marginBottom: 15,
         gap: 4
@@ -128,6 +141,6 @@ const styles = StyleSheet.create({
 
         width: '100%',
         borderRadius: 6,
-        position: 'relative'
+         position: 'relative'
     },
 });

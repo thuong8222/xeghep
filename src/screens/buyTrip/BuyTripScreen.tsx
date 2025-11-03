@@ -14,13 +14,42 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { buyTripEmitter, BuyTripStackParamList } from '../../navigation/menuBottomTabs/BuyTripTabs'
 import IconChevronLeftDouble from '../../assets/icons/IconChevronLeftDouble'
 import Trip from '../../components/component/Trip'
+import IconSort from '../../assets/icons/IconSort'
+import IconFilterRight from '../../assets/icons/IconFilterRight'
 
 type BuyTripProps = NativeStackNavigationProp<BuyTripStackParamList>;
 interface Props {
     navigation: BuyTripProps;
 }
-export default function BuyTripScreen({ navigation }: Props) {
-    const [isOpenModalBuyTrip, setIsOpenModalBuyTrip] = useState(false);
+export default function BuyTripScreen({ navigation, route }: Props) {
+    const { nameGroup, countMember } = route.params;
+    const [isModalVisible, setIsModalVisible] = useState(false)
+    const HeaderRightButton = () => (
+        <AppView row>
+            <AppButton onPress={() => setIsModalVisible(true)}>
+                <IconSort />
+            </AppButton>
+            <AppButton onPress={() => navigation.navigate('InfoGroup', { nameGroup: nameGroup, countMember: countMember })}>
+                <IconFilterRight />
+            </AppButton>
+        </AppView>
+    )
+    React.useEffect(() => {
+        // Use `setOptions` to update the button that we previously specified
+        // Now the button includes an `onPress` handler to update the count
+        navigation.setOptions({
+
+            headerTitle: () => (
+                <AppView justifyContent={'flex-start'} alignItems={'flex-start'}>
+                    <AppText fontWeight={700}>{nameGroup}</AppText>
+                    <AppText fontSize={12} lineHeight={16} color={ColorsGlobal.textLight}>{countMember + ' thành viên'}</AppText>
+                </AppView>
+            ),
+            headerRight: HeaderRightButton,
+
+        });
+    }, [navigation]);
+
     useEffect(() => {
         const listener = (newFilters: any) => {
             console.log('Filters changed:', newFilters)
@@ -34,13 +63,9 @@ export default function BuyTripScreen({ navigation }: Props) {
         }
     }, [])
     const renderItem_trip = ({ item }) => {
-        console.log('item', item)
         return (
-       
             <Trip data={item} />
-        
-        
-    )
+        )
     }
     const closeRow = (rowMap, rowKey) => {
         if (rowMap[rowKey]) {
@@ -61,16 +86,16 @@ export default function BuyTripScreen({ navigation }: Props) {
         navigation.navigate('SaleTrip')
     }
     const renderHiddenItem = (data, rowMap) => {
-        console.log('data', data)
-        if (data.item.Trip.sold===1) return null;
+
+        if (data.item.Trip.sold === 1) return null;
         return (
-      
+
             <View style={styles.rowBack}>
-                 <AppButton style={[styles.backBtn, styles.backBtnRight, { backgroundColor: ColorsGlobal.main }]} onPress={() => buyTrip(rowMap, data.item.Trip.id)}>
-                 <Text style={styles.backBtnText}>{'Mua chuyến'}</Text>
-                      </AppButton>
+                <AppButton style={[styles.backBtn, styles.backBtnRight, { backgroundColor: ColorsGlobal.main }]} onPress={() => buyTrip(rowMap, data.item.Trip.id)}>
+                    <Text style={styles.backBtnText}>{'Mua chuyến'}</Text>
+                </AppButton>
             </View>
-      
+
         )
     };
     return (
@@ -93,7 +118,8 @@ export default function BuyTripScreen({ navigation }: Props) {
             <AppButton onPress={SaleTrips} position={'absolute'} right={16} bottom={37} width={48} height={48} radius={999} backgroundColor={ColorsGlobal.main} justifyContent='center' alignItems='center'>
                 <IconPlus />
             </AppButton>
-            <ModalBuyTrip visible={isOpenModalBuyTrip} onRequestClose={() => setIsOpenModalBuyTrip(false)} />
+            <ModalBuyTrip visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)} />
+
         </AppView>
     )
 }
@@ -128,7 +154,7 @@ const styles = StyleSheet.create({
         width: 116,
     },
     backBtnRight: {
-       
+
         borderTopRightRadius: 12,
         borderBottomRightRadius: 12,
         right: 0,

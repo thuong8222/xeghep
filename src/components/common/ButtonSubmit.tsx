@@ -7,6 +7,9 @@ import {
   View,
 } from "react-native";
 import { ColorsGlobal } from "../base/Colors/ColorsGlobal";
+import { ViewStyle } from "react-native/types_generated/index";
+
+
 
 interface ButtonSubmitProps {
   title?: string;
@@ -15,10 +18,11 @@ interface ButtonSubmitProps {
   disabled?: boolean;
   colorBackground?: string;
   colorText?: string;
+  height?: ViewStyle['height'];
 }
 
 const ButtonSubmit: React.FC<ButtonSubmitProps> = ({
-  title,
+  title,height=48,
   onPress,
   isLoading = false,
   disabled = false,
@@ -30,7 +34,7 @@ const ButtonSubmit: React.FC<ButtonSubmitProps> = ({
       activeOpacity={0.8}
       style={[
         styles.buttonInner,
-
+{  backgroundColor: ColorsGlobal.main,height:height}
       ]}
       onPress={!isLoading && !disabled ? onPress : undefined}
       disabled={isLoading || disabled}
@@ -51,11 +55,11 @@ export default ButtonSubmit;
 
 const styles = StyleSheet.create({
   buttonInner: {
-    height: 48,
+
     borderRadius: 6,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: ColorsGlobal.main,
+  
    
   },
   content: {

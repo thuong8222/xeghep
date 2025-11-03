@@ -6,12 +6,15 @@ export const ColorsGlobal = {
     textBlack: '#000000',
     colorIconNoActive: '#949494',
     textLight: '#5A5A5F',
-textNote: '#666666',
+    textNote: '#666666',
     borderColor: '#EBEAEA',
-    borderColorDark:    '#BDBDC2',
+    borderColorDark: '#BDBDC2',
 
     backgroundTrip: "#FBFBFB",
-    backgroundTripSold:"#EEEEEE",
+    backgroundBuyTrip: "#F9B68A",
+    
+
+    backgroundTripSold: "#EEEEEE",
     backgroundWhite: '#FFFFFF',
     backgroundLight: '#EEEEEE',
     backgroundGray: '#F0F0F0',

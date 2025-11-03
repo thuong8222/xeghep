@@ -9,6 +9,7 @@ import IconClose from '../../../assets/icons/IconClose'
 import IconArowDown from '../../../assets/icons/IconArowDown'
 import DateTimeFilter from '../DateTimeFilter'
 import ButtonSubmit from '../../common/ButtonSubmit'
+import AppInput from '../../common/AppInput'
 
 interface ModalBuyTripProps {
   visible?: boolean;
@@ -16,7 +17,7 @@ interface ModalBuyTripProps {
   onApplyFilter?: (filters: { direction: string; time: string }) => void;
 }
 
-export default function ModalBuyTrip({ visible, onRequestClose ,onApplyFilter}: ModalBuyTripProps) {
+export default function ModalBuyTrip({ visible, onRequestClose, onApplyFilter }: ModalBuyTripProps) {
   const [selectedDirection, setSelectedDirection] = useState<'all' | 'go' | 'back'>('all');
   const [selectedTime, setSelectedTime] = useState<'now' | 'today' | 'tomorrow' | 'custom'>('now');
   const handleOk = () => {
@@ -25,6 +26,8 @@ export default function ModalBuyTrip({ visible, onRequestClose ,onApplyFilter}: 
       time: selectedTime,
     });
   };
+  const [placeStart, setPlaceStart] = useState('');
+  const [placeEnd, setPlaceEnd] = useState('');
   return (
     <Modal
       transparent
@@ -120,17 +123,21 @@ export default function ModalBuyTrip({ visible, onRequestClose ,onApplyFilter}: 
                   <IconArowDown />
                 </AppButton>
 
-                {selectedTime === 'custom' && <DateTimeFilter />}
+
+              </AppView>
+              {selectedTime === 'custom' && <DateTimeFilter />}
+              <AppView >
+                <AppInput value={placeStart} onChangeText={(text) => setPlaceStart(text)} type={'select'} placeholder='Điểm đón' />
+                <AppInput value={placeEnd} onChangeText={(text) => setPlaceEnd(text)} type={'select'} placeholder='Điểm trả' />
+
               </AppView>
             </AppView>
           </ScrollView>
 
           {/* Nút OK */}
-          <ButtonSubmit title="OK" onPress={handleOk}  />
+          <ButtonSubmit title="OK" onPress={handleOk} />
         </AppView>
       </AppView>
     </Modal>
   )
 }
-
-const styles = StyleSheet.create({})

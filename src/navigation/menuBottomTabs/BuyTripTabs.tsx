@@ -1,17 +1,25 @@
 import React, { useState } from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import { EventEmitter } from 'events' // ✅ Import đúng
+import { EventEmitter } from 'events'
 import GroupAreaScreen from '../../screens/buyTrip/GroupAreaScreen'
 import BuyTripScreen from '../../screens/buyTrip/BuyTripScreen'
 import SaleTripsScreen from '../../screens/SaleTrips/SaleTripsScreen'
 import AppButton from '../../components/common/AppButton'
 import IconSort from '../../assets/icons/IconSort'
 import ModalBuyTrip from '../../components/component/modals/ModalBuyTrip'
+import InfoGroupScreen from '../../screens/buyTrip/InfoGroupScreen'
 
 export type BuyTripStackParamList = {
   GroupArea: undefined
-  BuyTrip: undefined
-  SaleTrip: undefined
+  BuyTrip: {
+    nameGroup: string;
+    countMember: number;
+  }
+  SaleTrip: undefined;
+  InfoGroup: {
+    nameGroup: string;
+    countMember: number;
+  }
 }
 
 export const buyTripEmitter = new EventEmitter()
@@ -37,15 +45,11 @@ export default function BuyTripTabs() {
 
   return (
     <>
-      <Stack.Navigator
-
-      >
+      <Stack.Navigator >
         <Stack.Group screenOptions={{
           headerShown: true,
-          headerRight: HeaderRightButton, // ✅ Pass component reference
+          // headerRight: HeaderRightButton,
         }}>
-
-
           <Stack.Screen
             name="GroupArea"
             component={GroupAreaScreen}
@@ -54,7 +58,18 @@ export default function BuyTripTabs() {
           <Stack.Screen
             name="BuyTrip"
             component={BuyTripScreen}
-            options={{ headerTitle: 'Mua chuyến' }}
+            options={{
+              headerBackTitle: '',
+
+            }}
+          />
+          <Stack.Screen
+            name="InfoGroup"
+            component={InfoGroupScreen}
+            options={{
+              headerBackTitle: '',
+              headerTitle: 'Thông tin nhóm'
+            }}
           />
         </Stack.Group>
         <Stack.Screen

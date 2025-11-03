@@ -4,7 +4,7 @@ export interface BaseViewProps {
   justifyContent?: ViewStyle['justifyContent'];
   alignItems?: ViewStyle['alignItems'];
   row?: boolean;
-
+  maxHeight?:ViewStyle['maxHeight'];
 zIndex?:ViewStyle['zIndex'];
   height?: ViewStyle['height'];
   minHeight?: number | 'auto';
