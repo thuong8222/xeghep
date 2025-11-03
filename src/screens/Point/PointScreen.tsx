@@ -10,7 +10,8 @@ import Point from '../../components/component/Point'
 import IconPlus from '../../assets/icons/IconPlus'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { BuyTripStackParamList } from '../../navigation/menuBottomTabs/BuyTripTabs'
-type BuyTripProps = NativeStackNavigationProp<BuyTripStackParamList>;
+import { BottomTabParamList } from '../../navigation/MenuBottomTabs'
+type BuyTripProps = NativeStackNavigationProp<BottomTabParamList,'PointTabs'>;
 interface Props {
     navigation: BuyTripProps;
 }
@@ -31,7 +32,7 @@ export default function PointScreen({navigation}:Props) {
           // const prevIndex = listData.findIndex(item => item.key === rowKey);
           // newData.splice(prevIndex, 1);
           // setListData(newData);
-          Alert.alert('thanh cong', `Mua Chuyến thanh cong`);
+          Alert.alert('thanh cong', `Mua diem thanh cong`);
   
   
       };
@@ -47,7 +48,7 @@ export default function PointScreen({navigation}:Props) {
         )
   }
   const SaleTrips = () => {
-    navigation.navigate('BuyTrip')
+    navigation.navigate('BuyTripTabs',{screen:'SaleTrip'})
 }
   return (
    <AppView flex={1} padding={16} backgroundColor={ColorsGlobal.backgroundWhite}>

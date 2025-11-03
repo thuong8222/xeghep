@@ -6,10 +6,18 @@ import AppText from '../../components/common/AppText'
 import AppInput from '../../components/common/AppInput'
 import AppButton from '../../components/common/AppButton'
 import IconArrowDown from '../../assets/icons/IconArowDown'
+import { useFocusEffect } from '@react-navigation/native'
+import ModalUploadCarImage from '../../components/component/modals/UploadCarImage'
+import { clearWarnings } from 'react-native/types_generated/Libraries/LogBox/Data/LogBoxData'
 
 export default function AccountScreen() {
   const [nameDisplay, setNameDisplay] = useState('');
   const [numberPhone, setNumberPhone] = useState('');
+  const [isDisplayModalUploadImage,setIsDisplayModalUploadImage] = useState(false);
+  const handleUploadPress =()=>{
+    console.log('handleUploadPress')
+    setIsDisplayModalUploadImage(true);
+  }
   return (
     <AppView flex={1} backgroundColor={ColorsGlobal.backgroundWhite} padding={16} gap={24}>
       <AppView gap={16} height={'auto'} >
@@ -44,7 +52,7 @@ export default function AccountScreen() {
         </AppView>
         <AppView row>
 
-        <AppInput value={nameDisplay} onChangeText={(text) => setNameDisplay(text)} placeholder='Tải lên hình ảnh xe' label={'Hình ảnh xe'} type='upload' editable={false} />
+        <AppInput  onUploadPress={handleUploadPress} value={nameDisplay} onChangeText={(text) => setNameDisplay(text)} placeholder='Tải lên hình ảnh xe' label={'Hình ảnh xe'} type='upload' editable={false} />
       </AppView>
       </AppView>
       <AppView gap={16} >
@@ -65,6 +73,7 @@ export default function AccountScreen() {
         </AppView>
 
       </AppView>
+      <ModalUploadCarImage isDisplay={isDisplayModalUploadImage} onClose={()=>setIsDisplayModalUploadImage(false)} />
     </AppView>
   )
 }

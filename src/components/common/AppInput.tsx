@@ -20,15 +20,18 @@ interface CustomInputProps extends TextInputProps {
     marginTop?: number;
     type?: 'number' | 'email' | 'text' | 'phone' | 'password' | 'select'|'upload';
     error?: string;
+    onUploadPress?: () => void;
 }
 const AppInput: React.FC<CustomInputProps> = ({
     label,
     value,
     onChangeText,
+    onUploadPress, // ✅ nhận từ props
     isLoading = false,
     keyboardType = 'default',
     marginTop = 0,
     type, 
+    
     error,
     ...rest
 }) => {
@@ -51,6 +54,7 @@ const AppInput: React.FC<CustomInputProps> = ({
     
     const toggleSelect = () => {
         console.log('toggleSelect')
+     
     }
 
     return (
@@ -81,7 +85,7 @@ const AppInput: React.FC<CustomInputProps> = ({
                         placeholderTextColor={ColorsGlobal.placeholderText}
                         onFocus={() => setIsFocused(true)}
                         onBlur={() => setIsFocused(false)}
-                        editable={!isLoading}
+                        editable={!isLoading && type !== 'upload'}
                         secureTextEntry={secureTextEntry}
                         {...rest}
                     />
@@ -96,7 +100,7 @@ const AppInput: React.FC<CustomInputProps> = ({
                         </AppButton>
                     )}
                     {type === 'upload' && (
-                        <AppButton onPress={toggleSelect} position={'absolute'} right={13} top={12}>
+                        <AppButton onPress={onUploadPress} position={'absolute'} right={13} top={12}>
                             <IconUploadIcloud />
                         </AppButton>
                     )}

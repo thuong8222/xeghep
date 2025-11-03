@@ -1,24 +1,25 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import BuyTripTabs from './menuBottomTabs/BuyTripTabs';
+import BuyTripTabs, { BuyTripStackParamList } from './menuBottomTabs/BuyTripTabs';
 import ReceivingScheduleTabs from './menuBottomTabs/ReceivingScheduleTabs';
 import SaleTripsTabs from './menuBottomTabs/SaleTripsTabs';
-import PointTabs from './menuBottomTabs/PointTabs';
-import AccountTabs from './menuBottomTabs/AccountTabs';
+import PointTabs, { PointTabsParamList } from './menuBottomTabs/PointTabs';
+import AccountTabs, { AccountTabsParamList } from './menuBottomTabs/AccountTabs';
 import IconMenu from '../assets/icons/IconMenu';
 import IconReceiveHistory from '../assets/icons/IconReceiveHistory';
 import IconTranferPoint from '../assets/icons/IconTranferPoint';
 import IconUser from '../assets/icons/IconUser';
 import { ColorsGlobal } from '../components/base/Colors/ColorsGlobal';
+import { NavigatorScreenParams } from '@react-navigation/native';
 
 export type BottomTabParamList = {
-    BuyTripTabs: undefined;
+    BuyTripTabs: NavigatorScreenParams<BuyTripStackParamList>; // ✅ nested stack
     ReceivingScheduleTabs: undefined;
     SaleTripsTabs: undefined;
-    PointTabs: undefined;
-    AccountTabs: undefined;
-};
+    PointTabs: NavigatorScreenParams<PointTabsParamList>; // nếu Point cũng là stack
+    AccountTabs: NavigatorScreenParams<AccountTabsParamList>; // nếu Account cũng là stack
+  };
 const Tabs = createBottomTabNavigator<BottomTabParamList>();
 export default function MenuBottomTabs() {
 
