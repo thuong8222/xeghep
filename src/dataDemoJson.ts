@@ -59,8 +59,9 @@ export const  listTrips =
                 "id": 100726078,
                 "trip_status": 0,
                 'sold':1,
+                'driver_buy':'Nguyễn Văn Long',
                 "is_vat": 0,
-                "direction":1, //1:go, 2:back
+                "direction":1, 
                 "full_name_guest":"Nguyen Dung",
                 "guests":1,
                 "time_start": "2025-10-30 13:00:00",
@@ -104,6 +105,7 @@ export const  listTrips =
                 "id": 10068539,
                 "trip_status": 0,
                 'sold':0,
+                'driver_buy':'',
                 "is_vat": 1,
                 "direction":2,
                 "guests":1,
@@ -133,9 +135,7 @@ export const  listTrips =
                 "super_vip_drivers": "",
                 "note": "Xe 7 chỗ",
                 "price_note": "Giá trên đã bao gồm phí cao tốc, phí ra vào SB",
-                "service_note1": "",
-                "service_note2": "",
-                "service_note3": "",
+                
                 "buy_button": true,
                 "display": true,
                 "is_waitting": false,
@@ -149,7 +149,8 @@ export const  listTrips =
         {
             "Trip": {
                 "id": 100726359,
-                "trip_status": 0, 'sold':0,
+                "trip_status": 0, 'sold':0, 
+                'driver_buy':'',
                 "is_vat": 0,
                 "guests":4,
                 "direction":2,
@@ -179,9 +180,7 @@ export const  listTrips =
                 "super_vip_drivers": "",
                 "note": "Thân thiện, hỗ trợ hành lý",
                 "price_note": "",
-                "service_note1": "",
-                "service_note2": "",
-                "service_note3": "",
+               
                 "buy_button": false,
                 "display": true,
                 "is_waitting": true,
@@ -196,6 +195,7 @@ export const  listTrips =
             "Trip": {
                 "id": 100725825,
                 "trip_status": 0, 'sold':0,
+                'driver_buy':'',
                 "is_vat": 0,
                 "guests":2,
                 "direction":1,
@@ -225,9 +225,7 @@ export const  listTrips =
                 "super_vip_drivers": "",
                 "note": "Xe mới, sạch sẽ",
                 "price_note": "Giá trên đã bao gồm phí cao tốc, phí ra vào SB",
-                "service_note1": "service_note1",
-                "service_note2": "service_note2",
-                "service_note3": "service_note3",
+               
                 "buy_button": false,
                 "display": true,
                 "is_waitting": true,
@@ -242,6 +240,7 @@ export const  listTrips =
             "Trip": {
                 "id": 100685539,
                 "trip_status": 0, 'sold':0,
+                'driver_buy':'',
                 "is_vat": 1,
                 "direction":2,
                 "guests":1,
@@ -271,9 +270,7 @@ export const  listTrips =
                 "super_vip_drivers": "",
                 "note": "",
                 "price_note": "Giá trên đã bao gồm phí cao tốc, phí ra vào SB",
-                "service_note1": "",
-                "service_note2": "",
-                "service_note3": "",
+             
                 "buy_button": true,
                 "display": true,
                 "is_waitting": false,
@@ -289,6 +286,7 @@ export const  listTrips =
                 "id": 100722639,
                 "trip_status": 0,
                 "is_vat": 0, 'sold':0,
+                'driver_buy':'',
                 "guests":4,
                 "direction":2,
                 "full_name_guest":"Nguyen DUng",
@@ -317,9 +315,7 @@ export const  listTrips =
                 "super_vip_drivers": "",
                 "note": "Không ngồi ghế cuối",
                 "price_note": "Giá trên đã bao gồm phí cao tốc, phí ra vào SB",
-                "service_note1": "",
-                "service_note2": "",
-                "service_note3": "",
+              
                 "buy_button": false,
                 "display": true,
                 "is_waitting": true,
@@ -330,4 +326,11 @@ export const  listTrips =
                 "driver_limited": "2,6406,7887"
             }
         },
+]
+export const tranferPoints =[
+  { id: '1', name: 'Nguyễn Văn Anh', date: '2025-10-30 13:00:00', point: 540, price: '50K/Điểm', phone: '0933 456 789' },
+  { id: '2', name: 'Nguyễn Văn Anh', date: '2025-10-31 09:30:00', point: 540, price: '50K/Điểm', phone: '0933 456 789' },
+  { id: '3', name: 'Nguyễn Văn Anh', date: '2025-11-01 20:45:00', point: 540, price: '50K/Điểm', phone: '0933 456 789' },
+  { id: '4', name: 'Nguyễn Văn Anh', date: '2025-11-1 09:30:00', point: 540, price: '50K/Điểm', phone: '0933 456 789' },
+  { id: '5', name: 'Nguyễn Văn Anh', date: '2025-11-1 09:30:00', point: 540, price: '50K/Điểm', phone: '0933 456 789' },
 ]

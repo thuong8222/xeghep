@@ -2,13 +2,14 @@ import React from 'react';
 import { Text, TextStyle, TextProps, Platform } from 'react-native';
 import { scale } from 'react-native-size-matters';
 import { Typography } from '../base/types/typography';
-import { Color } from 'react-native/types_generated/Libraries/Animated/AnimatedExports';
+
 import { ColorsGlobal } from '../base/Colors/ColorsGlobal';
 
 
 
 export  interface CustomTextProps extends TextProps {
   color?: string;
+  bold?: boolean;
   fontWeight?: TextStyle['fontWeight'];
   fontSize?: TextStyle['fontSize'];
   fontStyle?: TextStyle['fontStyle'];
@@ -34,7 +35,7 @@ const AppText: React.FC<CustomTextProps> = ({
   textAlign,fontStyle, backgroundColor,
   title,borderBottomWidth,borderBottomColor,paddingVertical,
   style,  variant,
-  children,
+  children, bold,
   textDecorationLine,
   ...restProps
 }) => {
@@ -45,7 +46,9 @@ const AppText: React.FC<CustomTextProps> = ({
     fontSize: fontSize ,
     textAlign, backgroundColor,
     flexWrap: 'wrap',
-    fontStyle
+    ...(bold && { fontWeight: '700' }),
+    fontStyle,
+
     
   };
 

@@ -1,13 +1,13 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import MenuBottomTabs from './MenuBottomTabs';
+import MenuBottomTabs, { BottomTabParamList } from './MenuBottomTabs';
 
 import ChatScreen from '../screens/ChatScreen';
+import { NavigatorScreenParams } from '@react-navigation/native';
 
 export type RootStackParamList = {
-    BottomTabs: undefined;
-  
+    BottomTabs: NavigatorScreenParams<BottomTabParamList>;
     ChatScreen: { username: string };
    
   };

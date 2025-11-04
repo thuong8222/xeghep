@@ -5,16 +5,18 @@ import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import AppModal from '../../common/AppModal';
 import AppButton from '../../common/AppButton';
 import AppText from '../../common/AppText';
-import { clearWarnings } from 'react-native/types_generated/Libraries/LogBox/Data/LogBoxData';
+
+import { ColorsGlobal } from '../../base/Colors/ColorsGlobal';
+import IconArrowDown from '../../../assets/icons/IconArowDown';
 
 
 interface ModalUploadCarImageProps {
     isDisplay: boolean;
     onClose: () => void;
-    // onSubmitOtp?: (otp: string) => void;
+    onSelectImage: (uri: string) => void;
   }
-export default function ModalUploadCarImage({isDisplay, onClose}:ModalUploadCarImageProps) {
-  const [imageUri, setImageUri] = useState<string | null>(null);
+export default function ModalUploadCarImage({isDisplay, onClose, onSelectImage}:ModalUploadCarImageProps) {
+ 
 
   const pickImage = () => {
     launchImageLibrary(
@@ -29,7 +31,10 @@ export default function ModalUploadCarImage({isDisplay, onClose}:ModalUploadCarI
           return;
         }
         const uri = response.assets?.[0]?.uri;
-        if (uri) setImageUri(uri);
+        if (uri) {
+          onSelectImage(uri); // 👈 truyền ra ngoài
+          onClose();          // đóng modal
+        }
       }
     );
   };
@@ -47,30 +52,26 @@ export default function ModalUploadCarImage({isDisplay, onClose}:ModalUploadCarI
           return;
         }
         const uri = response.assets?.[0]?.uri;
-        if (uri) setImageUri(uri);
+        if (uri) {
+          onSelectImage(uri); // 👈 truyền ra ngoài
+          onClose();          // đóng modal
+        }
       }
     );
   };
-console.log('isDisplay',isDisplay)
+
   return (
-    <AppModal isVisible={isDisplay} onClose={onClose}>
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <AppButton  onPress={pickImage}>
+    <AppModal isVisible={isDisplay} onClose={onClose} heightPercent={0.26}>
+    <View style={{ flex: 1, justifyContent:'center', paddingBottom:30 } }>
+      <AppButton  onPress={pickImage} padding={10} justifyContent={'space-between'} row>
         <AppText>{'Chọn ảnh từ thư viện'}</AppText>
+        <IconArrowDown rotate={-90} />
       </AppButton>
-      <AppButton onPress={takePhoto}>
+      <AppButton onPress={takePhoto} padding={10} borderTopWidth={1} borderTopColor={ColorsGlobal.borderColor} justifyContent={'space-between'} row>
       <AppText>{'Chụp ảnh xe'}</AppText>
+      <IconArrowDown rotate={-90} />
       </AppButton>
-      {imageUri && (
-        <>
-          <AppText style={{ marginTop: 20 }}>Ảnh xe của bạn:</AppText>
-          <Image
-            source={{ uri: imageUri }}
-            style={{ width: 200, height: 200, borderRadius: 12, marginTop: 10 }}
-            resizeMode="cover"
-          />
-        </>
-      )}
+
     </View>
     </AppModal>
   );

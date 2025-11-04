@@ -14,6 +14,7 @@ import { StyleGlobal } from "../../components/base/StyleGlobal";
 import { ColorsGlobal } from "../../components/base/Colors/ColorsGlobal";
 import { Text } from "react-native-gesture-handler";
 import { AuthStackParamList } from "../../navigation/AuthNavigator";
+import ModalOnlySelectProvince from "../../components/component/modals/ModalOnlySelectProvince";
 
 
 type RegisterScreenNavProp = NativeStackNavigationProp<AuthStackParamList, "LoginScreen">;
@@ -28,14 +29,21 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   const [loading, setloading] = useState();
   const [isFormValid, setIsFocused] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
-
+  const [selectedProvince, setSelectedProvince] = useState<string>('');
   const handleLogin = () => {
-   navigation.navigate("LoginScreen");
-
+    navigation.goBack()
   };
 
   const gotoTerms = () => { }
   const gotoPolicy = () => { }
+  const ToggleSelect =()=>{
+    setIsOpenModal(true);
+    console.log('ToggleSelect')
+  }
+  const handleProvinceSelected = (data: { province: any }) => {
+    setSelectedProvince(data.province.name); // cập nhật state với tên tỉnh
+    setIsOpenModal(false); // đóng modal
+  };
   return (
 
     <ScrollView style={{ flexGrow: 1 }} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
@@ -58,7 +66,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 
           </AppView>
           <AppView gap={16} marginTop={32}>
-          <AppInput label="Tên hiển thị"
+            <AppInput label="Tên hiển thị"
               value={username}
               onChangeText={setUsername}
               placeholder="Nhập tên hiển thị"
@@ -69,11 +77,13 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
               onChangeText={setUsername}
               placeholder="Nhập số điện thoại"
             />
-              <AppInput label="Khu vực (chọn tỉnh/thành)"
-              value={username}
+            <AppInput label="Khu vực (chọn tỉnh/thành)"
+              value={selectedProvince}
               type="select"
-              onChangeText={setUsername}
+              editable={false} 
+              
               placeholder="Khu vực (chọn tỉnh/thành)"
+              onSelectionChange={ToggleSelect}
             />
             <AppInput label="Mật khẩu"
               value={password}
@@ -82,7 +92,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
               secureTextEntry
               type={'password'}
             />
-               <AppInput label="Xác nhận mật khẩu"
+            <AppInput label="Xác nhận mật khẩu"
               value={password}
               onChangeText={setPassword}
               placeholder="Xác nhận mật khẩu"
@@ -91,13 +101,13 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 
             />
           </AppView>
-        
+
           <AppView marginTop={32}>
-          <ButtonSubmit title="Đăng ký"
-            isLoading={loading}
-            onPress={handleLogin}
-            disabled={!isFormValid} />
-                 </AppView>
+            <ButtonSubmit title="Đăng ký"
+              isLoading={loading}
+              onPress={handleLogin}
+              disabled={!isFormValid} />
+          </AppView>
           <AppView marginTop={24} justifyContent="center" alignItems="center" row gap={12}>
 
             <AppText  >
@@ -105,7 +115,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             </AppText>
             <TouchableOpacity onPress={handleLogin} disabled={loading}>
               <AppText
-                style={{ textDecorationLine: 'underline', fontWeight:600 }}>
+                style={{ textDecorationLine: 'underline', fontWeight: 600 }}>
                 Đăng nhập
               </AppText>
             </TouchableOpacity>
@@ -127,7 +137,11 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
           </TouchableOpacity>
         </AppView>
       </View>
-
+      <ModalOnlySelectProvince
+  isVisible={isOpenModal}
+  onClose={() => setIsOpenModal(false)}
+  onSelected={handleProvinceSelected} // callback nhận dữ liệu
+/>
     </ScrollView>
 
 

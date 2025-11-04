@@ -10,35 +10,38 @@ import IconEyeOff from '../../assets/icons/iconEyeOff';
 import IconEye from '../../assets/icons/iconEyeOpen';
 import IconArowDown from '../../assets/icons/IconArowDown';
 import IconUploadIcloud from '../../assets/icons/IconUploadIcloud';
+import IconSearch from '../../assets/icons/IconSearch';
+import AppView from './AppView';
 
 interface CustomInputProps extends TextInputProps {
     label?: string;
     value: string;
-    onChangeText: (text: string) => void;
+    onChangeText?: (text: string) => void;
     isLoading?: boolean;
     keyboardType?: TextInputProps['keyboardType'];
     marginTop?: number;
-    type?: 'number' | 'email' | 'text' | 'phone' | 'password' | 'select'|'upload';
+    type?: 'number' | 'email' | 'text' | 'phone' | 'password' | 'select' | 'upload' | 'search';
     error?: string;
     onUploadPress?: () => void;
+    toggleSelect?: () => void;
+    onSearchPress?: () => void;
 }
 const AppInput: React.FC<CustomInputProps> = ({
     label,
     value,
     onChangeText,
-    onUploadPress, // ✅ nhận từ props
+    onUploadPress, toggleSelect, onSearchPress,
     isLoading = false,
     keyboardType = 'default',
-    marginTop = 0,
-    type, 
-    
+    marginTop = 10,
+    type,
     error,
     ...rest
 }) => {
     const [isFocused, setIsFocused] = useState(false);
     const animated = useRef(new Animated.Value(value ? 1 : 0)).current;
     const [secureTextEntry, setSecureTextEntry] = useState(type === 'password');
-    
+
     useEffect(() => {
         Animated.timing(animated, {
             toValue: isFocused || value ? 1 : 0,
@@ -47,15 +50,11 @@ const AppInput: React.FC<CustomInputProps> = ({
             useNativeDriver: false,
         }).start();
     }, [isFocused, value]);
-    
+
     const toggleShowPassword = () => {
         setSecureTextEntry(prev => !prev);
     };
-    
-    const toggleSelect = () => {
-        console.log('toggleSelect')
-     
-    }
+
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -88,6 +87,15 @@ const AppInput: React.FC<CustomInputProps> = ({
                         editable={!isLoading && type !== 'upload'}
                         secureTextEntry={secureTextEntry}
                         {...rest}
+                        returnKeyType={type === 'search' ? 'search' : 'done'}
+                        onSubmitEditing={
+                            type === 'search'
+                                ? () => {
+                                    Keyboard.dismiss();
+                                    onSearchPress?.();
+                                }
+                                : undefined
+                        }
                     />
                     {type === 'password' && (
                         <AppButton onPress={toggleShowPassword} position={'absolute'} right={13} top={12}>
@@ -104,6 +112,11 @@ const AppInput: React.FC<CustomInputProps> = ({
                             <IconUploadIcloud />
                         </AppButton>
                     )}
+                    {type === 'search' && (
+                            <AppButton onPress={onSearchPress} position={'absolute'} right={13} top={12}>
+                            <IconSearch />
+                          </AppButton>
+                    )}
                 </View>
                 {error ? (
                     <AppText color={'red'} style={{ marginTop: 4, fontSize: 12 }}>{error}</AppText>
@@ -115,7 +128,8 @@ const AppInput: React.FC<CustomInputProps> = ({
 export default AppInput;
 const styles = StyleSheet.create({
     container: {
-        flex: 1, height:'auto'
+        width: '100%',
+        height: 'auto',
     },
     inputContainer: {
         position: 'relative',
@@ -126,7 +140,7 @@ const styles = StyleSheet.create({
         gap: 4
     },
     labelFocused: {
-        color: '#007927',
+        color: ColorsGlobal.main2,
     },
     inputLabel: {
         fontSize: 14, lineHeight: 20, fontWeight: '400',
@@ -145,6 +159,6 @@ const styles = StyleSheet.create({
 
         width: '100%',
         borderRadius: 6,
-         position: 'relative'
+        position: 'relative'
     },
 });

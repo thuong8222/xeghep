@@ -25,7 +25,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
     const { nameGroup, countMember } = route.params;
     const [isModalVisible, setIsModalVisible] = useState(false)
     const HeaderRightButton = () => (
-        <AppView row>
+        <AppView row gap={6}>
             <AppButton onPress={() => setIsModalVisible(true)}>
                 <IconSort />
             </AppButton>
@@ -38,6 +38,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
         // Use `setOptions` to update the button that we previously specified
         // Now the button includes an `onPress` handler to update the count
         navigation.setOptions({
+            headerBackTitleStyle: { fontSize: 0 },
 
             headerTitle: () => (
                 <AppView justifyContent={'flex-start'} alignItems={'flex-start'}>
@@ -91,7 +92,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
         return (
 
             <View style={styles.rowBack}>
-                <AppButton style={[styles.backBtn, styles.backBtnRight, { backgroundColor: ColorsGlobal.main }]} onPress={() => buyTrip(rowMap, data.item.Trip.id)}>
+                <AppButton style={[styles.backBtn, styles.backBtnRight, { backgroundColor: ColorsGlobal.backgroundBuyTrip }]} onPress={() => buyTrip(rowMap, data.item.Trip.id)}>
                     <Text style={styles.backBtnText}>{'Mua chuyến'}</Text>
                 </AppButton>
             </View>
@@ -139,7 +140,7 @@ const styles = StyleSheet.create({
     },
     rowBack: {
         alignItems: 'center',
-        backgroundColor: ColorsGlobal.main,
+        backgroundColor: ColorsGlobal.backgroundBuyTrip,
         borderRadius: 12,
         flex: 1,
         flexDirection: 'row',
@@ -160,7 +161,8 @@ const styles = StyleSheet.create({
         right: 0,
     },
     backBtnText: {
-        color: 'white',
+        fontSize: 16,
+        lineHeight: 24,
         fontWeight: 'bold',
     },
 });

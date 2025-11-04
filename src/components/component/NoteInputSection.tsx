@@ -51,8 +51,12 @@ export default function NoteInputSection() {
       {/* Input ghi chú */}
       <AppView width="100%" alignItems="flex-start" justifyContent="flex-start">
         <TextInput
-          value={note}
-          onChangeText={setNote}
+        value={note ? `Ghi chú: ${note}` : ''}
+        onChangeText={(text) => {
+          // Nếu người dùng sửa thủ công thì loại bỏ "Ghi chú: " đi
+          const clean = text.replace(/^Ghi chú:\s*/i, '');
+          setNote(clean);
+        }}
           placeholder="Ghi chú: Nhập ghi chú...."
           multiline
           style={{
@@ -65,12 +69,13 @@ export default function NoteInputSection() {
             padding: 10,
             fontSize: 14,
             color: ColorsGlobal.textDark,
+            fontStyle: 'italic', 
           }}
         />
 
         {/* Gợi ý ghi chú nhanh */}
         <AppView marginTop={18} row gap={8} flexWrap="wrap">
-        {quickNotes.map((item, index) => {
+          {quickNotes.map((item, index) => {
             const isActive = selectedNotes.includes(item);
             return (
               <AppButton

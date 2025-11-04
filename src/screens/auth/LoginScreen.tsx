@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, TextInput, Button, StyleSheet, TouchableOpacity, SafeAreaView, Image, ScrollView, Alert } from "react-native";
-import {NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppButton from "../../components/common/AppButton";
 import AppInput from "../../components/common/AppInput";
 import ButtonSubmit from "../../components/common/ButtonSubmit";
@@ -15,12 +15,13 @@ import { ColorsGlobal } from "../../components/base/Colors/ColorsGlobal";
 import { AuthStackParamList } from "../../navigation/AuthNavigator";
 import IconTouch from "../../assets/icons/IconTouch";
 import ReactNativeBiometrics, { BiometryTypes } from 'react-native-biometrics'
+import { RootParamList } from "../../../App";
+import ModalForgetPassword from "../../components/component/modals/ModalForgetPassword";
 
 
 
-type RootNavProp = NativeStackNavigationProp<RootStackParamList>;
-type AuthNavProp = NativeStackNavigationProp<AuthStackParamList>;
-type LoginParamList = AuthNavProp & RootNavProp;
+
+type LoginParamList = NativeStackNavigationProp<RootParamList>;
 
 interface Props {
   navigation: LoginParamList;
@@ -37,13 +38,15 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
 
   const handleLogin = () => {
-
-    navigation.navigate('RootNavigator', { screen: 'BottomTabs' });
-
+    // Nếu login thành công, reset stack về RootNavigator
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'RootNavigator', params: undefined }],
+    });
   };
-  const gotoRegiste = () => {
-    navigation.navigate("RegisterScreen");
-
+  const gotoRegister = () => {
+    navigation.navigate('Auth', { screen:'RegisterScreen' });
+    console.log('gotoRegister')
   };
   const ForgotPassword = () => {
     setIsOpenModal(true);
@@ -54,14 +57,14 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const handleLoginWithBiometric = async () => {
     try {
       // kiểm tra thiết bị có hỗ trợ biometrics không
-      const {available, biometryType} = await rnBiometrics.isSensorAvailable();
+      const { available, biometryType } = await rnBiometrics.isSensorAvailable();
       if (!available) {
         Alert.alert('Không hỗ trợ biometric trên thiết bị này');
         return;
       }
 
       // hiện prompt
-      const {success, error} = await rnBiometrics.simplePrompt({
+      const { success, error } = await rnBiometrics.simplePrompt({
         promptMessage: 'Xác thực để đăng nhập',
       });
 
@@ -84,7 +87,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         <AppView flex={1} justifyContent="center" >
 
           <AppView justifyContent="center" alignItems="center" marginBottom={20} gap={16}>
-         
+
             <Image source={logo} style={styles.logo} />
             <AppView gap={6}>
               <AppText
@@ -106,43 +109,43 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
               placeholder="Nhập số điện thoại"
             />
             <AppInput label="Mật khẩu"
-            type={'password'}
+              type={'password'}
               value={password}
               onChangeText={setPassword}
               placeholder="Nhập mật khẩu"
               secureTextEntry
             />
           </AppView>
-          <AppView row justifyContent="space-between" marginTop={18}  alignItems="center">
+          <AppView row justifyContent="space-between" marginTop={18} alignItems="center">
             <AppButton onPress={handleLoginWithBiometric} disabled={loading} row gap={6}>
               <IconTouch />
               <AppText fontSize={18} lineHeight={26} >
                 Đăng nhập bằng vân tay
               </AppText>
             </AppButton>
-            <TouchableOpacity onPress={ForgotPassword} disabled={loading}>
+            <AppButton onPress={ForgotPassword} disabled={loading}>
               <AppText fontSize={18} lineHeight={26}
                 style={{ color: ColorsGlobal.main, textDecorationLine: 'underline' }}>
                 Quên mật khẩu
               </AppText>
-            </TouchableOpacity>
+            </AppButton>
           </AppView>
-<AppView marginTop={32}>
-<ButtonSubmit title="Đăng nhập" 
-            isLoading={loading}
-            onPress={handleLogin}
-            
-         />
-</AppView>
-          
+          <AppView marginTop={32}>
+            <ButtonSubmit title="Đăng nhập"
+              isLoading={loading}
+              onPress={handleLogin}
+
+            />
+          </AppView>
+
           <AppView marginTop={24} justifyContent="center" alignItems="center" row gap={12}>
 
             <AppText  >
               Bạn chưa có tài khoản?
             </AppText>
-            <TouchableOpacity onPress={gotoRegiste} disabled={loading}>
+            <TouchableOpacity onPress={gotoRegister} disabled={loading}>
               <AppText
-                style={{ textDecorationLine: 'underline' ,fontWeight:600 }}>
+                style={{ textDecorationLine: 'underline', fontWeight: 600 }}>
                 Đăng ký ngay
               </AppText>
             </TouchableOpacity>
@@ -153,7 +156,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           <TouchableOpacity onPress={gotoTerms} disabled={loading}>
             <AppText
               style={{ color: ColorsGlobal.textLight }}>
-               Điều khoản sử dụng   |
+              Điều khoản sử dụng   |
             </AppText>
           </TouchableOpacity>
           <TouchableOpacity onPress={gotoPolicy} disabled={loading}>
@@ -164,7 +167,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           </TouchableOpacity>
         </AppView>
       </View>
-
+      <ModalForgetPassword isVisible={isOpenModal} onRequestClose={() => setIsOpenModal(false)} />
     </ScrollView>
 
 

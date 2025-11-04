@@ -1,13 +1,9 @@
 import { Modal, ScrollView, StyleSheet } from 'react-native'
 import React, { useState } from 'react'
 import AppView from '../../common/AppView'
-import { ColorsGlobal } from '../../base/Colors/ColorsGlobal'
-import AppButton from '../../common/AppButton'
+
 import AppText from '../../common/AppText'
-import IconTick from '../../../assets/icons/IconTick'
-import IconClose from '../../../assets/icons/IconClose'
-import IconArowDown from '../../../assets/icons/IconArowDown'
-import DateTimeFilter from '../DateTimeFilter'
+
 import ButtonSubmit from '../../common/ButtonSubmit'
 
 interface ModalRequestJoinGroupProps {

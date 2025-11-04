@@ -5,7 +5,7 @@ import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal'
 import { SwipeListView } from 'react-native-swipe-list-view'
 import AppButton from '../../components/common/AppButton'
 import Trip from '../../components/component/Trip'
-import { listTrips } from '../../dataDemoJson'
+import { listTrips, tranferPoints } from '../../dataDemoJson'
 import Point from '../../components/component/Point'
 import IconPlus from '../../assets/icons/IconPlus'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -53,8 +53,8 @@ export default function PointScreen({navigation}:Props) {
   return (
    <AppView flex={1} padding={16} backgroundColor={ColorsGlobal.backgroundWhite}>
  <SwipeListView
-                data={listTrips}
-                keyExtractor={(item) => item.Trip.id.toString()}
+                data={tranferPoints}
+                keyExtractor={(item) => item.id.toString()}
                 showsVerticalScrollIndicator={false}
                 renderItem={renderItem_trip} ItemSeparatorComponent={() => <AppView height={16} />}
                 renderHiddenItem={renderHiddenItem}

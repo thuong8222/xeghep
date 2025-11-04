@@ -90,9 +90,9 @@ export default function Trip(props) {
 
             </AppView>
             {props.data.Trip.sold === 1 && (
-                <AppView borderLeftColor={'#949494'} borderLeftWidth={1} justifyContent='center' alignItems='center' padding={12}>
+                <AppView borderLeftColor={'#949494'} borderLeftWidth={1} justifyContent='center' alignItems='center' padding={8}>
                     <AppText fontSize={10} >{'Nhận'}</AppText>
-                    <AppText fontSize={10} >{'Nguyễn Văn Long'}</AppText>
+                    <AppText fontSize={10} >{props.data.Trip.driver_buy}</AppText>
                 </AppView>)
 
             }

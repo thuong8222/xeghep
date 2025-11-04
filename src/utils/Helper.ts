@@ -158,3 +158,12 @@ export const capitalizeWords = (str: string): string => {
     .join(" ");
 };
 
+export const removeVietnameseTones = (str: string) => {
+  return str
+    .normalize("NFD") // tách dấu
+    .replace(/[\u0300-\u036f]/g, "") // xóa dấu
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase()
+    .trim();
+};

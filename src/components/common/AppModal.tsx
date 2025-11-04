@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Modal from 'react-native-modal';
 import { _screen_height } from '../../utils/Helper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface AppModalProps {
   isVisible: boolean;
@@ -16,6 +17,7 @@ export default function AppModal({
   heightPercent = 0.8,
   children,
 }: AppModalProps) {
+  const insets = useSafeAreaInsets(); 
   return (
     <Modal
       isVisible={isVisible}
@@ -23,12 +25,14 @@ export default function AppModal({
       swipeDirection="down"
       onSwipeComplete={onClose}
       propagateSwipe
-      style={styles.modal}
+      style={[styles.modal]}
     >
       <View
         style={[
           styles.modalContent,
-          { height: _screen_height * heightPercent },
+          { height: _screen_height * heightPercent,
+            paddingBottom: insets.bottom
+           },
         ]}
       >
         <View style={styles.handleBar} />
@@ -41,7 +45,8 @@ export default function AppModal({
 const styles = StyleSheet.create({
   modal: {
     justifyContent: 'flex-end',
-    margin: 0,
+    margin:0,
+
   },
   modalContent: {
     backgroundColor: '#fff',

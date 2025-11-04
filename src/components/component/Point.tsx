@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import AppView from '../common/AppView';
 import { ColorsGlobal } from '../base/Colors/ColorsGlobal';
 import AppText from '../common/AppText';
+import moment from 'moment';
 
 
 export default function Point(props) {
@@ -14,14 +15,14 @@ export default function Point(props) {
             <AppView row justifyContent={'space-between'}>
 
                 <AppText fontWeight={600}
-                    color={ColorsGlobal.main2}>{props.data.Trip.full_name_guest}</AppText>
+                    color={ColorsGlobal.main2}>{props.data.name}</AppText>
 
-                <AppText color={ColorsGlobal.main2} fontWeight={600}>{'540 điểm'}</AppText>
+                <AppText color={ColorsGlobal.main2} fontWeight={600}>{props.data.point +' điểm'}</AppText>
 
             </AppView>
             <AppView row justifyContent={'space-between'}>
-                <AppText fontSize={14} lineHeight={20} fontWeight={600} color={ColorsGlobal.textLight}>{'Ngày 20/11/2025'}</AppText>
-                <AppText fontWeight={700} color={ColorsGlobal.main}>{'50K/ Điểm'}</AppText>
+                <AppText fontSize={14} lineHeight={20} fontWeight={600} color={ColorsGlobal.textLight}>{moment(props.data.date).format('DD/MM/YYYY')}</AppText>
+                <AppText fontWeight={700} color={ColorsGlobal.main}>{props.data.price}</AppText>
             </AppView>
 
 
