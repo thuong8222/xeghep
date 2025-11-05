@@ -1,16 +1,17 @@
 export const groupsArea =[
     {
       "id": 1,
-      "type_car": "Xe 4 chỗ",
-      "area": "Hà Nội",
-      "count": "120", 
-      "is_read":true
+      "type_car_name": "Xe 4 chỗ",
+      "group_type_car":4,
+      "group_area_name": "Hà Nội",
+      "count_trips": 120, 
+     
     },
     {
       "id": 2,
       "type_car": "Xe 7 chỗ",
       "area": "Hà Nội",
-      "count": "15",
+      "count": "15", 
       "is_read":false
     },
     {
@@ -30,7 +31,7 @@ export const groupsArea =[
       "id": 5,
       "type_car": "Xe 45 chỗ",
       "area": "Hà Nội",
-      "count": "12",
+      "count_trips": "12",
       "is_read":false
 
     },
@@ -57,47 +58,29 @@ export const  listTrips =
         {
             "Trip": {
                 "id": 100726078,
-                "trip_status": 0,
+              'group_type_car':4,
+              'group_area':'Hai Phong',
                 'sold':1,
                 'driver_buy':'Nguyễn Văn Long',
                 "is_vat": 0,
                 "direction":1, 
-                "full_name_guest":"Nguyen Dung",
+                "full_name_driver_owner":"Nguyen Dung",
                 "guests":1,
                 "time_start": "2025-10-30 13:00:00",
                 "time_sell": "2025-10-30 08:50:00",
                 "price_sell": 160,
-                "price_driver_priority": 0,
-                "price_driver_vip": 0,
-                "price_driver_normal": 160,
-                "type_car_id": 1,
                 "place_start": "Trung Tâm Hội Nghị Quốc Gia Việt Nam, Mễ Trì, Từ Liêm, Hà Nội",
                 "place_end": "Sân Bay Nội Bài (HAN), Sóc Sơn, Hà Nội",
-                "is_one_way": 1,
-                "time_sell_display": 29363400,
-                "total_time_sell_priority": 0,
-                "time_sell_driver_priority": "2025-10-30 08:50:00",
-                "time_sell_driver_priority_list": "2025-10-30 08:50:00",
-                "time_sell_driver_vip": "2025-10-30 08:50:00",
-                "time_sell_driver_normal": "1970-01-01 08:00:00",
+            
+              
                 "point": 0,
-                "point_time": 0,
-                "point_driver_priority": 0,
-                "point_driver_priority_list": 0,
-                "point_driver_vip": 0,
-                "point_driver_normal": 0,
-                "super_vip_drivers": "",
+              
                 "note": "Đón đúng giờ",
-                "price_note": "Giá trên đã bao gồm phí cao tốc, phí ra vào SB",
+          
              
-                "buy_button": false,
-                "display": true,
-                "is_waitting": true,
-                "level_sell": 3,
-                "driver_priority_id": 0,
-                "group_priority_name": "",
-                "driver_priority_list": "",
-                "driver_limited": "2,6406,7887"
+             
+             
+            
             }
         },
         {
