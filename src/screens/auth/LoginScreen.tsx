@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, TextInput, Button, StyleSheet, TouchableOpacity, SafeAreaView, Image, ScrollView, Alert } from "react-native";
+import { View, TextInput, Button, StyleSheet, TouchableOpacity, SafeAreaView, Image, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppButton from "../../components/common/AppButton";
 import AppInput from "../../components/common/AppInput";
@@ -45,7 +45,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     });
   };
   const gotoRegister = () => {
-    navigation.navigate('Auth', { screen:'RegisterScreen' });
+    navigation.navigate('Auth', { screen: 'RegisterScreen' });
     console.log('gotoRegister')
   };
   const ForgotPassword = () => {
@@ -81,96 +81,99 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
   return (
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView style={{ flexGrow: 1 }} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', backgroundColor:'pink' }}>
+        <View style={styles.container}>
+          <AppView flex={1} justifyContent="center" >
 
-    <ScrollView style={{ flexGrow: 1 }} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
-      <View style={styles.container}>
-        <AppView flex={1} justifyContent="center" >
+            <AppView justifyContent="center" alignItems="center" marginBottom={20} gap={16}>
 
-          <AppView justifyContent="center" alignItems="center" marginBottom={20} gap={16}>
+              <Image source={logo} style={styles.logo} />
+              <AppView gap={6}>
+                <AppText
+                  style={StyleGlobal.title1}>
+                  {'Đăng nhập'}
+                </AppText>
+                <AppText
+                  style={StyleGlobal.textNormal}>
+                  {'Chào mừng bạn đến với Xe ghép'}
+                </AppText>
+              </AppView>
 
-            <Image source={logo} style={styles.logo} />
-            <AppView gap={6}>
-              <AppText
-                style={StyleGlobal.title1}>
-                {'Đăng nhập'}
+            </AppView>
+            <AppView gap={16} marginTop={32}>
+              <AppInput label="Số điện thoại"
+                value={username}
+                keyboardType={'decimal-pad'}
+                onChangeText={setUsername}
+                placeholder="Nhập số điện thoại"
+              />
+              <AppInput label="Mật khẩu"
+                type={'password'}
+                value={password}
+                onChangeText={setPassword}
+                placeholder="Nhập mật khẩu"
+                secureTextEntry
+              />
+            </AppView>
+            <AppView row justifyContent="space-between" marginTop={18} alignItems="center">
+              <AppButton onPress={handleLoginWithBiometric} disabled={loading} row gap={6}>
+                <IconTouch />
+                <AppText fontSize={18} lineHeight={26} >
+                  Đăng nhập bằng vân tay
+                </AppText>
+              </AppButton>
+              <AppButton onPress={ForgotPassword} disabled={loading}>
+                <AppText fontSize={18} lineHeight={26}
+                  style={{ color: ColorsGlobal.main, textDecorationLine: 'underline' }}>
+                  Quên mật khẩu
+                </AppText>
+              </AppButton>
+            </AppView>
+            <AppView marginTop={32}>
+              <ButtonSubmit title="Đăng nhập"
+                isLoading={loading}
+                onPress={handleLogin}
+
+              />
+            </AppView>
+
+            <AppView marginTop={24} justifyContent="center" alignItems="center" row gap={12}>
+
+              <AppText  >
+                Bạn chưa có tài khoản?
               </AppText>
-              <AppText
-                style={StyleGlobal.textNormal}>
-                {'Chào mừng bạn đến với Xe ghép'}
-              </AppText>
+              <TouchableOpacity onPress={gotoRegister} disabled={loading}>
+                <AppText
+                  style={{ textDecorationLine: 'underline', fontWeight: 600 }}>
+                  Đăng ký ngay
+                </AppText>
+              </TouchableOpacity>
             </AppView>
 
           </AppView>
-          <AppView gap={16} marginTop={32}>
-            <AppInput label="Số điện thoại"
-              value={username}
-              keyboardType={'decimal-pad'}
-              onChangeText={setUsername}
-              placeholder="Nhập số điện thoại"
-            />
-            <AppInput label="Mật khẩu"
-              type={'password'}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Nhập mật khẩu"
-              secureTextEntry
-            />
-          </AppView>
-          <AppView row justifyContent="space-between" marginTop={18} alignItems="center">
-            <AppButton onPress={handleLoginWithBiometric} disabled={loading} row gap={6}>
-              <IconTouch />
-              <AppText fontSize={18} lineHeight={26} >
-                Đăng nhập bằng vân tay
-              </AppText>
-            </AppButton>
-            <AppButton onPress={ForgotPassword} disabled={loading}>
-              <AppText fontSize={18} lineHeight={26}
-                style={{ color: ColorsGlobal.main, textDecorationLine: 'underline' }}>
-                Quên mật khẩu
-              </AppText>
-            </AppButton>
-          </AppView>
-          <AppView marginTop={32}>
-            <ButtonSubmit title="Đăng nhập"
-              isLoading={loading}
-              onPress={handleLogin}
-
-            />
-          </AppView>
-
-          <AppView marginTop={24} justifyContent="center" alignItems="center" row gap={12}>
-
-            <AppText  >
-              Bạn chưa có tài khoản?
-            </AppText>
-            <TouchableOpacity onPress={gotoRegister} disabled={loading}>
+          <AppView justifyContent="center" alignItems="flex-end" row gap={12}>
+            <TouchableOpacity onPress={gotoTerms} disabled={loading}>
               <AppText
-                style={{ textDecorationLine: 'underline', fontWeight: 600 }}>
-                Đăng ký ngay
+                style={{ color: ColorsGlobal.textLight }}>
+                Điều khoản sử dụng   |
+              </AppText>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={gotoPolicy} disabled={loading}>
+              <AppText
+                style={{ color: ColorsGlobal.textLight }}>
+                Chính sách riêng tư
               </AppText>
             </TouchableOpacity>
           </AppView>
+        </View>
+        <ModalForgetPassword isVisible={isOpenModal} onRequestClose={() => setIsOpenModal(false)} />
+      </ScrollView>
 
-        </AppView>
-        <AppView justifyContent="center" alignItems="flex-end" row gap={12}>
-          <TouchableOpacity onPress={gotoTerms} disabled={loading}>
-            <AppText
-              style={{ color: ColorsGlobal.textLight }}>
-              Điều khoản sử dụng   |
-            </AppText>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={gotoPolicy} disabled={loading}>
-            <AppText
-              style={{ color: ColorsGlobal.textLight }}>
-              Chính sách riêng tư
-            </AppText>
-          </TouchableOpacity>
-        </AppView>
-      </View>
-      <ModalForgetPassword isVisible={isOpenModal} onRequestClose={() => setIsOpenModal(false)} />
-    </ScrollView>
-
-
+    </KeyboardAvoidingView>
   );
 };
 

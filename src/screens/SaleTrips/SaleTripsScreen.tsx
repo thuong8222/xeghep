@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native'
 import React, { useState } from 'react'
 import AppView from '../../components/common/AppView'
 import AppText from '../../components/common/AppText'
@@ -47,7 +47,7 @@ export default function SaleTripsScreen() {
   }
   return (
 
-    <AppView flex={1} backgroundColor='#fff' padding={16} gap={18} paddingBottom={insets.bottom}  >
+    <AppView flex={1} backgroundColor='#fff' paddingHorizontal={16} paddingTop={16} gap={18} paddingBottom={Platform.OS === 'ios' ?   insets.bottom:0}  >
 
       <AppView row gap={32}>
         <AppButton onPress={() => setSelectedDirection('go')} row gap={8}>

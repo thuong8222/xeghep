@@ -42,9 +42,11 @@ export default function MenuBottomTabs() {
              }} />
            
             <Tabs.Screen name="PointTabs" component={PointTabs} options={{ tabBarLabel: 'Đổi điểm' ,
+            headerShown:false,
                    tabBarIcon: ({ color, size, focused })=> <IconTranferPoint color={color}  />
             }} />
             <Tabs.Screen name="AccountTabs" component={AccountTabs} options={{ tabBarLabel: 'Tài khoản',
+              headerShown:false,
                    tabBarIcon: ({ color, size, focused })=> <IconUser color={color} />, 
               
              }} />

@@ -40,7 +40,7 @@ export default function PointScreen({navigation}:Props) {
  return (
       
             <AppView flex={1} alignItems='center' backgroundColor={ColorsGlobal.backgroundBuyTrip} radius={12} row justifyContent={'flex-end'}>
-                 <AppButton  style={[styles.backBtn, styles.backBtnRight, { backgroundColor: ColorsGlobal.backgroundBuyTrip }]} onPress={() => buyTrip(rowMap, data.item.Trip.id)}>
+                 <AppButton  style={[styles.backBtn, styles.backBtnRight, { backgroundColor: ColorsGlobal.backgroundBuyTrip }]} onPress={() => buyTrip(rowMap, data.item.id)}>
                  <Text style={styles.backBtnText}>{'Mua điểm'}</Text>
                       </AppButton>
             </AppView>

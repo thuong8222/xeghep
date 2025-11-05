@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TextInput, Button, StyleSheet, TouchableOpacity, SafeAreaView, Image, ScrollView } from "react-native";
+import { View, TextInput, Button, StyleSheet, TouchableOpacity, SafeAreaView, Image, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { createNativeStackNavigator, NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppButton from "../../components/common/AppButton";
 import AppInput from "../../components/common/AppInput";
@@ -26,26 +26,32 @@ interface Props {
 const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setloading] = useState();
   const [isFormValid, setIsFocused] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [selectedProvince, setSelectedProvince] = useState<string>('');
+  
   const handleLogin = () => {
     navigation.goBack()
   };
 
   const gotoTerms = () => { }
   const gotoPolicy = () => { }
-  const ToggleSelect =()=>{
+  const openSelectProvince = () =>{
+ 
     setIsOpenModal(true);
-    console.log('ToggleSelect')
+
   }
   const handleProvinceSelected = (data: { province: any }) => {
     setSelectedProvince(data.province.name); // cập nhật state với tên tỉnh
     setIsOpenModal(false); // đóng modal
   };
   return (
-
+<KeyboardAvoidingView
+  style={{ flex: 1 }}
+  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+>
     <ScrollView style={{ flexGrow: 1 }} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
       <View style={styles.container}>
         <AppView flex={1} justifyContent="center" >
@@ -83,7 +89,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
               editable={false} 
               
               placeholder="Khu vực (chọn tỉnh/thành)"
-              onSelectionChange={ToggleSelect}
+              toggleSelect={openSelectProvince}
             />
             <AppInput label="Mật khẩu"
               value={password}
@@ -93,8 +99,8 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
               type={'password'}
             />
             <AppInput label="Xác nhận mật khẩu"
-              value={password}
-              onChangeText={setPassword}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
               placeholder="Xác nhận mật khẩu"
               secureTextEntry
               type={'password'}
@@ -106,7 +112,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             <ButtonSubmit title="Đăng ký"
               isLoading={loading}
               onPress={handleLogin}
-              disabled={!isFormValid} />
+              disabled={!isFormValid}  />
           </AppView>
           <AppView marginTop={24} justifyContent="center" alignItems="center" row gap={12}>
 
@@ -143,7 +149,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   onSelected={handleProvinceSelected} // callback nhận dữ liệu
 />
     </ScrollView>
-
+    </KeyboardAvoidingView>
 
   );
 };

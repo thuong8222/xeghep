@@ -11,9 +11,11 @@ export type AccountTabsParamList ={
  const Stack = createNativeStackNavigator<AccountTabsParamList>();
 export default function AccountTabs() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator screenOptions={{  }}>
   
-       <Stack.Screen name="AccountScreen" component={AccountScreen} options={{headerTitle:'Tài khoản'}} />
+       <Stack.Screen name="AccountScreen" component={AccountScreen} options={{headerTitle:'Tài khoản', 
+        headerTitleAlign:'center'
+       }} />
           
      </Stack.Navigator>
   )

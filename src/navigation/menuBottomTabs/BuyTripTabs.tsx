@@ -8,6 +8,8 @@ import AppButton from '../../components/common/AppButton'
 import IconSort from '../../assets/icons/IconSort'
 import ModalBuyTrip from '../../components/component/modals/ModalBuyTrip'
 import InfoGroupScreen from '../../screens/buyTrip/InfoGroupScreen'
+import AppView from '../../components/common/AppView'
+import AppText from '../../components/common/AppText'
 
 export type BuyTripStackParamList = {
   GroupArea: undefined
@@ -59,6 +61,7 @@ export default function BuyTripTabs() {
             name="BuyTrip"
             component={BuyTripScreen}
             options={{
+              headerTitleAlign: 'left',
               headerBackTitle: '',
 
             }}
@@ -68,7 +71,8 @@ export default function BuyTripTabs() {
             component={InfoGroupScreen}
             options={{
               headerBackTitle: '',
-              headerTitle: 'Thông tin nhóm'
+              headerTitle: 'Thông tin nhóm', 
+               headerTitleAlign:'center'
             }}
           />
         </Stack.Group>
@@ -76,7 +80,9 @@ export default function BuyTripTabs() {
           name="SaleTrip"
           component={SaleTripsScreen}
           options={{
-            headerTitle: 'Bán chuyến',
+            headerTitleAlign: 'center',
+            headerTitle:'Bán chuyến'
+         ,
             presentation: 'modal',
           }}
         />

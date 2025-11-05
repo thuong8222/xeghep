@@ -73,5 +73,6 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     fontWeight: "bold",
     textAlign: "center",
+    width:'100%'
   },
 });

@@ -14,7 +14,7 @@ type ModalOnlySelectProvinceProps = {
   onSelected?: (data: { province: any }) => void;
 }
 export default function ModalOnlySelectProvince({ isVisible, onClose, onSelected }:ModalOnlySelectProvinceProps) {
-  const [step, setStep] = useState<'province' | 'district'>('province');
+console.log('isVisible ModalOnlySelectProvince: ',isVisible);
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState(null);
@@ -42,7 +42,7 @@ export default function ModalOnlySelectProvince({ isVisible, onClose, onSelected
 
   // ✅ Lọc danh sách theo searchText
   const filteredProvinces = provinces.filter((item) =>
-    removeVietnameseTones(item.name).includes(removeVietnameseTones(searchText))
+    removeVietnameseTones(item?.name).includes(removeVietnameseTones(searchText))
   );
   
   
