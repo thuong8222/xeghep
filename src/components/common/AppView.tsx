@@ -1,14 +1,13 @@
-import { View, ViewStyle } from 'react-native';
 import React from 'react';
+import { View, ViewStyle } from 'react-native';
 
-import { scale, verticalScale } from 'react-native-size-matters';
-
-import { autoScale } from '../../utils/Helper';
 import { BaseViewProps } from '../base/types/baseViewProps';
+import { scale } from '../../utils/Helper';
 
 const AppView: React.FC<BaseViewProps> = ({
   justifyContent,
-  alignItems,zIndex,
+  alignItems,
+  zIndex,
   backgroundColor,
   paddingVertical,
   paddingHorizontal,
@@ -19,7 +18,8 @@ const AppView: React.FC<BaseViewProps> = ({
   paddingLeft,
   marginBottom,
   height,
-  width,maxHeight,
+  width,
+  maxHeight,
   minHeight,
   radius,
   flex,
@@ -43,52 +43,67 @@ const AppView: React.FC<BaseViewProps> = ({
   children,
   row,
   position,
-  flexWrap,top,
+  flexWrap,
+  top,
   bottom,
   left,
-  right,alignSelf,
+  right,
+  alignSelf,
 }) => {
   const viewStyle: ViewStyle = {
-     justifyContent,
-     alignItems,
-     backgroundColor,
-     paddingRight,
-     paddingBottom,
-     marginTop,zIndex,
-     marginHorizontal,
-     paddingLeft,
-     marginBottom,
-     height,maxHeight,
-     minHeight,
-     width,
-     padding,
-     paddingVertical,
-     paddingHorizontal,
-     margin,
-     borderRadius:radius,
-     borderTopEndRadius,
-     borderTopLeftRadius,
-     gap,
-     borderColor,
-     borderWidth,
-     borderTopWidth,
-     borderTopColor,
-     borderBottomColor,
-     borderBottomWidth,
-     borderLeftColor,
-     borderLeftWidth,
-     borderRightColor,
-     borderRightWidth,
-     flexWrap,
-     flex,  paddingTop,
+    justifyContent,
+    alignItems,
+    backgroundColor,
+    zIndex,
 
-     top,
-     bottom,
-     left,
-     right,
-     position,
-     ...(row && { flexDirection: 'row' }),
-   };
+    // ✅ Scale các giá trị khoảng cách & kích thước
+    paddingRight: paddingRight ? scale(Number(paddingRight)) : undefined,
+    paddingBottom: paddingBottom ? scale(Number(paddingBottom)) : undefined,
+    marginTop: marginTop ? scale(Number(marginTop)) : undefined,
+    marginHorizontal: marginHorizontal ? scale(Number(marginHorizontal)) : undefined,
+    paddingLeft: paddingLeft ? scale(Number(paddingLeft)) : undefined,
+    marginBottom: marginBottom ? scale(Number(marginBottom)) : undefined,
+    height: typeof height === 'number'  ? scale(Number(height)) : height,
+    width: typeof width === 'number' ? scale(width) : width,
+    maxHeight: typeof maxHeight === 'number' ? scale(maxHeight) : maxHeight,
+    minHeight: typeof minHeight === 'number' ? scale(minHeight) : minHeight,
+    padding: padding ? scale(Number(padding)) : undefined,
+    paddingVertical: paddingVertical ? scale(paddingVertical) : undefined,
+    paddingHorizontal: paddingHorizontal ? scale(Number(paddingHorizontal)) : undefined,
+    margin: margin ? scale(Number(margin)) : undefined,
+    paddingTop: paddingTop ? scale(Number(paddingTop)) : undefined,
+    borderRadius: radius ? scale(Number(radius)) : undefined,
+    borderTopEndRadius: borderTopEndRadius ? scale(Number(borderTopEndRadius)) : undefined,
+    borderTopLeftRadius: borderTopLeftRadius ? scale(Number(borderTopLeftRadius)) : undefined,
+    gap: gap ? scale(Number(gap)) : undefined,
+
+    // ✅ Scale các border
+    borderWidth: borderWidth ? scale(Number(borderWidth)) : undefined,
+    borderTopWidth: borderTopWidth ? scale(Number(borderTopWidth)) : undefined,
+    borderBottomWidth: borderBottomWidth ? scale(Number(borderBottomWidth)) : undefined,
+    borderLeftWidth: borderLeftWidth ? scale(Number(borderLeftWidth)) : undefined,
+    borderRightWidth: borderRightWidth ? scale(Number(borderRightWidth)) : undefined,
+
+    borderColor,
+    borderTopColor,
+    borderBottomColor,
+    borderLeftColor,
+    borderRightColor,
+
+    flexWrap,
+    flex,
+
+    // ✅ Scale vị trí tuyệt đối
+    top: top ? verticalScale(Number(top)) : undefined,
+    bottom: bottom ? verticalScale(Number(bottom)) : undefined,
+    left: left ? scale(Number(left)) : undefined,
+    right: right ? scale(Number(right)) : undefined,
+
+    position,
+    alignSelf,
+
+    ...(row && { flexDirection: 'row' }),
+  };
 
   return <View style={[viewStyle, style]}>{children}</View>;
 };

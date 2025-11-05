@@ -16,6 +16,8 @@ import IconChevronLeftDouble from '../../assets/icons/IconChevronLeftDouble'
 import Trip from '../../components/component/Trip'
 import IconSort from '../../assets/icons/IconSort'
 import IconFilterRight from '../../assets/icons/IconFilterRight'
+import { scale } from '../../utils/Helper'
+
 
 type BuyTripProps = NativeStackNavigationProp<BuyTripStackParamList>;
 interface Props {
@@ -100,12 +102,12 @@ export default function BuyTripScreen({ navigation, route }: Props) {
         )
     };
     return (
-        <AppView flex={1} backgroundColor='#fff' padding={16} position='relative'>
+        <AppView flex={1} backgroundColor='#fff' padding={scale(16)} position='relative'>
             <SwipeListView
                 data={listTrips}
                 keyExtractor={(item) => item.Trip.id.toString()}
                 showsVerticalScrollIndicator={false}
-                renderItem={renderItem_trip} ItemSeparatorComponent={() => <AppView height={16} />}
+                renderItem={renderItem_trip} ItemSeparatorComponent={() => <AppView height={scale(16)} />}
                 renderHiddenItem={renderHiddenItem}
                 rightOpenValue={-116}
                 leftOpenValue={0}              // Tắt vuốt sang phải
@@ -116,7 +118,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
                 tension={50}
 
                 onRowDidOpen={rowKey => console.log(`Hàng ${rowKey} đã mở`)} />
-            <AppButton onPress={SaleTrips} position={'absolute'} right={16} bottom={37} width={48} height={48} radius={999} backgroundColor={ColorsGlobal.main} justifyContent='center' alignItems='center'>
+            <AppButton onPress={SaleTrips} position={'absolute'} right={36} bottom={34} width={48} height={48} radius={999} backgroundColor={ColorsGlobal.main} justifyContent='center' alignItems='center'>
                 <IconPlus />
             </AppButton>
             <ModalBuyTrip visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)} />
@@ -128,7 +130,7 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: 'white',
         flex: 1,
-        paddingTop: 50,
+        
     },
     rowFront: {
         alignItems: 'center',

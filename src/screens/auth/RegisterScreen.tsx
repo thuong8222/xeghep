@@ -140,18 +140,19 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 
           </AppView>
           <AppView justifyContent="center" alignItems="flex-end" row gap={12}>
-            <TouchableOpacity onPress={gotoTerms} disabled={loading}>
+            <AppButton onPress={gotoTerms} disabled={loading}>
               <AppText
                 style={{ color: ColorsGlobal.textLight }}>
-                Điều khoản sử dụng   |
+                Điều khoản sử dụng
               </AppText>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={gotoPolicy} disabled={loading}>
+            </AppButton>
+            <AppView width={1} backgroundColor={ColorsGlobal.textLight} height={'100%'} />
+            <AppButton onPress={gotoPolicy} disabled={loading}>
               <AppText
                 style={{ color: ColorsGlobal.textLight }}>
                 Chính sách riêng tư
               </AppText>
-            </TouchableOpacity>
+            </AppButton>
           </AppView>
         </View>
         <ModalOnlySelectProvince

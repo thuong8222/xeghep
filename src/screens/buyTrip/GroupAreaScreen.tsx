@@ -48,7 +48,7 @@ export default function GroupAreaScreen({ navigation }: Props) {
 
   const gotoDetailArea = (props) => {
 
-  navigation.navigate('BuyTrip', {nameGroup: props.area + ' - '+ props.type_car, countMember: props.count})
+  navigation.navigate('BuyTrip', {nameGroup: props.group_area_name + ' - '+ props.type_car_name, countMember: props.count_trips})
   }
   const renderItem_groupArea = ({ item, index }) => {
     return (
@@ -73,11 +73,11 @@ const Area = (props) => {
   return (
     <AppButton onPress={detailArea} gap={8} row width={400} alignItems='center' paddingVertical={16} paddingLeft={12}>
       <AppView height={scale(42)} width={scale(42)} radius={9999} backgroundColor={ColorsGlobal.backgroundLight} alignItems='center' justifyContent='center'>
-        <AppText fontSize={18} lineHeight={26} fontWeight={700}>{props.data.count > 99 ? '99+' : props.data.count}</AppText>
+        <AppText fontSize={18} lineHeight={26} fontWeight={700}>{props.data.count_trips > 99 ? '99+' : props.data.count_trips}</AppText>
       </AppView>
       <AppView>
-        <AppText color={props.data.is_read ? ColorsGlobal.textLight : ColorsGlobal.main} fontSize={16} fontWeight={700}>{props.data.type_car}</AppText>
-        <AppText color={props.data.is_read ? ColorsGlobal.textLight : ColorsGlobal.main} fontSize={12}>{'Khu vực ' + props.data.area}</AppText>
+        <AppText color={props.data.is_read ? ColorsGlobal.textLight : ColorsGlobal.main} fontSize={16} fontWeight={700}>{props.data.type_car_name}</AppText>
+        <AppText color={props.data.is_read ? ColorsGlobal.textLight : ColorsGlobal.main} fontSize={12}>{'Khu vực ' + props.data.group_area_name}</AppText>
       </AppView>
     </AppButton>
   )

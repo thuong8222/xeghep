@@ -8,6 +8,7 @@ import moment from 'moment';
 import ArrowRight from '../../assets/icons/ArrowRight';
 import AppButton from '../common/AppButton';
 import IconNote from '../../assets/icons/IconNote';
+import { scale } from '../../utils/Helper';
 
 export default function Trip(props) {
 
@@ -38,8 +39,11 @@ export default function Trip(props) {
 
     };
     return (
-        <AppView  gap={4} radius={12} borderWidth={1} borderColor={ColorsGlobal.borderColorDark} backgroundColor={props.data.Trip.sold === 1 ? ColorsGlobal.backgroundTripSold : ColorsGlobal.backgroundTrip} opacity={props.data.Trip.sold === 1 ? .5 : 1} row>
-            <AppView gap={4} flex={1} padding={12} >
+        <AppView  gap={4} radius={12} borderWidth={1} padding={0}
+        borderColor={ColorsGlobal.borderColorDark} 
+        backgroundColor={props.data.Trip.sold === 1 ? ColorsGlobal.backgroundTripSold : ColorsGlobal.backgroundTrip} 
+        opacity={props.data.Trip.sold === 1 ? .5 : 1} row>
+            <AppView gap={4} flex={1} padding={12}  >
                 <AppView row justifyContent={'space-between'}>
                     <AppView row alignItems='center' gap={8}>
                         <AppText fontWeight={600} 
@@ -49,7 +53,7 @@ export default function Trip(props) {
                           : props.data.Trip.direction === 1
                             ? ColorsGlobal.main
                             : ColorsGlobal.main2
-                        }>{props.data.Trip.full_name_guest}</AppText>
+                        }>{props.data.Trip.full_name_driver_owner}</AppText>
                         <IconChevronLeftDouble rotate={props.data.Trip.direction === 1 ? 0 : 180} color={
                         props.data.Trip.sold === 1
                           ? ColorsGlobal.textLight 
@@ -65,13 +69,13 @@ export default function Trip(props) {
                     </AppView>
                 </AppView>
                 <AppButton onPress={() => openMapSmart(props.data.Trip)} row gap={8} >
-                    <AppView borderBottomColor={ColorsGlobal.borderColor} borderBottomWidth={1} paddingVertical={10} flex={1}>
+                    <AppView borderBottomColor={'#E4E4E4'} borderBottomWidth={1} paddingVertical={8} flex={1}>
                         <AppText fontSize={14} lineHeight={20}>{props.data.Trip.place_start.split(',')[0].trim()}</AppText>
                     </AppView>
                     <AppView alignItems='center' justifyContent='center'  >
                         <ArrowRight />
                     </AppView>
-                    <AppView borderBottomColor={ColorsGlobal.borderColor} borderBottomWidth={1} paddingVertical={10} flex={1}>
+                    <AppView borderBottomColor={'#E4E4E4'} borderBottomWidth={1} paddingVertical={8} flex={1}>
                         <AppText fontSize={14} lineHeight={20}>{props.data.Trip.place_end.split(',')[0].trim()}</AppText>
                     </AppView>
                 </AppButton>
@@ -82,7 +86,7 @@ export default function Trip(props) {
 
                 </AppView>
                 {props.data.Trip.note &&
-                    <AppView row gap={4} >
+                    <AppView row gap={4} alignItems='center' >
                         <IconNote />
                         <AppText fontSize={14} lineHeight={20} fontWeight={400}>{props.data.Trip.note}</AppText>
                     </AppView>

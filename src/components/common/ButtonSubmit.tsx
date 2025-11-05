@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { ColorsGlobal } from "../base/Colors/ColorsGlobal";
 import { ViewStyle } from "react-native/types_generated/index";
+import { scale } from "../../utils/Helper";
 
 
 
@@ -22,7 +23,7 @@ interface ButtonSubmitProps {
 }
 
 const ButtonSubmit: React.FC<ButtonSubmitProps> = ({
-  title,height=48,
+  title,height=scale(48),
   onPress,
   isLoading = false,
   disabled = false,

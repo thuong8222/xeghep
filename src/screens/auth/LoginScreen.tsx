@@ -56,11 +56,13 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       screen: 'BlankScreen', 
       params: { nameScreen: 'Điều khoản sử dụng' } 
     });
+    
   }
   const gotoPolicy = () => {
-    navigation.navigate('Auth', { 
-      screen: 'BlankScreen',
+     navigation.navigate('Auth', { 
+      screen: 'BlankScreen', 
       params: {nameScreen:'Chính sách riêng tư'}})
+
    }
 
   const handleLoginWithBiometric = async () => {
@@ -131,12 +133,12 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             <AppView row justifyContent="space-between" marginTop={18} alignItems="center">
               <AppButton onPress={handleLoginWithBiometric} disabled={loading} row gap={6}>
                 <IconTouch />
-                <AppText fontSize={18} lineHeight={26} >
+                <AppText  >
                   Đăng nhập bằng vân tay
                 </AppText>
               </AppButton>
               <AppButton onPress={ForgotPassword} disabled={loading}>
-                <AppText fontSize={18} lineHeight={26}
+                <AppText 
                   style={{ color: ColorsGlobal.main, textDecorationLine: 'underline' }}>
                   Quên mật khẩu
                 </AppText>
@@ -168,9 +170,10 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             <AppButton onPress={gotoTerms} disabled={loading}>
               <AppText
                 style={{ color: ColorsGlobal.textLight }}>
-                Điều khoản sử dụng   |
+                Điều khoản sử dụng
               </AppText>
             </AppButton>
+            <AppView width={1} backgroundColor={ColorsGlobal.textLight} height={'100%'} />
             <AppButton onPress={gotoPolicy} disabled={loading}>
               <AppText
                 style={{ color: ColorsGlobal.textLight }}>
@@ -189,7 +192,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 export default LoginScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 20, backgroundColor: ColorsGlobal.backgroundWhite, paddingBottom:30 },
+  container: { flex: 1, justifyContent: "center", padding: 20, backgroundColor: ColorsGlobal.backgroundWhite },
   logo: {
     height: 73,
     width: 180,

@@ -136,25 +136,25 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     inputWrapper: {
-        marginBottom: 15,
-        gap: 4
+        marginBottom: scale(15),
+        gap: scale(4)
     },
     labelFocused: {
         color: ColorsGlobal.main2,
     },
     inputLabel: {
         fontSize: 14, lineHeight: 20, fontWeight: '400',
-        marginBottom: 6, position: 'absolute', top: -10, left: 20, zIndex: 4, paddingHorizontal: 6, backgroundColor: ColorsGlobal.backgroundWhite,
+        marginBottom: scale(6), position: 'absolute', top: -10, left: scale(20), zIndex: 4, paddingHorizontal: scale(6), backgroundColor: ColorsGlobal.backgroundWhite,
     },
     inputLabelPass: {
-        width: 70,
+        width: scale(70),
     },
     input: {
         backgroundColor: 'white',
         color: '#000',
-        height: 50,
-        padding: 10,
-        paddingLeft: 20,
+        height:scale(50) ,
+        padding: scale(10),
+        paddingLeft: scale(20),
         borderWidth: 1,
 
         width: '100%',
