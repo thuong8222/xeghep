@@ -17,7 +17,7 @@ export default function ModalForgetPassword({ isVisible, onRequestClose }: Modal
     console.log('RequestGetNewPassword')
   }
   return (
-    <AppModal isVisible={isVisible} onClose={onRequestClose} >
+    <AppModal isVisible={isVisible} onClose={onRequestClose} heightPercent={0.6} >
       <AppText textAlign='center' bold fontSize={18}>{'Quên mật khẩu'}</AppText>
       <AppView gap={24} marginTop={30}>
         <AppInput label='Số điện thoại' value={phoneNumber} onChangeText={(text) => setPhoneNumber(text)} placeholder='Nhập số điện thoại đăng ký tài khoản' keyboardType={'decimal-pad'} />
@@ -27,4 +27,3 @@ export default function ModalForgetPassword({ isVisible, onRequestClose }: Modal
   )
 }
 
-const styles = StyleSheet.create({})

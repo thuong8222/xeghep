@@ -11,6 +11,7 @@ import ModalUploadCarImage from '../../components/component/modals/ModalUploadCa
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 
 import { RootParamList } from '../../../App'
+import ModalChangePassword from '../../components/component/modals/ModalChangePassword'
 
 type AccountScreenNavProp = NativeStackNavigationProp<RootParamList>;
 
@@ -22,6 +23,7 @@ export default function AccountScreen({ navigation }: Props) {
   const [numberPhone, setNumberPhone] = useState('');
   const [isDisplayModalUploadImage, setIsDisplayModalUploadImage] = useState(false);
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [isModalChangePw, setIsModalChangePw] = useState(false);
   const handleUploadPress = () => {
     console.log('handleUploadPress')
     setIsDisplayModalUploadImage(true);
@@ -49,6 +51,20 @@ export default function AccountScreen({ navigation }: Props) {
       ]
     );
 
+  }
+  const gotoHistoryBuySalePoint =()=>{
+    console.log('gotoHistoryBuySalePoint')
+    navigation.navigate('RootNavigator', {
+      screen: 'BottomTabs',      // bước 1: đi vào bottom tabs
+      params: {
+        screen: 'AccountTabs',       // bước 2: vào account tab
+        params: {
+          screen: 'HistoryBuySalePoint'// bước 3: tới màn hình History
+         
+        }
+      }
+    });
+    
   }
   return (
     <ScrollView style={{ flex: 1, backgroundColor: ColorsGlobal.backgroundWhite }}>
@@ -104,12 +120,12 @@ export default function AccountScreen({ navigation }: Props) {
         <AppView gap={6} >
           <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Tính năng'}</AppText>
           <AppView gap={12}>
-            <AppButton row justifyContent={'space-between'} padding={12} borderWidth={1} borderColor={ColorsGlobal.borderColor} radius={6}>
+            <AppButton onPress={()=>setIsModalChangePw(true)} row justifyContent={'space-between'} padding={12} borderWidth={1} borderColor={ColorsGlobal.borderColor} radius={6}>
               <AppText color={ColorsGlobal.textLight} >{'Đổi mật khẩu'}</AppText>
               <IconArrowDown rotate={-90} size={20} />
             </AppButton>
             <AppButton row justifyContent={'space-between'} padding={12} borderWidth={1} borderColor={ColorsGlobal.borderColor} radius={6}>
-              <AppText color={ColorsGlobal.textLight}   >{'Lịch sử mua/bán điểm'}</AppText>
+              <AppText color={ColorsGlobal.textLight} onPress={gotoHistoryBuySalePoint}  >{'Lịch sử mua/bán điểm'}</AppText>
               <IconArrowDown rotate={-90} size={20} />
             </AppButton>
             <AppButton onPress={Logout} row justifyContent={'space-between'} padding={12} borderWidth={1} borderColor={ColorsGlobal.borderColor} radius={6}>
@@ -121,6 +137,7 @@ export default function AccountScreen({ navigation }: Props) {
         </AppView>
         <ModalUploadCarImage isDisplay={isDisplayModalUploadImage} onClose={() => setIsDisplayModalUploadImage(false)}
           onSelectImage={(uri) => setImageUri(uri)} />
+          <ModalChangePassword isVisible={isModalChangePw}  onRequestClose={()=>setIsModalChangePw(false)}/>
       </AppView>
     </ScrollView>
   )

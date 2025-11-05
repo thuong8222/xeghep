@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TouchableOpacity } from 'react-native';
+import { Platform, TouchableOpacity } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AppView from '../common/AppView';
 import AppButton from '../common/AppButton';
@@ -107,8 +107,15 @@ export default function TimeSelectSection() {
             </AppView>
 
             {/* Bộ chọn giờ */}
-
-            <AppModal isVisible={showPicker} onClose={() => setShowPicker(false)} heightPercent={0.4}  >
+            {showPicker && Platform.OS === 'android' && <DateTimePicker
+                value={selectedTime || new Date()}
+                mode="time"
+                is24Hour={true}
+                display="spinner"
+                onChange={onChangeTime}
+                style={{ width: '100%' }}
+            />}
+            <AppModal isVisible={showPicker && Platform.OS === 'ios'} onClose={() => setShowPicker(false)} heightPercent={0.4}  >
                 <DateTimePicker
                     value={selectedTime || new Date()}
                     mode="time"

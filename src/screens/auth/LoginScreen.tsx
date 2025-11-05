@@ -51,8 +51,17 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const ForgotPassword = () => {
     setIsOpenModal(true);
   }
-  const gotoTerms = () => { }
-  const gotoPolicy = () => { }
+  const gotoTerms = () => { 
+    navigation.navigate('Auth', { 
+      screen: 'BlankScreen', 
+      params: { nameScreen: 'Điều khoản sử dụng' } 
+    });
+  }
+  const gotoPolicy = () => {
+    navigation.navigate('Auth', { 
+      screen: 'BlankScreen',
+      params: {nameScreen:'Chính sách riêng tư'}})
+   }
 
   const handleLoginWithBiometric = async () => {
     try {
@@ -91,7 +100,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
             <AppView justifyContent="center" alignItems="center" marginBottom={20} gap={16}>
 
-              <Image source={logo} style={styles.logo} />
+              <Image source={logo} style={styles.logo} resizeMode="contain" />
               <AppView gap={6}>
                 <AppText
                   style={StyleGlobal.title1}>
@@ -156,18 +165,18 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
           </AppView>
           <AppView justifyContent="center" alignItems="flex-end" row gap={12}>
-            <TouchableOpacity onPress={gotoTerms} disabled={loading}>
+            <AppButton onPress={gotoTerms} disabled={loading}>
               <AppText
                 style={{ color: ColorsGlobal.textLight }}>
                 Điều khoản sử dụng   |
               </AppText>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={gotoPolicy} disabled={loading}>
+            </AppButton>
+            <AppButton onPress={gotoPolicy} disabled={loading}>
               <AppText
                 style={{ color: ColorsGlobal.textLight }}>
                 Chính sách riêng tư
               </AppText>
-            </TouchableOpacity>
+            </AppButton>
           </AppView>
         </View>
         <ModalForgetPassword isVisible={isOpenModal} onRequestClose={() => setIsOpenModal(false)} />
@@ -180,9 +189,9 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 export default LoginScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 20, backgroundColor: ColorsGlobal.backgroundWhite },
+  container: { flex: 1, justifyContent: "center", padding: 20, backgroundColor: ColorsGlobal.backgroundWhite, paddingBottom:30 },
   logo: {
-    height: 68,
+    height: 73,
     width: 180,
 
     alignSelf: 'center',

@@ -15,14 +15,15 @@ import { ColorsGlobal } from "../../components/base/Colors/ColorsGlobal";
 import { Text } from "react-native-gesture-handler";
 import { AuthStackParamList } from "../../navigation/AuthNavigator";
 import ModalOnlySelectProvince from "../../components/component/modals/ModalOnlySelectProvince";
+import { RootParamList } from "../../../App";
 
 
-type RegisterScreenNavProp = NativeStackNavigationProp<AuthStackParamList, "LoginScreen">;
+
+type LoginParamList = NativeStackNavigationProp<RootParamList>;
 
 interface Props {
-  navigation: RegisterScreenNavProp;
+  navigation: LoginParamList;
 }
-
 const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -31,15 +32,25 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   const [isFormValid, setIsFocused] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [selectedProvince, setSelectedProvince] = useState<string>('');
-  
+
   const handleLogin = () => {
     navigation.goBack()
   };
 
-  const gotoTerms = () => { }
-  const gotoPolicy = () => { }
-  const openSelectProvince = () =>{
- 
+  const gotoTerms = () => {
+    navigation.navigate('Auth', {
+      screen: 'BlankScreen',
+      params: { nameScreen: 'Điều khoản sử dụng' }
+    });
+  }
+  const gotoPolicy = () => {
+    navigation.navigate('Auth', {
+      screen: 'BlankScreen',
+      params: { nameScreen: 'Chính sách riêng tư' }
+    })
+  }
+  const openSelectProvince = () => {
+
     setIsOpenModal(true);
 
   }
@@ -48,107 +59,107 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     setIsOpenModal(false); // đóng modal
   };
   return (
-<KeyboardAvoidingView
-  style={{ flex: 1 }}
-  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
->
-    <ScrollView style={{ flexGrow: 1 }} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
-      <View style={styles.container}>
-        <AppView flex={1} justifyContent="center" >
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView style={{ flexGrow: 1 }} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
+        <View style={styles.container}>
+          <AppView flex={1} justifyContent="center" >
 
-          <AppView justifyContent="center" alignItems="center" gap={16}>
-            {/* <FastImage source={logo} styles={styles.logo}  /> */}
-            <Image source={logo} style={styles.logo} />
-            <AppView gap={6}>
-              <AppText
-                style={StyleGlobal.title1}>
-                {'Đăng ký'}
+            <AppView justifyContent="center" alignItems="center" gap={16}>
+              {/* <FastImage source={logo} styles={styles.logo}  /> */}
+              <Image source={logo} style={styles.logo} resizeMode="contain" />
+              <AppView gap={6}>
+                <AppText
+                  style={StyleGlobal.title1}>
+                  {'Đăng ký'}
+                </AppText>
+                <AppText
+                  style={StyleGlobal.textNormal}>
+                  {'Chào mừng bạn đến với Xe ghép'}
+                </AppText>
+              </AppView>
+
+            </AppView>
+            <AppView gap={16} marginTop={32}>
+              <AppInput label="Tên hiển thị"
+                value={username}
+                onChangeText={setUsername}
+                placeholder="Nhập tên hiển thị"
+              />
+              <AppInput label="Số điện thoại"
+                value={username}
+                keyboardType='decimal-pad'
+                onChangeText={setUsername}
+                placeholder="Nhập số điện thoại"
+              />
+              <AppInput label="Khu vực (chọn tỉnh/thành)"
+                value={selectedProvince}
+                type="select"
+                editable={false}
+
+                placeholder="Khu vực (chọn tỉnh/thành)"
+                toggleSelect={openSelectProvince}
+              />
+              <AppInput label="Mật khẩu"
+                value={password}
+                onChangeText={setPassword}
+                placeholder="Nhập mật khẩu"
+                secureTextEntry
+                type={'password'}
+              />
+              <AppInput label="Xác nhận mật khẩu"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                placeholder="Xác nhận mật khẩu"
+                secureTextEntry
+                type={'password'}
+
+              />
+            </AppView>
+
+            <AppView marginTop={32}>
+              <ButtonSubmit title="Đăng ký"
+                isLoading={loading}
+                onPress={handleLogin}
+              />
+            </AppView>
+            <AppView marginTop={24} justifyContent="center" alignItems="center" row gap={12}>
+
+              <AppText  >
+                Bạn đã có tài khoản?
               </AppText>
-              <AppText
-                style={StyleGlobal.textNormal}>
-                {'Chào mừng bạn đến với Xe ghép'}
-              </AppText>
+              <TouchableOpacity onPress={handleLogin} disabled={loading}>
+                <AppText
+                  style={{ textDecorationLine: 'underline', fontWeight: 600 }}>
+                  Đăng nhập
+                </AppText>
+              </TouchableOpacity>
             </AppView>
 
           </AppView>
-          <AppView gap={16} marginTop={32}>
-            <AppInput label="Tên hiển thị"
-              value={username}
-              onChangeText={setUsername}
-              placeholder="Nhập tên hiển thị"
-            />
-            <AppInput label="Số điện thoại"
-              value={username}
-              keyboardType='decimal-pad'
-              onChangeText={setUsername}
-              placeholder="Nhập số điện thoại"
-            />
-            <AppInput label="Khu vực (chọn tỉnh/thành)"
-              value={selectedProvince}
-              type="select"
-              editable={false} 
-              
-              placeholder="Khu vực (chọn tỉnh/thành)"
-              toggleSelect={openSelectProvince}
-            />
-            <AppInput label="Mật khẩu"
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Nhập mật khẩu"
-              secureTextEntry
-              type={'password'}
-            />
-            <AppInput label="Xác nhận mật khẩu"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              placeholder="Xác nhận mật khẩu"
-              secureTextEntry
-              type={'password'}
-
-            />
-          </AppView>
-
-          <AppView marginTop={32}>
-            <ButtonSubmit title="Đăng ký"
-              isLoading={loading}
-              onPress={handleLogin}
-              disabled={!isFormValid}  />
-          </AppView>
-          <AppView marginTop={24} justifyContent="center" alignItems="center" row gap={12}>
-
-            <AppText  >
-              Bạn đã có tài khoản?
-            </AppText>
-            <TouchableOpacity onPress={handleLogin} disabled={loading}>
+          <AppView justifyContent="center" alignItems="flex-end" row gap={12}>
+            <TouchableOpacity onPress={gotoTerms} disabled={loading}>
               <AppText
-                style={{ textDecorationLine: 'underline', fontWeight: 600 }}>
-                Đăng nhập
+                style={{ color: ColorsGlobal.textLight }}>
+                Điều khoản sử dụng   |
+              </AppText>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={gotoPolicy} disabled={loading}>
+              <AppText
+                style={{ color: ColorsGlobal.textLight }}>
+                Chính sách riêng tư
               </AppText>
             </TouchableOpacity>
           </AppView>
-
-        </AppView>
-        <AppView justifyContent="center" alignItems="flex-end" row gap={12}>
-          <TouchableOpacity onPress={gotoTerms} disabled={loading}>
-            <AppText
-              style={{ color: ColorsGlobal.textLight }}>
-              Điều khoản sử dụng   |
-            </AppText>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={gotoPolicy} disabled={loading}>
-            <AppText
-              style={{ color: ColorsGlobal.textLight }}>
-              Chính sách riêng tư
-            </AppText>
-          </TouchableOpacity>
-        </AppView>
-      </View>
-      <ModalOnlySelectProvince
-  isVisible={isOpenModal}
-  onClose={() => setIsOpenModal(false)}
-  onSelected={handleProvinceSelected} // callback nhận dữ liệu
-/>
-    </ScrollView>
+        </View>
+        <ModalOnlySelectProvince
+          isVisible={isOpenModal}
+          onClose={() => setIsOpenModal(false)}
+          onSelected={handleProvinceSelected} // callback nhận dữ liệu
+        />
+      </ScrollView>
     </KeyboardAvoidingView>
 
   );
@@ -157,9 +168,9 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 export default RegisterScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 20, backgroundColor: ColorsGlobal.backgroundWhite },
+  container: { flex: 1, justifyContent: "center", padding: 20, backgroundColor: ColorsGlobal.backgroundWhite, paddingBottom: 30 },
   logo: {
-    height: 68,
+    height: 73,
     width: 180,
     alignSelf: 'center',
 

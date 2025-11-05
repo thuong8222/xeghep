@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import Modal from 'react-native-modal';
 import { _screen_height } from '../../utils/Helper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ColorsGlobal } from '../base/Colors/ColorsGlobal';
 
 interface AppModalProps {
   isVisible: boolean;
@@ -30,7 +31,7 @@ export default function AppModal({
       <View
         style={[
           styles.modalContent,
-          { height: _screen_height * heightPercent,
+          { height: _screen_height * heightPercent ,
             paddingBottom: insets.bottom
            },
         ]}
@@ -46,14 +47,15 @@ const styles = StyleSheet.create({
   modal: {
     justifyContent: 'flex-end',
     margin:0,
-
+      paddingBottom: 0, 
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor:ColorsGlobal.backgroundWhite,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     padding: 20,
     gap: 16,
+    margin:0,
   },
   handleBar: {
     width: 50,

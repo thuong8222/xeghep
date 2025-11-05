@@ -12,9 +12,9 @@ import IconPlus from '../../assets/icons/IconPlus'
 import IconArowDown from '../../assets/icons/IconArowDown'
 import IconMinus from '../../assets/icons/IconMinus'
 import ButtonSubmit from '../../components/common/ButtonSubmit'
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import NoteInputSection from '../../components/component/NoteInputSection'
-import ModalSelectWard from '../../components/component/modals/ModalSelectWard'
+
 import SelectProvinceDistrictModal from '../../components/component/modals/ModalSelectWard'
 import TripOptionsSection from '../../components/component/TripOptionsSection'
 
@@ -47,7 +47,7 @@ export default function SaleTripsScreen() {
   }
   return (
 
-    <AppView flex={1} backgroundColor='#fff' paddingHorizontal={16} paddingTop={16} gap={18} paddingBottom={Platform.OS === 'ios' ?   insets.bottom:0}  >
+    <AppView flex={1} backgroundColor='#fff' paddingHorizontal={16} paddingTop={16} gap={18} paddingBottom={Platform.OS === 'ios' ? insets.bottom : 0}  >
 
       <AppView row gap={32}>
         <AppButton onPress={() => setSelectedDirection('go')} row gap={8}>
@@ -65,7 +65,7 @@ export default function SaleTripsScreen() {
             <AppView gap={6}>
               <AppView row gap={8} alignItems='flex-end' justifyContent={'space-between'}>
                 <AppInput
-                label={placeStart?'Điểm đón':''}
+                  label={placeStart ? 'Điểm đón' : ''}
                   value={placeStart}
                   onChangeText={setPlaceStart}
                   placeholder="Nhập điểm đón"
@@ -77,7 +77,7 @@ export default function SaleTripsScreen() {
             <AppView gap={6}>
               <AppView row gap={8} alignItems='flex-end' justifyContent={'space-between'}>
                 <AppInput
-                label={placeEnd?'Điểm trả':''}
+                  label={placeEnd ? 'Điểm trả' : ''}
                   value={placeEnd}
                   onChangeText={setPlaceEnd}
                   placeholder="Nhập điểm trả"
@@ -101,7 +101,7 @@ export default function SaleTripsScreen() {
               }
             </AppView>
           </AppView>
-       <TripOptionsSection />
+          <TripOptionsSection />
           <NoteInputSection />
         </AppView>
       </ScrollView>

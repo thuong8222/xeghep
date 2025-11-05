@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { Alert, StyleSheet, Text, View } from 'react-native'
 import React, { useState } from 'react'
 import AppView from '../../components/common/AppView'
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal'
@@ -10,7 +10,7 @@ import ModalRequestJoinGroup from '../../components/component/modals/ModalReques
 export default function InfoGroupScreen({ route }) {
     const { nameGroup, countMember } = route.params;
     const [isModalRequestJoinGroup, setIsModalRequestJoinGroup] = useState(false);
-    const RequestJoinGroup =()=>{
+    const RequestJoinGroup = () => {
         setIsModalRequestJoinGroup(true)
     }
     return (
@@ -20,15 +20,15 @@ export default function InfoGroupScreen({ route }) {
                 <AppText fontWeight={500} >{countMember + ' thành viên'}</AppText>
             </AppView>
             <AppView>
-                <AppButton row justifyContent={'space-between'} padding={12}>
+                <AppButton onPress={() => Alert.alert('Đang phát triển')} row justifyContent={'space-between'} padding={12}>
                     <AppText >{'Danh sách thành viên '}</AppText>
                     <IconArowDown rotate={-90} size={20} />
                 </AppButton>
-                <AppButton row justifyContent={'space-between'} padding={12}>
+                <AppButton onPress={() => Alert.alert('Đang phát triển')} row justifyContent={'space-between'} padding={12}>
                     <AppText >{'Thông báo'}</AppText>
                     <IconArowDown rotate={-90} size={20} />
                 </AppButton>
-                <AppButton row justifyContent={'space-between'} padding={12}>
+                <AppButton onPress={() => Alert.alert('Đang phát triển')} row justifyContent={'space-between'} padding={12}>
                     <AppText >{'Quy định nhóm'}</AppText>
                     <IconArowDown rotate={-90} size={20} />
                 </AppButton>
@@ -36,7 +36,7 @@ export default function InfoGroupScreen({ route }) {
                     <AppText >{'Xin vào nhóm'}</AppText>
                 </AppButton>
             </AppView>
-            <ModalRequestJoinGroup visible={isModalRequestJoinGroup} onRequestClose={()=>setIsModalRequestJoinGroup(false)} />
+            <ModalRequestJoinGroup visible={isModalRequestJoinGroup} onRequestClose={() => setIsModalRequestJoinGroup(false)} />
         </AppView>
     )
 }
