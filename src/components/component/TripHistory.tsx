@@ -10,9 +10,9 @@ import AppButton from '../common/AppButton';
 import IconNote from '../../assets/icons/IconNote';
 import { scale } from '../../utils/Helper';
 
-export default function Trip(props) {
+export default function TripHistory(props) {
 
-   
+
     return (
         <AppView gap={4} radius={12} borderWidth={1} padding={0}
             borderColor={ColorsGlobal.borderColorDark}
@@ -39,8 +39,8 @@ export default function Trip(props) {
                     </AppView>
 
                     <AppView row gap={8}>
-                        <AppText fontWeight={600}>{moment(props.data.Trip.time_sell).format('hh:mm')}</AppText>
-                        <AppText color={ColorsGlobal.main2}>{`+15'`}</AppText>
+                        <AppText fontWeight={600}>{moment(props.data.Trip.time_receive).format('hh:mm')}</AppText>
+
                     </AppView>
                 </AppView>
                 <AppView row gap={8} >
@@ -57,7 +57,7 @@ export default function Trip(props) {
                 <AppView row justifyContent={'space-between'}>
                     <AppText fontWeight={600}>{props.data.Trip.guests + ' khách'}</AppText>
                     <AppText color={ColorsGlobal.main} fontWeight={700}>{props.data.Trip.price_sell + "K"}</AppText>
-                    <AppText fontWeight={700}>{'-' + props.data.Trip.point + ' đ'}</AppText>
+                    <AppText fontWeight={700}>{'-' + props.data.Trip.point + 'đ'}</AppText>
 
                 </AppView>
                 {props.data.Trip.note &&

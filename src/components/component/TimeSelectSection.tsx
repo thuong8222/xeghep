@@ -9,6 +9,7 @@ import IconArrowDown from '../../assets/icons/IconArowDown';
 import IconMinus from '../../assets/icons/IconMinus';
 import IconPlus from '../../assets/icons/IconPlus';
 import AppModal from '../common/AppModal';
+import { scale } from '../../utils/Helper';
 
 
 export default function TimeSelectSection() {
@@ -100,7 +101,7 @@ export default function TimeSelectSection() {
                         </AppButton>
                         <AppText fontWeight={700}>{`${time}p`}</AppText>
                         <AppButton onPress={addTime}>
-                            <IconPlus size={20} color={ColorsGlobal.textDark} />
+                            <IconPlus size={scale(20)} color={ColorsGlobal.textDark} />
                         </AppButton>
                     </AppView>
                 )}

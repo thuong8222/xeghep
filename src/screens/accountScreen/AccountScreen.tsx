@@ -21,6 +21,8 @@ interface Props {
 export default function AccountScreen({ navigation }: Props) {
   const [nameDisplay, setNameDisplay] = useState('');
   const [numberPhone, setNumberPhone] = useState('');
+  const [nameCar, setNameCar] = useState('');
+  const [licensePlate, setLicensePlate] = useState('');
   const [isDisplayModalUploadImage, setIsDisplayModalUploadImage] = useState(false);
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [isModalChangePw, setIsModalChangePw] = useState(false);
@@ -52,7 +54,7 @@ export default function AccountScreen({ navigation }: Props) {
     );
 
   }
-  const gotoHistoryBuySalePoint =()=>{
+  const gotoHistoryBuySalePoint = () => {
     console.log('gotoHistoryBuySalePoint')
     navigation.navigate('RootNavigator', {
       screen: 'BottomTabs',      // bước 1: đi vào bottom tabs
@@ -60,11 +62,11 @@ export default function AccountScreen({ navigation }: Props) {
         screen: 'AccountTabs',       // bước 2: vào account tab
         params: {
           screen: 'HistoryBuySalePoint'// bước 3: tới màn hình History
-         
+
         }
       }
     });
-    
+
   }
   return (
     <ScrollView style={{ flex: 1, backgroundColor: ColorsGlobal.backgroundWhite }}>
@@ -87,7 +89,7 @@ export default function AccountScreen({ navigation }: Props) {
         <AppView gap={6} height={'auto'} >
           <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Thông tin xe'}</AppText>
           <AppView row gap={20}>
-            <AppInput value={nameDisplay} onChangeText={(text) => setNameDisplay(text)} placeholder='Nhập tên xe' label={'Tên xe'} />
+            <AppInput value={nameCar} onChangeText={(text) => setNameCar(text)} placeholder='Nhập tên xe' label={'Tên xe'} />
 
             <AppInput label="Năm"
               value={numberPhone}
@@ -97,30 +99,49 @@ export default function AccountScreen({ navigation }: Props) {
             />
           </AppView>
           <AppView row>
-            <AppInput value={nameDisplay} onChangeText={(text) => setNameDisplay(text)} placeholder='Biển số xe' label={'Biển số'} />
+            <AppInput value={licensePlate} onChangeText={(text) => setLicensePlate(text)} placeholder='Biển số xe' label={'Biển số'} />
           </AppView>
-          <AppView row>
-
-            <AppInput onUploadPress={handleUploadPress} value={nameDisplay} onChangeText={(text) => setNameDisplay(text)} placeholder='Tải lên hình ảnh xe' label={'Hình ảnh xe'} type='upload' editable={false} />
-
-          </AppView>
+          <AppButton row onPress={handleUploadPress}>
+            <AppInput onUploadPress={handleUploadPress} value={imageUri} onChangeText={(text) => setImageUri(text)} placeholder='Tải lên hình ảnh xe' label={'Hình ảnh xe'} type='upload' editable={false} />
+          </AppButton>
           {imageUri && (
-            <>
-              <AppView justifyContent='center' alignItems='center'>
+            <AppView justifyContent="center" alignItems="center" marginTop={8}>
+              <View style={{ position: 'relative' }}>
                 <Image
                   source={{ uri: imageUri }}
-                  style={{ width: 200, height: 200, borderRadius: 12, marginTop: 0 }}
+                  style={{
+                    width: 200,
+                    height: 200,
+                    borderRadius: 12,
+                  }}
                   resizeMode="cover"
                 />
-              </AppView>
-
-            </>
+                {/* Nút X để xoá ảnh */}
+                <AppButton
+                  onPress={() => setImageUri(null)}
+                  style={{
+                    position: 'absolute',
+                    top: -8,
+                    right: -8,
+                    backgroundColor: 'rgba(0,0,0,0.6)',
+                    width: 28,
+                    height: 28,
+                    borderRadius: 14,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <AppText color="#fff" fontSize={14}>×</AppText>
+                </AppButton>
+              </View>
+            </AppView>
           )}
+
         </AppView>
         <AppView gap={6} >
           <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Tính năng'}</AppText>
           <AppView gap={12}>
-            <AppButton onPress={()=>setIsModalChangePw(true)} row justifyContent={'space-between'} padding={12} borderWidth={1} borderColor={ColorsGlobal.borderColor} radius={6}>
+            <AppButton onPress={() => setIsModalChangePw(true)} row justifyContent={'space-between'} padding={12} borderWidth={1} borderColor={ColorsGlobal.borderColor} radius={6}>
               <AppText color={ColorsGlobal.textLight} >{'Đổi mật khẩu'}</AppText>
               <IconArrowDown rotate={-90} size={20} />
             </AppButton>
@@ -137,7 +158,7 @@ export default function AccountScreen({ navigation }: Props) {
         </AppView>
         <ModalUploadCarImage isDisplay={isDisplayModalUploadImage} onClose={() => setIsDisplayModalUploadImage(false)}
           onSelectImage={(uri) => setImageUri(uri)} />
-          <ModalChangePassword isVisible={isModalChangePw}  onRequestClose={()=>setIsModalChangePw(false)}/>
+        <ModalChangePassword isVisible={isModalChangePw} onRequestClose={() => setIsModalChangePw(false)} />
       </AppView>
     </ScrollView>
   )

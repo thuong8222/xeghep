@@ -26,14 +26,6 @@ export default function SaleTripsScreen() {
   const [placeStart, setPlaceStart] = useState('');
   const [placeEnd, setPlaceEnd] = useState('');
   const [communeWard, setCommuneWard] = useState('');
-  const [note, setNote] = useState('');
-  const [isWardModal, setIsWardModal] = useState(false);
-  const [selectedWard, setSelectedWard] = useState('');
-  const [districtCode, setDistrictCode] = useState('0101'); // tạm — mã huyện thật bạn truyền sau
-
-  const handleSelectWard = (ward: any) => {
-    setSelectedWard(ward.name);
-  };
 
   const selectCommuneWard = () => {
     setIsCommuneWard(true); // mở modal chọn xã/phường

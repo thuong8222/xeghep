@@ -6,8 +6,16 @@ import AppText from '../../components/common/AppText';
 import AppButton from '../../components/common/AppButton';
 import IconArowDown from '../../assets/icons/IconArowDown';
 import ModalRequestJoinGroup from '../../components/component/modals/ModalRequestJoinGroup';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { BuyTripStackParamList } from '../../navigation/menuBottomTabs/BuyTripTabs';
 
-export default function InfoGroupScreen({ route }) {
+
+type BuyTripProps = NativeStackNavigationProp<BuyTripStackParamList>;
+interface Props {
+    navigation: BuyTripProps;
+}
+
+export default function InfoGroupScreen({ route, navigation }:Props) {
     const { nameGroup, countMember } = route.params;
     const [isModalRequestJoinGroup, setIsModalRequestJoinGroup] = useState(false);
     const RequestJoinGroup = () => {
@@ -20,7 +28,7 @@ export default function InfoGroupScreen({ route }) {
                 <AppText fontWeight={500} >{countMember + ' thành viên'}</AppText>
             </AppView>
             <AppView>
-                <AppButton onPress={() => Alert.alert('Đang phát triển')} row justifyContent={'space-between'} padding={12}>
+                <AppButton onPress={() => navigation.navigate('MemberGroup')} row justifyContent={'space-between'} padding={12}>
                     <AppText >{'Danh sách thành viên '}</AppText>
                     <IconArowDown rotate={-90} size={20} />
                 </AppButton>

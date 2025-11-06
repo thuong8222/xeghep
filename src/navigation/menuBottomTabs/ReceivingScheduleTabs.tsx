@@ -10,9 +10,11 @@ export type ReceivingScheduleTabsParamList ={
  const Stack = createNativeStackNavigator<ReceivingScheduleTabsParamList>();
 export default function ReceivingScheduleTabs() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator screenOptions={{ headerShown: true }}>
    
-        <Stack.Screen name="ReceivingScheduleScreen" component={ReceivingScheduleScreen} />
+        <Stack.Screen name="ReceivingScheduleScreen" component={ReceivingScheduleScreen}  options={{
+          headerTitle:'Lịch sử chuyến', 
+          headerTitleAlign:'center'}}/>
            
       </Stack.Navigator>
   )

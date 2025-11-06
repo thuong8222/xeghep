@@ -28,7 +28,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
     const [isModalVisible, setIsModalVisible] = useState(false)
     const HeaderRightButton = () => (
         <AppView row gap={6}>
-            <AppButton onPress={() => setIsModalVisible(true)}>
+            <AppButton onPress={() => setIsModalVisible(true)} paddingLeft={30}>
                 <IconSort />
             </AppButton>
             <AppButton onPress={() => navigation.navigate('InfoGroup', { nameGroup: nameGroup, countMember: countMember })}>
@@ -116,8 +116,8 @@ export default function BuyTripScreen({ navigation, route }: Props) {
                 directionalDistanceChangeThreshold={2}
                 friction={8}
                 tension={50}
-
-                onRowDidOpen={rowKey => console.log(`Hàng ${rowKey} đã mở`)} />
+                onRowDidOpen={rowKey => console.log(`Hàng ${rowKey} đã mở`)}
+            />
             <AppButton onPress={SaleTrips} position={'absolute'} right={36} bottom={34} width={48} height={48} radius={999} backgroundColor={ColorsGlobal.main} justifyContent='center' alignItems='center'>
                 <IconPlus />
             </AppButton>
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: 'white',
         flex: 1,
-        
+
     },
     rowFront: {
         alignItems: 'center',

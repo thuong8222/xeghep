@@ -1,8 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, ViewStyle, StyleSheet } from 'react-native';
 import { CustomButtonProps } from '../base/types/baseViewProps';
-
-
+import { scale } from '../../utils/Helper';
 
 const AppButton: React.FC<CustomButtonProps> = ({
   justifyContent,
@@ -11,10 +10,14 @@ const AppButton: React.FC<CustomButtonProps> = ({
   height,
   minHeight,
   width,
-  padding,paddingRight,
+  padding,
+  paddingRight,
   paddingVertical,
   paddingHorizontal,
-  margin, marginLeft,paddingLeft,marginRight,
+  margin,
+  marginLeft,
+  paddingLeft,
+  marginRight,
   radius,
   borderColor,
   borderTopEndRadius,
@@ -34,11 +37,13 @@ const AppButton: React.FC<CustomButtonProps> = ({
   top,
   bottom,
   left,
-  right,activeOpacity,
+  right,
+  activeOpacity,
   row,
   position,
   style,
-  children,opacity,
+  children,
+  opacity,
   onPress,
   disabled = false,
 }) => {
@@ -46,14 +51,18 @@ const AppButton: React.FC<CustomButtonProps> = ({
     justifyContent,
     alignItems,
     backgroundColor,
-    height,activeOpacity,
+    height: typeof height === 'number' ? scale(height) : height,
+    width: typeof width === 'number' ? scale(width) : width,
     minHeight,
-    width,
-    padding,paddingRight,paddingLeft,
-    paddingVertical,
-    paddingHorizontal,
-    margin,marginLeft,marginRight,
-    borderRadius:radius,
+    padding: typeof padding === 'number' ? scale(padding) : padding,
+    paddingRight: typeof paddingRight === 'number' ? scale(paddingRight) : paddingRight,
+    paddingVertical: typeof paddingVertical === 'number' ? scale(paddingVertical) : paddingVertical,
+    paddingHorizontal: typeof paddingHorizontal === 'number' ? scale(paddingHorizontal) : paddingHorizontal,
+    margin: typeof margin === 'number' ? scale(margin) : margin,
+    marginLeft: typeof marginLeft === 'number' ? scale(marginLeft) : marginLeft,
+    marginRight: typeof marginRight === 'number' ? scale(marginRight) : marginRight,
+    paddingLeft: typeof paddingLeft === 'number' ? scale(paddingLeft) : paddingLeft,
+    borderRadius: radius,
     borderTopEndRadius,
     borderTopLeftRadius,
     gap,
@@ -67,31 +76,27 @@ const AppButton: React.FC<CustomButtonProps> = ({
     borderLeftWidth,
     borderRightColor,
     borderRightWidth,
-    flexWrap, opacity,
+    flexWrap,
+    opacity: disabled ? 0.5 : opacity,
     flex,
     top,
     bottom,
     left,
     right,
     position,
-    ...(row && { flexDirection: 'row' }),
+    ...(row && { flexDirection: 'row' }),  // Row layout nếu row prop được truyền
   };
 
   return (
     <TouchableOpacity
-      style={[viewStyle, style, disabled && styles.disabled]}
+      style={[viewStyle, style]}  // Kết hợp style từ props và các style động
       onPress={onPress}
       disabled={disabled}
+      activeOpacity={activeOpacity || 0.7}  // Có thể tùy chỉnh activeOpacity khi bấm
     >
       {children}
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  disabled: {
-    opacity: 0.5,
-  },
-});
 
 export default AppButton;

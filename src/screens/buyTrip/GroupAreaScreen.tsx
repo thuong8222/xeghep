@@ -22,14 +22,14 @@ interface Props {
 
 
 export default function GroupAreaScreen({ navigation }: Props) {
-   const [isModalVisible, setIsModalVisible] = useState(false)
+  const [isModalVisible, setIsModalVisible] = useState(false)
   const HeaderRightButton = () => (
-    <AppView row>
-    <AppButton onPress={() => setIsModalVisible(true)}>
+
+    <AppButton onPress={() => setIsModalVisible(true)} paddingLeft={30}>
       <IconSort />
     </AppButton>
-    
-    </AppView>
+
+
   )
   React.useEffect(() => {
     // Use `setOptions` to update the button that we previously specified
@@ -41,29 +41,27 @@ export default function GroupAreaScreen({ navigation }: Props) {
           <AppText fontSize={12} lineHeight={16} color={ColorsGlobal.textLight}>{'300 thành viên'}</AppText>
         </AppView>
       ),
-      headerRight: HeaderRightButton, 
+      headerRight: HeaderRightButton,
     });
   }, [navigation]);
 
 
   const gotoDetailArea = (props) => {
 
-  navigation.navigate('BuyTrip', {nameGroup: props.group_area_name + ' - '+ props.type_car_name, countMember: props.count_trips})
+    navigation.navigate('BuyTrip', { nameGroup: props.group_area_name + ' - ' + props.type_car_name, countMember: props.count_trips })
   }
   const renderItem_groupArea = ({ item, index }) => {
     return (
-      <Area data={item} gotoDetailAreaPress={()=>gotoDetailArea(item)} />
+      <Area data={item} gotoDetailAreaPress={() => gotoDetailArea(item)} />
     )
   }
   return (
     <AppView backgroundColor='#fff' flex={1} padding={16}>
       <FlatList data={groupsArea} renderItem={renderItem_groupArea}
-
         ItemSeparatorComponent={() => <AppView height={1} backgroundColor={ColorsGlobal.borderColor} />}
       />
       <ModalBuyTrip visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)} />
     </AppView>
-
   )
 }
 const Area = (props) => {
@@ -71,9 +69,9 @@ const Area = (props) => {
     props.gotoDetailAreaPress(props.data)
   }
   return (
-    <AppButton onPress={detailArea} gap={8} row width={400} alignItems='center' paddingVertical={16} paddingLeft={12}>
-      <AppView height={scale(42)} width={scale(42)} radius={9999} backgroundColor={ColorsGlobal.backgroundLight} alignItems='center' justifyContent='center'>
-        <AppText fontSize={18} lineHeight={26} fontWeight={700}>{props.data.count_trips > 99 ? '99+' : props.data.count_trips}</AppText>
+    <AppButton onPress={detailArea} gap={8} row alignItems='center' paddingVertical={16} paddingLeft={12} >
+      <AppView height={45} width={45} radius={9999} backgroundColor={ColorsGlobal.backgroundLight} alignItems='center' justifyContent='center' padding={4} >
+        <AppText fontSize={scale(18)} lineHeight={scale(26)} fontWeight={700} textAlign='center'>{props.data.count_trips > 99 ? '99+' : props.data.count_trips}</AppText>
       </AppView>
       <AppView>
         <AppText color={props.data.is_read ? ColorsGlobal.textLight : ColorsGlobal.main} fontSize={16} fontWeight={700}>{props.data.type_car_name}</AppText>

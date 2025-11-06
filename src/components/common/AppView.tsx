@@ -7,6 +7,8 @@ import { scale } from '../../utils/Helper';
 const AppView: React.FC<BaseViewProps> = ({
   justifyContent,
   alignItems,
+  borderTopRightRadius,
+  borderBottomLeftRadius,
   zIndex,
   backgroundColor,
   paddingVertical,
@@ -75,6 +77,8 @@ const AppView: React.FC<BaseViewProps> = ({
     borderRadius: radius ? scale(Number(radius)) : undefined,
     borderTopEndRadius: borderTopEndRadius ? scale(Number(borderTopEndRadius)) : undefined,
     borderTopLeftRadius: borderTopLeftRadius ? scale(Number(borderTopLeftRadius)) : undefined,
+    borderTopRightRadius ,
+    borderBottomLeftRadius,
     gap: gap ? scale(Number(gap)) : undefined,
 
     // ✅ Scale các border
@@ -94,8 +98,8 @@ const AppView: React.FC<BaseViewProps> = ({
     flex,
 
     // ✅ Scale vị trí tuyệt đối
-    top: top ? verticalScale(Number(top)) : undefined,
-    bottom: bottom ? verticalScale(Number(bottom)) : undefined,
+    top: top ? scale(Number(top)) : undefined,
+    bottom: bottom ? scale(Number(bottom)) : undefined,
     left: left ? scale(Number(left)) : undefined,
     right: right ? scale(Number(right)) : undefined,
 

@@ -1,11 +1,11 @@
-import { GestureResponderEvent, ViewStyle } from 'react-native';
+import { GestureResponderEvent, TouchableOpacityProps, ViewStyle } from 'react-native';
 
 export interface BaseViewProps {
   justifyContent?: ViewStyle['justifyContent'];
   alignItems?: ViewStyle['alignItems'];
   row?: boolean;
-  maxHeight?:ViewStyle['maxHeight'];
-zIndex?:ViewStyle['zIndex'];
+  maxHeight?: ViewStyle['maxHeight'];
+  zIndex?: ViewStyle['zIndex'];
   height?: ViewStyle['height'];
   minHeight?: number | 'auto';
   width?: ViewStyle['width'];
@@ -19,7 +19,7 @@ zIndex?:ViewStyle['zIndex'];
   marginBottom?: number;
   marginHorizontal?: number;
   marginLeft?: ViewStyle['marginLeft'];
-  marginRight?:ViewStyle['marginRight'];
+  marginRight?: ViewStyle['marginRight'];
   marginTop?: number;
   padding?: number;
   paddingHorizontal?: number;
@@ -38,6 +38,9 @@ zIndex?:ViewStyle['zIndex'];
   borderTopWidth?: number;
   borderTopEndRadius?: number;
   borderTopLeftRadius?: number;
+  borderTopRightRadius?: ViewStyle['borderTopRightRadius'];
+  borderBottomRightRadius?: ViewStyle['borderBottomRightRadius'];
+  borderBottomLeftRadius?: ViewStyle['borderBottomLeftRadius'];
   borderBottomColor?: ViewStyle['borderBottomColor'];
   borderBottomWidth?: number;
   borderLeftColor?: ViewStyle['borderLeftColor'];
@@ -60,7 +63,7 @@ zIndex?:ViewStyle['zIndex'];
 export interface CustomButtonProps extends BaseViewProps {
   onPress?: (event: GestureResponderEvent) => void;
   disabled?: boolean;
-  activeOpacity?: number | undefined|string;
+  activeOpacity?: TouchableOpacityProps['activeOpacity'];
 }
 export interface CustomButtonSubmitProps extends CustomButtonProps {
   titleText?: number | string;

@@ -10,6 +10,7 @@ import ModalBuyTrip from '../../components/component/modals/ModalBuyTrip'
 import InfoGroupScreen from '../../screens/buyTrip/InfoGroupScreen'
 import AppView from '../../components/common/AppView'
 import AppText from '../../components/common/AppText'
+import MemberGroupScreen from '../../screens/buyTrip/MemberGroupScreen'
 
 export type BuyTripStackParamList = {
   GroupArea: undefined
@@ -22,6 +23,7 @@ export type BuyTripStackParamList = {
     nameGroup: string;
     countMember: number;
   }
+  MemberGroup:undefined;
 }
 
 export const buyTripEmitter = new EventEmitter()
@@ -71,8 +73,8 @@ export default function BuyTripTabs() {
             component={InfoGroupScreen}
             options={{
               headerBackTitle: '',
-              headerTitle: 'Thông tin nhóm', 
-               headerTitleAlign:'center'
+              headerTitle: 'Thông tin nhóm',
+              headerTitleAlign: 'center'
             }}
           />
         </Stack.Group>
@@ -81,8 +83,18 @@ export default function BuyTripTabs() {
           component={SaleTripsScreen}
           options={{
             headerTitleAlign: 'center',
-            headerTitle:'Bán chuyến'
-         ,
+            headerTitle: 'Bán chuyến'
+            ,
+            presentation: 'modal',
+          }}
+        />
+        <Stack.Screen
+          name="MemberGroup"
+          component={MemberGroupScreen}
+          options={{
+            headerTitleAlign: 'center',
+            headerTitle: 'Thành viên nhóm'
+            ,
             presentation: 'modal',
           }}
         />

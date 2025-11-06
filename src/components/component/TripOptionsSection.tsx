@@ -12,6 +12,8 @@ import GuestModal from './modals/GuestModal';
 import AppInput from '../common/AppInput';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import TimeSelectSection from './TimeSelectSection';
+import { scale } from '../../utils/Helper';
+
 
 export default function TripOptionsSection() {
     const [time, setTime] = useState(10);
@@ -35,20 +37,8 @@ const [selectedTime, setSelectedTime] = useState<Date | null>(null);
 
     const addGuest = () => setNumGuests(prev => Math.min(prev + 1, 6));
     const subGuest = () => setNumGuests(prev => Math.max(prev - 1, 1));
-    const onChangeTime = (_: any, date?: Date) => {
-        setShowPicker(false);
-        if (date) setSelectedTime(date);
-      };
-      const handleSelectOption = (option: string) => {
-        setShowDropdown(false);
-        if (option === 'Đi ngay') {
-          setIsInstant(true);
-          setShowPicker(false);
-        } else {
-          setIsInstant(false);
-          setShowPicker(true);
-        }
-      };
+
+
     return (
         <>
             <AppView
@@ -87,7 +77,7 @@ const [selectedTime, setSelectedTime] = useState<Date | null>(null);
                         {/* Nút cộng (chỉ hiện khi KHÔNG phải bao xe) */}
                         {guestType === 'normal' && (
                             <AppButton onPress={addGuest}>
-                                <IconPlus size={20} color={ColorsGlobal.textDark} />
+                                <IconPlus size={scale(20)} color={ColorsGlobal.textDark} />
                             </AppButton>
                         )}
                     </AppView>
@@ -135,7 +125,7 @@ const [selectedTime, setSelectedTime] = useState<Date | null>(null);
                         </AppView>
 
                         <AppButton onPress={addPrice}>
-                            <IconPlus size={20} color={ColorsGlobal.textDark} />
+                            <IconPlus size={scale(20)} color={ColorsGlobal.textDark} />
                         </AppButton>
                     </AppView>
                 </AppView>
@@ -149,7 +139,7 @@ const [selectedTime, setSelectedTime] = useState<Date | null>(null);
                             <IconMinus size={20} color={ColorsGlobal.colorIconNoActive} />
                         </AppButton>
                         {/* <AppText fontWeight={700}>{`${points} điểm`}</AppText> */}
-                        <AppView
+                        <AppView gap={8}
                             style={{
                                 borderBottomWidth: 1,
                                 borderBottomColor: ColorsGlobal.borderColor,
@@ -180,7 +170,7 @@ const [selectedTime, setSelectedTime] = useState<Date | null>(null);
                             <AppText fontWeight={600}>{'điểm'}</AppText>
                         </AppView>
                         <AppButton onPress={addPoint} disabled={points == 10}>
-                            <IconPlus size={20} color={ColorsGlobal.textDark} />
+                            <IconPlus size={scale(20)} color={ColorsGlobal.textDark} />
                         </AppButton>
                     </AppView>
                 </AppView>

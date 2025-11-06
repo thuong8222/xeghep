@@ -14,42 +14,47 @@ import { ColorsGlobal } from '../components/base/Colors/ColorsGlobal';
 import { NavigatorScreenParams } from '@react-navigation/native';
 
 export type BottomTabParamList = {
-    BuyTripTabs: NavigatorScreenParams<BuyTripStackParamList>; // ✅ nested stack
-    ReceivingScheduleTabs: undefined;
-    SaleTripsTabs: undefined;
-    PointTabs: NavigatorScreenParams<PointTabsParamList>; // nếu Point cũng là stack
-    AccountTabs: NavigatorScreenParams<AccountTabsParamList>; // nếu Account cũng là stack
-  };
+  BuyTripTabs: NavigatorScreenParams<BuyTripStackParamList>; // ✅ nested stack
+  ReceivingScheduleTabs: undefined;
+  SaleTripsTabs: undefined;
+  PointTabs: NavigatorScreenParams<PointTabsParamList>; // nếu Point cũng là stack
+  AccountTabs: NavigatorScreenParams<AccountTabsParamList>; // nếu Account cũng là stack
+};
 const Tabs = createBottomTabNavigator<BottomTabParamList>();
 export default function MenuBottomTabs() {
 
-    return (
-        <Tabs.Navigator  screenOptions={({ route }) => 
-        ({
-          
-            tabBarActiveTintColor: ColorsGlobal.main,
-            tabBarInactiveTintColor: ColorsGlobal.colorIconNoActive,
+  return (
+    <Tabs.Navigator screenOptions={({ route }) =>
+    ({
+      headerShown: false,
+      tabBarActiveTintColor: ColorsGlobal.main,
+      tabBarInactiveTintColor: ColorsGlobal.colorIconNoActive,
 
-        })} >
-            <Tabs.Screen name="BuyTripTabs" component={BuyTripTabs} 
-            options={{ tabBarLabel: 'Mua chuyến',
-            tabBarIcon: ({ color, size, focused })=> <IconMenu color={color} 
+    })} >
+      <Tabs.Screen name="BuyTripTabs" component={BuyTripTabs}
+        options={{
+          tabBarLabel: 'Mua chuyến',
+          tabBarIcon: ({ color, size, focused }) => <IconMenu color={color}
           />,
-          headerShown:false
-            }} />
-            <Tabs.Screen name="ReceivingScheduleTabs" component={ReceivingScheduleTabs} options={{ tabBarLabel: 'Lịch nhận',
-                   tabBarIcon: ({ color, size, focused })=> <IconReceiveHistory color={color}  />
-             }} />
-           
-            <Tabs.Screen name="PointTabs" component={PointTabs} options={{ tabBarLabel: 'Đổi điểm' ,
-            headerShown:false,
-                   tabBarIcon: ({ color, size, focused })=> <IconTranferPoint color={color}  />
-            }} />
-            <Tabs.Screen name="AccountTabs" component={AccountTabs} options={{ tabBarLabel: 'Tài khoản',
-              headerShown:false,
-                   tabBarIcon: ({ color, size, focused })=> <IconUser color={color} />, 
-              
-             }} />
-        </Tabs.Navigator>
-    );
+
+        }} />
+      <Tabs.Screen name="ReceivingScheduleTabs" component={ReceivingScheduleTabs} options={{
+        tabBarLabel: 'Lịch nhận',
+
+        tabBarIcon: ({ color, size, focused }) => <IconReceiveHistory color={color} />
+      }} />
+
+      <Tabs.Screen name="PointTabs" component={PointTabs} options={{
+        tabBarLabel: 'Đổi điểm',
+
+        tabBarIcon: ({ color, size, focused }) => <IconTranferPoint color={color} />
+      }} />
+      <Tabs.Screen name="AccountTabs" component={AccountTabs} options={{
+        tabBarLabel: 'Tài khoản',
+
+        tabBarIcon: ({ color, size, focused }) => <IconUser color={color} />,
+
+      }} />
+    </Tabs.Navigator>
+  );
 };

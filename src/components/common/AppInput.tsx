@@ -5,36 +5,38 @@ import AppButton from './AppButton';
 import { ColorsGlobal } from '../base/Colors/ColorsGlobal';
 import { scale } from '../../utils/Helper';
 import AppText from './AppText';
-import { StyleGlobal } from '../base/StyleGlobal';
+
 import IconEyeOff from '../../assets/icons/iconEyeOff';
 import IconEye from '../../assets/icons/iconEyeOpen';
 import IconArowDown from '../../assets/icons/IconArowDown';
 import IconUploadIcloud from '../../assets/icons/IconUploadIcloud';
 import IconSearch from '../../assets/icons/IconSearch';
-import AppView from './AppView';
+import IconCalendar from '../../assets/icons/IconCalendar';
+
 
 interface CustomInputProps extends TextInputProps {
     label?: string;
-    value: string;
+    value: string
     onChangeText?: (text: string) => void;
     isLoading?: boolean;
     keyboardType?: TextInputProps['keyboardType'];
     marginTop?: number;
-    type?: 'number' | 'email' | 'text' | 'phone' | 'password' | 'select' | 'upload' | 'search';
+    type?: 'number' | 'email' | 'text' | 'phone' | 'password' | 'select' | 'upload' | 'search' | 'default' | 'calendar';
     error?: string;
     onUploadPress?: () => void;
     toggleSelect?: () => void;
     onSearchPress?: () => void;
+    onCalendarPress?: () => void;
 }
 const AppInput: React.FC<CustomInputProps> = ({
     label,
     value,
     onChangeText,
-    onUploadPress, toggleSelect, onSearchPress,
+    onUploadPress, toggleSelect, onSearchPress, onCalendarPress,
     isLoading = false,
     keyboardType = 'default',
     marginTop = 10,
-    type,
+    type = 'default',
     error,
     ...rest
 }) => {
@@ -76,7 +78,7 @@ const AppInput: React.FC<CustomInputProps> = ({
                     <TextInput
                         style={[
                             styles.input,
-                            { borderColor: isFocused ? ColorsGlobal.main2 : ColorsGlobal.borderColor },
+                            { borderColor: isFocused ? ColorsGlobal.main2 : ColorsGlobal.borderColor, paddingRight: type !== 'default' ? 40 : 20 },
                         ]}
                         value={value}
                         onChangeText={onChangeText}
@@ -86,6 +88,11 @@ const AppInput: React.FC<CustomInputProps> = ({
                         onBlur={() => setIsFocused(false)}
                         editable={!isLoading && type !== 'upload'}
                         secureTextEntry={secureTextEntry}
+                        autoComplete='password'
+
+                        key={secureTextEntry ? 'secure' : 'not-secure'}
+                        autoCorrect={false}
+
                         {...rest}
                         returnKeyType={type === 'search' ? 'search' : 'done'}
                         onSubmitEditing={
@@ -98,24 +105,30 @@ const AppInput: React.FC<CustomInputProps> = ({
                         }
                     />
                     {type === 'password' && (
-                        <AppButton onPress={toggleShowPassword} position={'absolute'} right={13} top={12}>
+                        <AppButton onPress={toggleShowPassword} position={'absolute'} paddingHorizontal={13} right={0} top={scale(12)}>
                             {secureTextEntry ? <IconEyeOff size={24} /> : <IconEye size={24} />}
                         </AppButton>
                     )}
                     {type === 'select' && (
-                        <AppButton onPress={toggleSelect} position={'absolute'} right={13} top={12}>
+                        <AppButton onPress={toggleSelect} position={'absolute'} paddingHorizontal={13} right={0} top={scale(13)}>
                             <IconArowDown />
                         </AppButton>
                     )}
                     {type === 'upload' && (
-                        <AppButton onPress={onUploadPress} position={'absolute'} right={13} top={12}>
+                        <AppButton onPress={onUploadPress} position={'absolute'} paddingHorizontal={13} right={0} top={10}>
                             <IconUploadIcloud />
                         </AppButton>
                     )}
                     {type === 'search' && (
-                            <AppButton onPress={onSearchPress} position={'absolute'} right={13} top={12}>
+                        <AppButton disabled onPress={onSearchPress} position={'absolute'} paddingHorizontal={13} right={0} top={scale(13)}>
                             <IconSearch />
-                          </AppButton>
+                        </AppButton>
+                    )}
+
+                    {type === 'calendar' && (
+                        <AppButton  onPress={onCalendarPress} position={'absolute'} paddingHorizontal={13} right={0} top={scale(13)}>
+                            <IconCalendar />
+                        </AppButton>
                     )}
                 </View>
                 {error ? (
@@ -152,7 +165,7 @@ const styles = StyleSheet.create({
     input: {
         backgroundColor: 'white',
         color: '#000',
-        height:scale(50) ,
+        height: scale(50),
         padding: scale(10),
         paddingLeft: scale(20),
         borderWidth: 1,

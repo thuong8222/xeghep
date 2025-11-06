@@ -25,6 +25,7 @@ export default function ModalBuyTrip({ visible, onRequestClose, onApplyFilter }:
       direction: selectedDirection,
       time: selectedTime,
     });
+    onRequestClose?.();
   };
   const [placeStart, setPlaceStart] = useState('');
   const [placeEnd, setPlaceEnd] = useState('');

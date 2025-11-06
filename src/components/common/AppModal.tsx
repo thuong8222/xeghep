@@ -4,6 +4,7 @@ import Modal from 'react-native-modal';
 import { _screen_height } from '../../utils/Helper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ColorsGlobal } from '../base/Colors/ColorsGlobal';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 interface AppModalProps {
   isVisible: boolean;
@@ -18,7 +19,7 @@ export default function AppModal({
   heightPercent = 0.8,
   children,
 }: AppModalProps) {
-  const insets = useSafeAreaInsets(); 
+  const insets = useSafeAreaInsets();
   return (
     <Modal
       isVisible={isVisible}
@@ -28,17 +29,32 @@ export default function AppModal({
       propagateSwipe
       style={[styles.modal]}
     >
+
       <View
         style={[
           styles.modalContent,
-          { height: _screen_height * heightPercent ,
+          {
+            height: '100%',
+            maxHeight: _screen_height * heightPercent,
             paddingBottom: insets.bottom
-           },
+          },
         ]}
       >
         <View style={styles.handleBar} />
-        {children}
+        <KeyboardAwareScrollView
+          style={{ flex: 1, }}
+          viewIsInsideTabBar={true}
+          enableAutomaticScroll={true}
+          contentContainerStyle={{ flexGrow: 1 }}
+          enableOnAndroid={true}
+          extraScrollHeight={0}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {children}
+        </KeyboardAwareScrollView>
       </View>
+
     </Modal>
   );
 }
@@ -46,16 +62,16 @@ export default function AppModal({
 const styles = StyleSheet.create({
   modal: {
     justifyContent: 'flex-end',
-    margin:0,
-      paddingBottom: 0, 
+    margin: 0,
+    paddingBottom: 0,
   },
   modalContent: {
-    backgroundColor:ColorsGlobal.backgroundWhite,
+    backgroundColor: ColorsGlobal.backgroundWhite,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     padding: 20,
     gap: 16,
-    margin:0,
+    margin: 0,
   },
   handleBar: {
     width: 50,
