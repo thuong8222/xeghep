@@ -87,6 +87,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       if (success) {
         // authenticated locally — bạn có thể set local session/token
         Alert.alert('Xác thực thành công — đăng nhập!');
+        handleLogin()
         // gọi API backend để lấy token nếu cần, hoặc unlock local data
       } else {
         Alert.alert('Xác thực thất bại hoặc bị hủy');
