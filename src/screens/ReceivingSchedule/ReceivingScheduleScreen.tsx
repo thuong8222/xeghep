@@ -14,7 +14,7 @@ import AppInput from '../../components/common/AppInput';
 import AppText from '../../components/common/AppText';
 
 export default function ReceivingScheduleScreen() {
-  const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+  const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [selectedDateType, setSelectedDateType] = useState<'from' | 'to' | null>(null);
@@ -49,7 +49,7 @@ export default function ReceivingScheduleScreen() {
         const toDateObj = parseDate(toDate);
         if (toDateObj && selectedDate > toDateObj) {
           setErrorMessage('Ngày bắt đầu không thể sau ngày kết thúc.');
-
+          closeDatePicker()
           return;
         }
       }
@@ -64,7 +64,7 @@ export default function ReceivingScheduleScreen() {
         const fromDateObj = parseDate(fromDate);
         if (fromDateObj && selectedDate < fromDateObj) {
           setErrorMessage('Ngày kết thúc không thể trước ngày bắt đầu.');
-
+          closeDatePicker()
           return;
         }
       }
@@ -74,7 +74,21 @@ export default function ReceivingScheduleScreen() {
 
     }
 
-    setDatePickerVisible(false);
+    setIsDatePickerVisible(false);
+    setSelectedDateType(null);
+  };
+  const openSelectFromDate = () => {
+    console.log('openSelectFromDate')
+    setSelectedDateType('from');
+    setIsDatePickerVisible(true);
+  }
+  const openSelectFromTo = () => {
+    console.log('openSelectFromDate')
+    setSelectedDateType('to');
+    setIsDatePickerVisible(true);
+  }
+  const closeDatePicker = () => {
+    setIsDatePickerVisible(false);
     setSelectedDateType(null);
   };
 
@@ -83,10 +97,7 @@ export default function ReceivingScheduleScreen() {
       <AppView row justifyContent={'space-between'} gap={12} paddingBottom={16}>
         <AppButton
           flex={1}
-          onPress={() => {
-            setSelectedDateType('from');
-            setDatePickerVisible(true);
-          }}
+          onPress={openSelectFromDate}
         >
           <AppInput
             keyboardType='numeric'
@@ -97,19 +108,13 @@ export default function ReceivingScheduleScreen() {
             label='Từ ngày'
             placeholder='Chọn ngày'
             type='calendar'
-            onCalendarPress={() => {
-              setSelectedDateType('from');
-              setDatePickerVisible(true);
-            }}
+            onCalendarPress={openSelectFromDate}
           />
         </AppButton>
 
         <AppButton
           flex={1}
-          onPress={() => {
-            setSelectedDateType('to');
-            setDatePickerVisible(true);
-          }}
+          onPress={openSelectFromTo}
         >
           <AppInput
             keyboardType='numeric'
@@ -120,11 +125,7 @@ export default function ReceivingScheduleScreen() {
             label='Đến ngày'
             placeholder='Chọn ngày'
             type='calendar'
-            onCalendarPress={() => {
-              console.log(' onCalendarPress inout')
-              setSelectedDateType('to');
-              setDatePickerVisible(true);
-            }}
+            onCalendarPress={openSelectFromTo}
           />
         </AppButton>
       </AppView>
@@ -151,7 +152,7 @@ export default function ReceivingScheduleScreen() {
         isVisible={isDatePickerVisible}
         mode="date"
         onConfirm={handleConfirmDate}
-        onCancel={() => setDatePickerVisible(false)}
+        onCancel={() => setIsDatePickerVisible(false)}
       />
     </AppView>
   );

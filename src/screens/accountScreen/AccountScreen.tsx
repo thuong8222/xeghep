@@ -5,13 +5,14 @@ import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal'
 import AppText from '../../components/common/AppText'
 import AppInput from '../../components/common/AppInput'
 import AppButton from '../../components/common/AppButton'
-import IconArrowDown from '../../assets/icons/IconArowDown'
-import { useFocusEffect } from '@react-navigation/native'
+
 import ModalUploadCarImage from '../../components/component/modals/ModalUploadCarImage'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 
 import { RootParamList } from '../../../App'
 import ModalChangePassword from '../../components/component/modals/ModalChangePassword'
+import { validatePhoneNumber, validatePlateVN } from '../../utils/Helper'
+import FunctionSection from '../../components/component/FunctionSection'
 
 type AccountScreenNavProp = NativeStackNavigationProp<RootParamList>;
 
@@ -22,7 +23,9 @@ export default function AccountScreen({ navigation }: Props) {
   const [nameDisplay, setNameDisplay] = useState('');
   const [numberPhone, setNumberPhone] = useState('');
   const [nameCar, setNameCar] = useState('');
+  const [phoneNumberError, setPhoneNumberError] = useState('');
   const [licensePlate, setLicensePlate] = useState('');
+  const [licensePlateError, setLicensePlateError] = useState('');
   const [isDisplayModalUploadImage, setIsDisplayModalUploadImage] = useState(false);
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [isModalChangePw, setIsModalChangePw] = useState(false);
@@ -80,8 +83,13 @@ export default function AccountScreen({ navigation }: Props) {
             <AppInput label="Số điện thoại"
               value={numberPhone}
               keyboardType={'decimal-pad'}
-              onChangeText={(text) => setNumberPhone(text)}
+              onChangeText={(text) => {
+                setNumberPhone(text)
+                setPhoneNumberError(validatePhoneNumber(text))
+              }}
+              error={phoneNumberError}
               placeholder="Nhập số điện thoại"
+
             />
           </AppView>
 
@@ -90,7 +98,6 @@ export default function AccountScreen({ navigation }: Props) {
           <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Thông tin xe'}</AppText>
           <AppView row gap={20}>
             <AppInput value={nameCar} onChangeText={(text) => setNameCar(text)} placeholder='Nhập tên xe' label={'Tên xe'} />
-
             <AppInput label="Năm"
               value={numberPhone}
               keyboardType={'decimal-pad'}
@@ -99,7 +106,13 @@ export default function AccountScreen({ navigation }: Props) {
             />
           </AppView>
           <AppView row>
-            <AppInput value={licensePlate} onChangeText={(text) => setLicensePlate(text)} placeholder='Biển số xe' label={'Biển số'} />
+            <AppInput value={licensePlate}
+              onChangeText={(text) => {
+                setLicensePlate(text)
+                setLicensePlateError(validatePlateVN(text))
+              }}
+              error={licensePlateError}
+              placeholder='Biển số xe' label={'Biển số'} />
           </AppView>
           <AppButton row onPress={handleUploadPress}>
             <AppInput onUploadPress={handleUploadPress} value={imageUri} onChangeText={(text) => setImageUri(text)} placeholder='Tải lên hình ảnh xe' label={'Hình ảnh xe'} type='upload' editable={false} />
@@ -141,18 +154,9 @@ export default function AccountScreen({ navigation }: Props) {
         <AppView gap={6} >
           <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Tính năng'}</AppText>
           <AppView gap={12}>
-            <AppButton onPress={() => setIsModalChangePw(true)} row justifyContent={'space-between'} padding={12} borderWidth={1} borderColor={ColorsGlobal.borderColor} radius={6}>
-              <AppText color={ColorsGlobal.textLight} >{'Đổi mật khẩu'}</AppText>
-              <IconArrowDown rotate={-90} size={20} />
-            </AppButton>
-            <AppButton row justifyContent={'space-between'} padding={12} borderWidth={1} borderColor={ColorsGlobal.borderColor} radius={6}>
-              <AppText color={ColorsGlobal.textLight} onPress={gotoHistoryBuySalePoint}  >{'Lịch sử mua/bán điểm'}</AppText>
-              <IconArrowDown rotate={-90} size={20} />
-            </AppButton>
-            <AppButton onPress={Logout} row justifyContent={'space-between'} padding={12} borderWidth={1} borderColor={ColorsGlobal.borderColor} radius={6}>
-              <AppText color={ColorsGlobal.textLight}  >{'Đăng xuất'}</AppText>
-              <IconArrowDown rotate={-90} size={20} />
-            </AppButton>
+            <FunctionSection label='Đổi mật khẩu' onPress={() => setIsModalChangePw(true)} />
+            <FunctionSection label='Lịch sử mua/bán điểm' onPress={gotoHistoryBuySalePoint} />
+            <FunctionSection label='Đăng xuất' onPress={Logout} />
           </AppView>
 
         </AppView>

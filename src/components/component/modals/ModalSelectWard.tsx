@@ -7,9 +7,13 @@ import AppView from '../../common/AppView';
 import AppInput from '../../common/AppInput';
 import { ColorsGlobal } from '../../base/Colors/ColorsGlobal';
 import { removeVietnameseTones } from '../../../utils/Helper';
+interface Props {
+  isVisible: boolean;
+  onClose: () => void;
+  onSelected: () => void;
+}
 
-
-export default function SelectProvinceDistrictModal({ isVisible, onClose, onSelected }) {
+export default function SelectProvinceDistrictModal({ isVisible, onClose, onSelected }: Props) {
   const [step, setStep] = useState<'province' | 'district'>('province');
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
@@ -59,11 +63,11 @@ export default function SelectProvinceDistrictModal({ isVisible, onClose, onSele
   const filteredProvinces = provinces.filter((item) =>
     removeVietnameseTones(item.name).includes(removeVietnameseTones(searchText))
   );
-  
+
   const filteredDistricts = districts.filter((item) =>
     removeVietnameseTones(item.name).includes(removeVietnameseTones(searchText))
   );
-  
+
 
   const renderProvince = ({ item }) => (
     <AppButton onPress={() => handleSelectProvince(item)} padding={12}>
@@ -85,7 +89,7 @@ export default function SelectProvinceDistrictModal({ isVisible, onClose, onSele
             <AppText bold fontSize={18}>Chọn Tỉnh / Thành phố</AppText>
             {/* ✅ Ô nhập tìm kiếm tỉnh */}
             <AppInput
-            type='search'
+              type='search'
               value={searchText}
               onChangeText={setSearchText}
               placeholder="Tìm kiếm tỉnh/thành phố..."
@@ -109,7 +113,7 @@ export default function SelectProvinceDistrictModal({ isVisible, onClose, onSele
             </AppButton>
             {/* ✅ Ô nhập tìm kiếm xã/phường */}
             <AppInput
-            type='search'
+              type='search'
               value={searchText}
               onChangeText={setSearchText}
               placeholder="Tìm kiếm xã/phường..."

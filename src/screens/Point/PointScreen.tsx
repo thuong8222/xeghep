@@ -68,8 +68,8 @@ export default function PointScreen({ navigation }: Props) {
                 tension={50}
 
                 onRowDidOpen={rowKey => console.log(`Hàng ${rowKey} đã mở`)} />
-            <AppButton onPress={SaleTrips} position={'absolute'} right={16} bottom={37} width={48} height={48} radius={999} backgroundColor={ColorsGlobal.main} justifyContent='center' alignItems='center'>
-                <IconPlus />
+            <AppButton onPress={SaleTrips} position={'absolute'} right={36} bottom={34} width={48} height={48} radius={999} backgroundColor={ColorsGlobal.main} justifyContent='center' alignItems='center'>
+              <IconPlus size={20} />
             </AppButton>
         </AppView>
     )

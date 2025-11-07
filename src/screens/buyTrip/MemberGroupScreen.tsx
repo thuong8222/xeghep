@@ -6,6 +6,8 @@ import AppInput from '../../components/common/AppInput';
 import { members } from '../../dataDemoJson';
 import IconUser from '../../assets/icons/IconUser';
 import AppText from '../../components/common/AppText';
+import IconCalendar from '../../assets/icons/IconCalendar';
+import IconCar from '../../assets/icons/iconCar';
 
 export default function MemberGroupScreen({ }) {
     const [keysearch, setKeysearch] = useState('');
@@ -62,7 +64,12 @@ const Member = ({ data, index }) => {
         >
             <IconUser size={40} />
             <AppView justifyContent='center'>
-                <AppText bold>{data.full_name}</AppText>
+                <AppView row gap={8} alignItems='center'>
+                    <AppText bold>{data.full_name}</AppText>
+                    {data.role === 'driver' && <IconCar size={16} />}
+
+                </AppView>
+
                 <AppText>{data.user_name}</AppText>
             </AppView>
         </AppView>

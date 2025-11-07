@@ -4,11 +4,10 @@ import AppView from '../common/AppView';
 import { ColorsGlobal } from '../base/Colors/ColorsGlobal';
 import AppText from '../common/AppText';
 import moment from 'moment';
+import { NumberFormat } from '../../utils/Helper';
 
 
-export default function Point(props) {
-
-  
+export default function Point(props: any) {
     return (
         <AppView gap={12} radius={12} padding={12} borderWidth={1} borderColor={ColorsGlobal.borderColorDark} backgroundColor={ColorsGlobal.backgroundWhite} >
 

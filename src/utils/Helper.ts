@@ -95,23 +95,15 @@ export function GetObjectProperty(obj: any, prop: any, defaultValue = '') {
   return defaultValue;
 }
 export const CONSTANT = {
-  ORDER_STATUS: {
-    all: { label: 'All ', color: ColorsGlobal.placeholder },
-    processing: { label: 'Processing', color: '#3D9EFF' },
-    completed: { label: 'Completed', color: '#4CAF50' },
-    cancelled: { label: 'Cancelled', color: '#F44336' },
-    pending: { label: 'Pending', color: '#FFA500' },
-    'on-hold': { label: 'On hold', color: 'pink' },
-    'on hold': { label: 'On hold', color: 'pink' },
-  },
-  ORDER_STATUS_BY_KEY: {
-    all: ColorsGlobal.placeholder,
-    processing: '#3D9EFF',
-    completed: '#4CAF50',
-    cancelled: '#F44336',
-    pending: '#FFA500',
+
+  TRANSACTION_TYPE_BY_KEY: {
+    buy_point: 'Mua điểm',
+    sell_point:'Bán điểm',
+    buy_trip: 'Mua chuyến',
+    sell_trip: 'Bán chuyến',
   },
 };
+
 
 export type PriceInfo = {
   regularPrice: string | null;
@@ -290,6 +282,40 @@ export const validateConfirmPassword = ({ value, password }: { value: string, pa
   }
   return ''; // Nếu không có lỗi thì trả về chuỗi rỗng
 };
+
+export function validatePlateVN(input: string): string {
+  if (!input || typeof input !== "string") {
+    return "Không được để trống";
+  }
+
+  const raw = input.trim().toUpperCase().replace(/\s+/g, "");
+  const normalized = raw.replace(/_/g, "-").replace(/—/g, "-");
+
+  const provinceCodes = [
+    "11","12","14","15","16","17","18","19","20","21","22","23","24","25","26","27",
+    "28","29","30","31","32","33","34","35","36","37","38","43","47","48","49","50",
+    "51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66",
+    "67","68","69","70","71","72","73","74","75","76","77","78","79","80","81","82",
+    "83","84","85","86","88","89","90","92","93","94","95","97","98","99"
+  ];
+
+  const pattern = /^(\d{2})([A-Z]{1,2})-?(\d{3,5})(\.\d{2})?$/;
+  const match = normalized.match(pattern);
+
+  if (!match) return "Định dạng không hợp lệ (vd: 30A-123.45, 59B1-12345)";
+
+  const province = match[1];
+  const numbers = match[3];
+
+  if (!provinceCodes.includes(province)) return `Mã tỉnh (${province}) không hợp lệ`;
+
+  if (numbers.length < 4 || numbers.length > 5) return "Số thứ tự phải có 4–5 chữ số";
+
+  return "Biển số hợp lệ";
+}
+
+
+
 export   const openMapSmart = (trip:any) => {
         const {
             lat_start,

@@ -4,6 +4,7 @@ import AppView from '../common/AppView';
 import AppButton from '../common/AppButton';
 import AppText from '../common/AppText';
 import { ColorsGlobal } from '../base/Colors/ColorsGlobal';
+import QuickNoteButton from './QuickNoteButton';
 
 export default function NoteInputSection() {
   const [note, setNote] = useState('');
@@ -51,12 +52,12 @@ export default function NoteInputSection() {
       {/* Input ghi chú */}
       <AppView width="100%" alignItems="flex-start" justifyContent="flex-start">
         <TextInput
-        value={note ? `Ghi chú: ${note}` : ''}
-        onChangeText={(text) => {
-          // Nếu người dùng sửa thủ công thì loại bỏ "Ghi chú: " đi
-          const clean = text.replace(/^Ghi chú:\s*/i, '');
-          setNote(clean);
-        }}
+          value={note ? `Ghi chú: ${note}` : ''}
+          onChangeText={(text) => {
+            // Nếu người dùng sửa thủ công thì loại bỏ "Ghi chú: " đi
+            const clean = text.replace(/^Ghi chú:\s*/i, '');
+            setNote(clean);
+          }}
           placeholder="Ghi chú: Nhập ghi chú...."
           multiline
           style={{
@@ -69,40 +70,23 @@ export default function NoteInputSection() {
             padding: 10,
             fontSize: 14,
             color: ColorsGlobal.textDark,
-            fontStyle: 'italic', 
+            fontStyle: 'italic',
           }}
         />
 
         {/* Gợi ý ghi chú nhanh */}
         <AppView marginTop={18} row gap={8} flexWrap="wrap">
-          {quickNotes.map((item, index) => {
-            const isActive = selectedNotes.includes(item);
-            return (
-              <AppButton
-                key={index}
-                onPress={() => handleAddNote(item)}
-                borderWidth={1}
-                borderColor={
-                  isActive ? ColorsGlobal.main : ColorsGlobal.borderColor
-                }
-                backgroundColor={
-                  isActive ? ColorsGlobal.main + '15' : 'transparent'
-                }
-                paddingVertical={4}
-                paddingHorizontal={12}
-                radius={99}
-              >
-                <AppText
-                  fontStyle="italic"
-                  color={isActive ? ColorsGlobal.main : ColorsGlobal.textLight}
-                  fontSize={14}
-                >
-                  {item}
-                </AppText>
-              </AppButton>
-            );
-          })}
+          {quickNotes.map((item, index) => (
+            <QuickNoteButton
+              key={index}
+              label={item}
+              isActive={selectedNotes.includes(item)}
+              onPress={() => handleAddNote(item)}
+              fontStyle="normal" // 👈 truyền tùy ý: 'italic' | 'normal'
+            />
+          ))}
         </AppView>
+
       </AppView>
     </AppView>
   );

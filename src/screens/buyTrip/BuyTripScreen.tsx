@@ -77,10 +77,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
     };
     const buyTrip = (rowMap, rowKey) => {
         closeRow(rowMap, rowKey);
-        // const newData = [...listData];
-        // const prevIndex = listData.findIndex(item => item.key === rowKey);
-        // newData.splice(prevIndex, 1);
-        // setListData(newData);
+     
         Alert.alert('thanh cong', `Mua Chuyến thanh cong`);
 
 
@@ -110,8 +107,8 @@ export default function BuyTripScreen({ navigation, route }: Props) {
                 renderItem={renderItem_trip} ItemSeparatorComponent={() => <AppView height={scale(16)} />}
                 renderHiddenItem={renderHiddenItem}
                 rightOpenValue={-116}
-                leftOpenValue={0}              // Tắt vuốt sang phải
-                disableRightSwipe={true}       // Chỉ vuốt trái
+                leftOpenValue={0}            
+                disableRightSwipe={true}    
                 swipeToOpenPercent={10}
                 directionalDistanceChangeThreshold={2}
                 friction={8}
@@ -119,7 +116,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
                 onRowDidOpen={rowKey => console.log(`Hàng ${rowKey} đã mở`)}
             />
             <AppButton onPress={SaleTrips} position={'absolute'} right={36} bottom={34} width={48} height={48} radius={999} backgroundColor={ColorsGlobal.main} justifyContent='center' alignItems='center'>
-                <IconPlus />
+                <IconPlus size={20} />
             </AppButton>
             <ModalBuyTrip visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)} />
 
