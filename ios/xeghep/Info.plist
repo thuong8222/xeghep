@@ -51,8 +51,17 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>NSFaceIDUsageDescription</key>
-<string>Đăng nhập nhanh bằng Face ID, Touch ID để bảo mật tài khoản</string>
+
+<key>NSCameraUsageDescription</key>
+<string>Ứng dụng cần quyền truy cập Camera để chụp ảnh phương tiện của bạn (ví dụ: biển số, hình xe, giấy tờ xe) khi cập nhật thông tin xe.</string>
+
+<key>NSPhotoLibraryUsageDescription</key>
+<string>Ứng dụng cần quyền truy cập Thư viện ảnh để bạn có thể chọn ảnh xe đã chụp sẵn từ thiết bị của mình.</string>
+
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>Ứng dụng cần quyền lưu ảnh xe vào Thư viện khi bạn chụp hoặc cập nhật ảnh phương tiện mới.</string>
+
+
 
 </dict>
 </plist>

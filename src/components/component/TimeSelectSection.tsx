@@ -14,19 +14,20 @@ import { scale } from '../../utils/Helper';
 
 export default function TimeSelectSection() {
     const [isInstant, setIsInstant] = useState(true);
-    const [time, setTime] = useState(10);
+    const [time, setTime] = useState(0);
     const [showDropdown, setShowDropdown] = useState(false);
     const [showPicker, setShowPicker] = useState(false);
     const [selectedTime, setSelectedTime] = useState<Date | null>(null);
 
-    const addTime = () => setTime(prev => prev + 5);
-    const subTime = () => setTime(prev => (prev > 5 ? prev - 5 : prev));
+    const addTime = () => setTime(prev => Math.min(prev + 15, 60)); // ⏫ Giới hạn tối đa 60 phút
+    const subTime = () => setTime(prev => Math.max(prev - 15, 0)); 
 
     const handleSelectOption = (option: string) => {
         setShowDropdown(false);
         if (option === 'Đi ngay') {
             setIsInstant(true);
             setShowPicker(false);
+            setTime(0); 
         } else {
             setIsInstant(false);
             setShowPicker(true);

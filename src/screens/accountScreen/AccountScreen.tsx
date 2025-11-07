@@ -11,7 +11,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 
 import { RootParamList } from '../../../App'
 import ModalChangePassword from '../../components/component/modals/ModalChangePassword'
-import { validatePhoneNumber, validatePlateVN } from '../../utils/Helper'
+import { validatePhoneNumber, validatePlateVN, validateYear } from '../../utils/Helper'
 import FunctionSection from '../../components/component/FunctionSection'
 
 type AccountScreenNavProp = NativeStackNavigationProp<RootParamList>;
@@ -24,6 +24,8 @@ export default function AccountScreen({ navigation }: Props) {
   const [numberPhone, setNumberPhone] = useState('');
   const [nameCar, setNameCar] = useState('');
   const [phoneNumberError, setPhoneNumberError] = useState('');
+  const [yearCar, setYearCar] = useState('');
+  const [yearCarError, setYearCarError] = useState('');
   const [licensePlate, setLicensePlate] = useState('');
   const [licensePlateError, setLicensePlateError] = useState('');
   const [isDisplayModalUploadImage, setIsDisplayModalUploadImage] = useState(false);
@@ -97,13 +99,21 @@ export default function AccountScreen({ navigation }: Props) {
         <AppView gap={6} height={'auto'} >
           <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Thông tin xe'}</AppText>
           <AppView row gap={20}>
-            <AppInput value={nameCar} onChangeText={(text) => setNameCar(text)} placeholder='Nhập tên xe' label={'Tên xe'} />
-            <AppInput label="Năm"
-              value={numberPhone}
-              keyboardType={'decimal-pad'}
-              onChangeText={(text) => setNumberPhone(text)}
-              placeholder="Năm"
-            />
+            <AppView flex={1}>
+              <AppInput value={nameCar} onChangeText={(text) => setNameCar(text)} placeholder='Nhập tên xe' label={'Tên xe'} />
+            </AppView>
+            <AppView flex={1}>
+              <AppInput label="Năm"
+                value={yearCar}
+                keyboardType={'decimal-pad'}
+                onChangeText={(text) => {
+                  setYearCar(text)
+                  setYearCarError(validateYear(text))
+                }}
+                error={yearCarError}
+                placeholder="Năm"
+              />
+            </AppView>
           </AppView>
           <AppView row>
             <AppInput value={licensePlate}

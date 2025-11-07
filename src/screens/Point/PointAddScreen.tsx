@@ -36,13 +36,13 @@ export default function PointAddScreen() {
                 placeholder='Nhập số lượng điểm' keyboardType='decimal-pad'
                 error={pointError} />
             <AppInput
-                value={NumberFormat(pricePoint)}
+                value={ NumberFormat(pricePoint)}
                 onChangeText={(text) => {
                     setPricePoint(text);
                     setPriceError(validatePrice(text))
                 }}
                 label='Giá tiền'
-                placeholder='Nhập giá ...K/ điểm' keyboardType='decimal-pad'
+                placeholder='Nhập giá ...K/ điểm (1K=1000 VND)' keyboardType='decimal-pad'
                 error={priceError} />
             <ButtonSubmit title='Đăng bán' onPress={postBuyPoint} />
 

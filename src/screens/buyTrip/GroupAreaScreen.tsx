@@ -1,14 +1,13 @@
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { FlatList, StyleSheet } from 'react-native'
 import React, { useState } from 'react'
-import AppInput from '../../components/common/AppInput'
-import { TouchEventType } from 'react-native-gesture-handler/lib/typescript/TouchEventType';
+
 import AppView from '../../components/common/AppView';
 import { scale } from '../../utils/Helper';
 import AppText from '../../components/common/AppText';
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal';
 import AppButton from '../../components/common/AppButton';
 import { BuyTripStackParamList } from '../../navigation/menuBottomTabs/BuyTripTabs';
-import { createNativeStackNavigator, NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { groupsArea } from '../../dataDemoJson';
 import IconSort from '../../assets/icons/IconSort';
 import ModalBuyTrip from '../../components/component/modals/ModalBuyTrip';
@@ -80,4 +79,3 @@ const Area = (props) => {
     </AppButton>
   )
 }
-const styles = StyleSheet.create({})

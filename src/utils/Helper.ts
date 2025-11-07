@@ -184,13 +184,13 @@ export const validatePrice = (value: string) => {
   }
 
   // Nếu < 1.000
-  if (parseInt(cleaned, 10) < 1000) {
-    return 'Số tiền phải lớn hơn hoặc bằng 1.000 VNĐ';
+  if (parseInt(cleaned, 10) < 1) {
+    return 'Số tiền phải lớn hơn hoặc bằng 1 K';
   }
 
   // Nếu > 10 tỷ (giới hạn tuỳ chọn)
-  if (parseInt(cleaned, 10) > 10000000000) {
-    return 'Số tiền quá lớn';
+  if (parseInt(cleaned, 10) > 100000) {
+    return 'Nhập dưới 100 000';
   }
 
   return '';
@@ -275,7 +275,29 @@ export const validatePassword = (value: string) => {
   // Nếu mật khẩu hợp lệ, trả về chuỗi rỗng
   return '';
 };
+export const validateYear = (text: string) => {
 
+
+  // Chỉ cho phép nhập số
+  if (!/^\d*$/.test(text)) {
+    return("Chỉ được nhập số");
+  
+  }
+
+  // Nếu đủ 4 ký tự thì kiểm tra hợp lệ
+  if (text.length === 4) {
+    const yearNumber = parseInt(text, 10);
+    const currentYear = new Date().getFullYear();
+
+    if (yearNumber < 1900 || yearNumber > currentYear) {
+      return(`Năm phải từ 1900 đến ${currentYear}`);
+    } else {
+      return("");
+    }
+  } else {
+    return("Năm phải gồm 4 chữ số");
+  }
+};
 export const validateConfirmPassword = ({ value, password }: { value: string, password: string }) => {
   if (value !== password) {
     return 'Mật khẩu nhập lại không khớp';

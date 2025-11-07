@@ -4,13 +4,12 @@ import AppView from '../../components/common/AppView'
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal'
 import { SwipeListView } from 'react-native-swipe-list-view'
 import AppButton from '../../components/common/AppButton'
-import Trip from '../../components/component/Trip'
-import { listTrips, tranferPoints } from '../../dataDemoJson'
+
+import {  tranferPoints } from '../../dataDemoJson'
 import Point from '../../components/component/Point'
 import IconPlus from '../../assets/icons/IconPlus'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { BuyTripStackParamList } from '../../navigation/menuBottomTabs/BuyTripTabs'
-import { BottomTabParamList } from '../../navigation/MenuBottomTabs'
+
 import { PointTabsParamList } from '../../navigation/menuBottomTabs/PointTabs'
 type BuyTripProps = NativeStackNavigationProp<PointTabsParamList, 'PointAddScreen'>;
 interface Props {
