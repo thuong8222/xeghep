@@ -56,9 +56,9 @@ export default function TypeFilterBar({
         flexDirection: "row",
         alignItems: "center",
         columnGap: 12,
-        paddingHorizontal: 10,
+      
       }}
-      style={{ height: 40 }}
+      style={{ height: 32 }}
     >
       {types.map((type, index) => {
         const label =

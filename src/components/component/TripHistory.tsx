@@ -57,7 +57,7 @@ export default function TripHistory(props) {
                 <AppView row justifyContent={'space-between'}>
                     <AppText fontWeight={600}>{props.data.Trip.guests + ' khách'}</AppText>
                     <AppText color={ColorsGlobal.main} fontWeight={700}>{props.data.Trip.price_sell + "K"}</AppText>
-                    <AppText fontWeight={700}>{'-' + props.data.Trip.point + 'đ'}</AppText>
+                    <AppText fontWeight={700}>{'+' + props.data.Trip.point + 'đ'}</AppText>
 
                 </AppView>
                 {props.data.Trip.note &&

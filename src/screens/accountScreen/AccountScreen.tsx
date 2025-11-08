@@ -13,6 +13,7 @@ import { RootParamList } from '../../../App'
 import ModalChangePassword from '../../components/component/modals/ModalChangePassword'
 import { validatePhoneNumber, validatePlateVN, validateYear } from '../../utils/Helper'
 import FunctionSection from '../../components/component/FunctionSection'
+import IconUser from '../../assets/icons/IconUser'
 
 type AccountScreenNavProp = NativeStackNavigationProp<RootParamList>;
 
@@ -73,103 +74,63 @@ export default function AccountScreen({ navigation }: Props) {
     });
 
   }
+  const gotoInfoAccount = () => {
+    navigation.navigate('RootNavigator', {
+      screen: 'BottomTabs',      // bước 1: đi vào bottom tabs
+      params: {
+        screen: 'AccountTabs',       // bước 2: vào account tab
+        params: {
+          screen: 'AccountInfoScreen'
+
+        }
+      }
+    });
+  }
+  const gotoInfoCar = () => {
+    navigation.navigate('RootNavigator', {
+      screen: 'BottomTabs',      // bước 1: đi vào bottom tabs
+      params: {
+        screen: 'AccountTabs',       // bước 2: vào account tab
+        params: {
+          screen: 'CarInfoScreen'
+
+        }
+      }
+    });
+  }
   return (
     <ScrollView style={{ flex: 1, backgroundColor: ColorsGlobal.backgroundWhite }}>
-      <AppView flex={1} backgroundColor={ColorsGlobal.backgroundWhite} padding={16} gap={24}>
-        <AppView gap={6} height={'auto'} >
-          <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Thông tin cá nhân'}</AppText>
-          <AppView row>
-            <AppInput value={nameDisplay} onChangeText={(text) => setNameDisplay(text)} placeholder='Nhập tên hiển thị' label={'Tên hiển thị'} />
+      <AppView flex={1} backgroundColor={ColorsGlobal.backgroundWhite} padding={16} gap={12}>
+        <AppView justifyContent='center' alignItems='center' paddingBottom={10} gap={8} >
+          <AppView backgroundColor={ColorsGlobal.backgroundGray} radius={999} padding={20}>
+            <IconUser size={100} />
           </AppView>
-          <AppView row>
-            <AppInput label="Số điện thoại"
-              value={numberPhone}
-              keyboardType={'decimal-pad'}
-              onChangeText={(text) => {
-                setNumberPhone(text)
-                setPhoneNumberError(validatePhoneNumber(text))
-              }}
-              error={phoneNumberError}
-              placeholder="Nhập số điện thoại"
-
-            />
+          <AppView alignItems='center'>
+            <AppText bold color={ColorsGlobal.main}>{'Nguyen van a'}</AppText>
+            <AppText color={ColorsGlobal.main2}>{'Tài xế'}</AppText>
           </AppView>
 
         </AppView>
         <AppView gap={6} height={'auto'} >
+          <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Tài khoản'}</AppText>
+          <FunctionSection label='Thông tin cá nhân' onPress={gotoInfoAccount} />
+        </AppView>
+        <AppView gap={6} height={'auto'} >
           <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Thông tin xe'}</AppText>
-          <AppView row gap={20}>
-            <AppView flex={1}>
-              <AppInput value={nameCar} onChangeText={(text) => setNameCar(text)} placeholder='Nhập tên xe' label={'Tên xe'} />
-            </AppView>
-            <AppView flex={1}>
-              <AppInput label="Năm"
-                value={yearCar}
-                keyboardType={'decimal-pad'}
-                onChangeText={(text) => {
-                  setYearCar(text)
-                  setYearCarError(validateYear(text))
-                }}
-                error={yearCarError}
-                placeholder="Năm"
-              />
-            </AppView>
-          </AppView>
-          <AppView row>
-            <AppInput value={licensePlate}
-              onChangeText={(text) => {
-                setLicensePlate(text)
-                setLicensePlateError(validatePlateVN(text))
-              }}
-              error={licensePlateError}
-              placeholder='Biển số xe' label={'Biển số'} />
-          </AppView>
-          <AppButton row onPress={handleUploadPress}>
-            <AppInput onUploadPress={handleUploadPress} value={imageUri} onChangeText={(text) => setImageUri(text)} placeholder='Tải lên hình ảnh xe' label={'Hình ảnh xe'} type='upload' editable={false} />
-          </AppButton>
-          {imageUri && (
-            <AppView justifyContent="center" alignItems="center" marginTop={8}>
-              <View style={{ position: 'relative' }}>
-                <Image
-                  source={{ uri: imageUri }}
-                  style={{
-                    width: 200,
-                    height: 200,
-                    borderRadius: 12,
-                  }}
-                  resizeMode="cover"
-                />
-                {/* Nút X để xoá ảnh */}
-                <AppButton
-                  onPress={() => setImageUri(null)}
-                  style={{
-                    position: 'absolute',
-                    top: -8,
-                    right: -8,
-                    backgroundColor: 'rgba(0,0,0,0.6)',
-                    width: 28,
-                    height: 28,
-                    borderRadius: 14,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}
-                >
-                  <AppText color="#fff" fontSize={14}>×</AppText>
-                </AppButton>
-              </View>
-            </AppView>
-          )}
+          <FunctionSection label='Thông tin xe' onPress={gotoInfoCar} />
+
 
         </AppView>
         <AppView gap={6} >
           <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Tính năng'}</AppText>
-          <AppView gap={12}>
+          <AppView gap={8}>
             <FunctionSection label='Đổi mật khẩu' onPress={() => setIsModalChangePw(true)} />
             <FunctionSection label='Lịch sử mua/bán điểm' onPress={gotoHistoryBuySalePoint} />
             <FunctionSection label='Đăng xuất' onPress={Logout} />
           </AppView>
 
         </AppView>
+
         <ModalUploadCarImage isDisplay={isDisplayModalUploadImage} onClose={() => setIsDisplayModalUploadImage(false)}
           onSelectImage={(uri) => setImageUri(uri)} />
         <ModalChangePassword isVisible={isModalChangePw} onRequestClose={() => setIsModalChangePw(false)} />

@@ -96,7 +96,7 @@ export default function ModalUploadCarImage({ isDisplay, onClose, onSelectImage 
           <IconArrowDown rotate={-90} />
         </AppButton>
         <AppButton onPress={takePhoto} padding={10} borderTopWidth={1} borderTopColor={ColorsGlobal.borderColor} justifyContent={'space-between'} row>
-          <AppText>{'Chụp ảnh xe'}</AppText>
+          <AppText>{'Chụp ảnh mới'}</AppText>
           <IconArrowDown rotate={-90} />
         </AppButton>
 

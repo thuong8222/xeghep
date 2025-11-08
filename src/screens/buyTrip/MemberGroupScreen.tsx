@@ -49,7 +49,7 @@ export default function MemberGroupScreen({ }) {
 }
 
 const Member = ({ data, index }) => {
-    const backgroundColor = index % 2 === 0 ? ColorsGlobal.borderColor : ColorsGlobal.backgroundWhite;
+    const backgroundColor = index % 2 === 0 ? ColorsGlobal.backgroundLight : ColorsGlobal.backgroundWhite;
     const isFirstItem = index === 0;
 
     return (

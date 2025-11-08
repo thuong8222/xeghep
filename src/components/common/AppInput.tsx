@@ -12,10 +12,12 @@ import IconArowDown from '../../assets/icons/IconArowDown';
 import IconUploadIcloud from '../../assets/icons/IconUploadIcloud';
 import IconSearch from '../../assets/icons/IconSearch';
 import IconCalendar from '../../assets/icons/IconCalendar';
+import { ViewBaseProps } from 'react-native/types_generated/Libraries/Components/View/ViewPropTypes';
 
 
 interface CustomInputProps extends TextInputProps {
     label?: string;
+    flex?: ViewBaseProps['flex'];
     value: string
     onChangeText?: (text: string) => void;
     isLoading?: boolean;
@@ -29,7 +31,7 @@ interface CustomInputProps extends TextInputProps {
     onCalendarPress?: () => void;
 }
 const AppInput: React.FC<CustomInputProps> = ({
-    label,
+    label,flex,
     value,
     onChangeText,
     onUploadPress, toggleSelect, onSearchPress, onCalendarPress,
@@ -61,7 +63,7 @@ const AppInput: React.FC<CustomInputProps> = ({
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             {/* Thêm View container bên ngoài */}
-            <View style={[styles.container, { marginTop }]}>
+            <View style={[styles.container, { marginTop, flex }]}>
                 <View style={styles.inputContainer}>
                     {label && (
                         <Text

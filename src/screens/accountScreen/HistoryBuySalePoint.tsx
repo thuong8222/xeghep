@@ -94,8 +94,6 @@ export default function HistoryBuySalePoint() {
     setIsDatePickerVisible(false);
     setSelectedDateType(null);
   };
-
-
   const types = [...new Set(historyBuySalePoint.map(item => item.type))];
   console.log(types);
   // Lọc dữ liệu theo selectedType
@@ -104,12 +102,8 @@ export default function HistoryBuySalePoint() {
     return historyBuySalePoint.filter((item) => item.type === selectedType);
   }, [selectedType, historyBuySalePoint]);
 
-  const toggleFilter = (type: string) => {
-    // Chọn lại cùng 1 type thì bỏ lọc
-    setSelectedType((prev) => (prev === type ? null : type));
-  };
   return (
-    <AppView flex={1} backgroundColor='#fff' padding={16} position='relative' gap={12}>
+    <AppView flex={1} backgroundColor='#fff' paddingHorizontal={16} paddingTop={10} position='relative' gap={10}>
       <AppView row justifyContent={'space-between'} gap={12} alignItems={'center'} >
         <AppButton
           flex={1}
@@ -155,7 +149,7 @@ export default function HistoryBuySalePoint() {
           {"! " + errorMessage}
         </AppText>
       )}
-      <AppView>
+      <AppView >
         <TypeFilterBar
           types={types}
           selectedType={selectedType}
