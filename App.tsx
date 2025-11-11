@@ -13,7 +13,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import RootNavigator, { RootStackParamList } from './src/navigation/RootNavigator';
 import AuthNavigator, { AuthStackParamList } from './src/navigation/AuthNavigator';
 
-import { requestUserPermission, listenForForegroundMessages, registerBackgroundHandler, getFcmToken, createAndroidChannel } from '../xeghep/src/utils/notificationService';
+import { requestUserPermission, listenForForegroundMessages, registerBackgroundHandler, getFcmToken, createAndroidChannel, displayNotification } from '../xeghep/src/utils/notificationService';
 export type RootParamList = {
   RootNavigator: NavigatorScreenParams<RootStackParamList>
   Auth: NavigatorScreenParams<AuthStackParamList>;
@@ -25,10 +25,23 @@ const Stack = createNativeStackNavigator<RootParamList>();
 const App = () => {
 
   useEffect(() => {
-    console.log('App.tsx useEffect ')
-    createAndroidChannel();   // tạo channel Android
-    requestUserPermission();  // xin quyền notification
-    listenForForegroundMessages(); // lắng nghe foreground
+    const initNotifications = async () => {
+      console.log('App.tsx useEffect - initNotifications');
+
+      // 1️⃣ Tạo channel Android
+      await createAndroidChannel();
+
+      // 2️⃣ Xin quyền notification
+      await requestUserPermission();
+
+      // 3️⃣ Test hiển thị local notification
+      await displayNotification('Xin chào iOS', 'Test hiển thị local notification');
+
+      // 4️⃣ Lắng nghe notification khi app đang foreground
+      listenForForegroundMessages();
+    };
+
+    initNotifications();
   }, []);
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
