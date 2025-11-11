@@ -19,6 +19,9 @@ import { RootParamList } from "../../../App";
 import ModalForgetPassword from "../../components/component/modals/ModalForgetPassword";
 import { validatePassword, validatePhoneNumber } from "../../utils/Helper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAuthApi } from "../../redux/hooks/useAuthApi";
+import { loginUser } from "../../redux/slices/ authSlice";
+import { useDispatch } from "react-redux";
 
 
 
@@ -30,24 +33,35 @@ interface Props {
 }
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [password, setPassword] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("09876442312");
+  const [password, setPassword] = useState("Admin123456@");
   const [phoneNumberError, setPhoneNumberError] = useState('');
   const [passwordError, setPasswordError] = useState('');
-  const [loading, setloading] = useState();
+  // const [loading, setloading] = useState(false);
   const [isFormValid, setIsFocused] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
 
   const rnBiometrics = new ReactNativeBiometrics()
+  const { login, loading, error, successMessage, clear } = useAuthApi();
 
+  const handleLogin = async () => {
+    if (phoneNumberError || passwordError || !phoneNumber || !password) {
+      Alert.alert('Vui lòng nhập đầy đủ thông tin hợp lệ');
+      return;
+    }
 
-  const handleLogin = () => {
-    // Nếu login thành công, reset stack về RootNavigator
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'RootNavigator', params: undefined }],
-    });
+    try {
+      const token = await login({ phone: phoneNumber, password });
+      console.log('token: ', token)
+      Alert.alert('Đăng nhập thành công!');
+      clear();
+    } catch (err: any) {
+      Alert.alert('Lỗi', err || 'Đăng nhập thất bại');
+    }
   };
+
+
+
   const gotoRegister = () => {
     navigation.navigate('Auth', { screen: 'RegisterScreen' });
     console.log('gotoRegister')

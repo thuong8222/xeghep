@@ -14,6 +14,8 @@ import RootNavigator, { RootStackParamList } from './src/navigation/RootNavigato
 import AuthNavigator, { AuthStackParamList } from './src/navigation/AuthNavigator';
 
 import { requestUserPermission, listenForForegroundMessages, registerBackgroundHandler, getFcmToken, createAndroidChannel, displayNotification } from '../xeghep/src/utils/notificationService';
+import { Provider } from 'react-redux';
+import { store } from './src/redux/data/store';
 export type RootParamList = {
   RootNavigator: NavigatorScreenParams<RootStackParamList>
   Auth: NavigatorScreenParams<AuthStackParamList>;
@@ -44,6 +46,7 @@ const App = () => {
     initNotifications();
   }, []);
   return (
+    <Provider store={store}>
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Auth" screenOptions={{ headerShown: false }}>
@@ -52,6 +55,7 @@ const App = () => {
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>
+    </Provider>
   );
 };
 

@@ -43,7 +43,9 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   const handleLogin = () => {
     navigation.goBack()
   };
-
+const handleRegister =()=>{
+  
+}
   const gotoTerms = () => {
     navigation.navigate('Auth', {
       screen: 'BlankScreen',
@@ -153,7 +155,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
           <AppView marginTop={24}>
             <ButtonSubmit title="Đăng ký"
               isLoading={loading}
-              onPress={handleLogin}
+              onPress={handleRegister}
             />
           </AppView>
           <AppView marginTop={24} justifyContent="center" alignItems="center" row gap={12}>
