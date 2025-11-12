@@ -33,30 +33,49 @@ interface Props {
 }
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
+  const { login, token, loading, error, successMessage, clear } = useAuthApi();
   const [phoneNumber, setPhoneNumber] = useState("09876442312");
   const [password, setPassword] = useState("Admin123456@");
   const [phoneNumberError, setPhoneNumberError] = useState('');
   const [passwordError, setPasswordError] = useState('');
-  // const [loading, setloading] = useState(false);
-  const [isFormValid, setIsFocused] = useState(false);
+
+
   const [isOpenModal, setIsOpenModal] = useState(false);
 
   const rnBiometrics = new ReactNativeBiometrics()
-  const { login, loading, error, successMessage, clear } = useAuthApi();
+
+  console.log('loading LoginScreen: ', loading)
+  console.log('successMessage LoginScreen: ', successMessage)
+  console.log('error LoginScreen: ', error);
+  console.log('token LoginScreen: ', token);
+  useEffect(() => {
+    if (successMessage) {
+      Alert.alert('Thành công', successMessage, [
+        {
+          text: 'OK',
+          onPress: () => {
+            clear();
+            navigation.navigate('RootNavigator');
+          },
+        },
+      ]);
+    }
+
+    if (error) {
+      Alert.alert('Lỗi', error, [{ text: 'OK', onPress: clear }]);
+    }
+  }, [successMessage, error]);
 
   const handleLogin = async () => {
     if (phoneNumberError || passwordError || !phoneNumber || !password) {
-      Alert.alert('Vui lòng nhập đầy đủ thông tin hợp lệ');
+      Alert.alert('Thông báo', 'Vui lòng nhập đầy đủ thông tin hợp lệ');
       return;
     }
 
     try {
-      const token = await login({ phone: phoneNumber, password });
-      console.log('token: ', token)
-      Alert.alert('Đăng nhập thành công!');
-      clear();
+      await login({ phone: phoneNumber, password });
     } catch (err: any) {
-      Alert.alert('Lỗi', err || 'Đăng nhập thất bại');
+      Alert.alert('Đăng nhập thất bại', err || 'Có lỗi xảy ra');
     }
   };
 

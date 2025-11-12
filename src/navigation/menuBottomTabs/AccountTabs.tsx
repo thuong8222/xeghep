@@ -5,12 +5,13 @@ import AccountScreen from '../../screens/accountScreen/AccountScreen';
 import HistoryBuySalePoint from '../../screens/accountScreen/HistoryBuySalePoint';
 import AccountInfoScreen from '../../screens/accountScreen/AccountInfoScreen';
 import CarInfoScreen from '../../screens/accountScreen/CarInfoScreen';
+import { Driver } from '../../redux/slices/driverSlice';
 
 export type AccountTabsParamList = {
   AccountScreen: undefined;
   HistoryBuySalePoint: undefined;
-  AccountInfoScreen: undefined;
-  CarInfoScreen: undefined;
+  AccountInfoScreen: {data:Driver};
+  CarInfoScreen: {data:Driver};
 }
 
 const Stack = createNativeStackNavigator<AccountTabsParamList>();

@@ -6,7 +6,7 @@ import AppInput from '../../common/AppInput';
 import ButtonSubmit from '../../common/ButtonSubmit';
 import AppView from '../../common/AppView';
 import { validateConfirmPassword, validatePassword } from '../../../utils/Helper';
-
+import { useDriverApi } from '../../../redux/hooks/userDriverApi';
 
 type ModalForgetProps = {
   isVisible: boolean;
@@ -14,15 +14,26 @@ type ModalForgetProps = {
 }
 export default function ModalChangePassword({ isVisible, onRequestClose }: ModalForgetProps) {
   const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('dsfdsf!@#dddS1');
   const [newConfirmPassword, setNewConfirmPassword] = useState('');
   const [oldPasswordError, setOldPasswordError] = useState('');
   const [newPasswordError, setNewPasswordError] = useState('');
   const [newConfirmPasswordError, setNewConfirmPasswordError] = useState('');
-  const RequestGetNewPassword = () => {
-    Alert.alert('Xeghep', 'Gửi yêu cầu thành công!')
-    console.log('RequestGetNewPassword')
+  const { changePassword, loading, successMessage, error, clear } = useDriverApi();
+
+const handleChangePassword = async () => {
+  try {
+    await changePassword({
+      current_password: oldPassword,
+      password: newPassword,
+      confirm_password: newConfirmPassword,
+    });
+    onRequestClose()
+  } catch (err) {
+    console.log('Lỗi đổi mật khẩu:', err);
   }
+};
+  
   // Hàm validate khi người dùng nhập xác nhận mật khẩu
   const handleConfirmPasswordChange = (text: string) => {
     setNewConfirmPassword(text);
@@ -63,10 +74,9 @@ export default function ModalChangePassword({ isVisible, onRequestClose }: Modal
           onChangeText={handleConfirmPasswordChange}
           error={newConfirmPasswordError}
           placeholder='Nhập lại mật khẩu' type='password' />
-        <ButtonSubmit title='Gửi yêu cầu' onPress={RequestGetNewPassword} />
+        <ButtonSubmit title='Gửi yêu cầu' onPress={handleChangePassword} />
       </AppView>
     </AppModal>
   )
 }
 
-const styles = StyleSheet.create({})

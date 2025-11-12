@@ -1,19 +1,19 @@
 import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import AppView from '../../components/common/AppView'
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal'
 import AppText from '../../components/common/AppText'
-import AppInput from '../../components/common/AppInput'
-import AppButton from '../../components/common/AppButton'
+
 
 import ModalUploadCarImage from '../../components/component/modals/ModalUploadCarImage'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 
 import { RootParamList } from '../../../App'
 import ModalChangePassword from '../../components/component/modals/ModalChangePassword'
-import { validatePhoneNumber, validatePlateVN, validateYear } from '../../utils/Helper'
+
 import FunctionSection from '../../components/component/FunctionSection'
 import IconUser from '../../assets/icons/IconUser'
+import { useDriverApi } from '../../redux/hooks/userDriverApi'
 
 type AccountScreenNavProp = NativeStackNavigationProp<RootParamList>;
 
@@ -21,21 +21,33 @@ interface Props {
   navigation: AccountScreenNavProp;
 }
 export default function AccountScreen({ navigation }: Props) {
-  const [nameDisplay, setNameDisplay] = useState('');
-  const [numberPhone, setNumberPhone] = useState('');
-  const [nameCar, setNameCar] = useState('');
-  const [phoneNumberError, setPhoneNumberError] = useState('');
-  const [yearCar, setYearCar] = useState('');
-  const [yearCarError, setYearCarError] = useState('');
-  const [licensePlate, setLicensePlate] = useState('');
-  const [licensePlateError, setLicensePlateError] = useState('');
-  const [isDisplayModalUploadImage, setIsDisplayModalUploadImage] = useState(false);
-  const [imageUri, setImageUri] = useState<string | null>(null);
+
+  const { driver, loading, error, successMessage, getDriver, clear } = useDriverApi();
+
+
   const [isModalChangePw, setIsModalChangePw] = useState(false);
-  const handleUploadPress = () => {
-    console.log('handleUploadPress')
-    setIsDisplayModalUploadImage(true);
-  }
+
+
+
+  // Lấy thông tin driver khi vào màn hình
+  useEffect(() => {
+    if (!driver) {
+      getDriver().catch(err => {
+        console.log('Lỗi lấy thông tin driver:', err);
+      });
+    }
+  }, [driver]);
+
+  // Hiện thông báo error hoặc success
+  useEffect(() => {
+    if (error) {
+      Alert.alert('Lỗi', error, [{ text: 'OK', onPress: () => clear() }]);
+    }
+    if (successMessage) {
+      Alert.alert('Thành công', successMessage, [{ text: 'OK', onPress: () => clear() }]);
+    }
+  }, [error, successMessage]);
+
   const Logout = () => {
     Alert.alert(
       'Xeghep',
@@ -76,14 +88,16 @@ export default function AccountScreen({ navigation }: Props) {
   }
   const gotoInfoAccount = () => {
     navigation.navigate('RootNavigator', {
-      screen: 'BottomTabs',      // bước 1: đi vào bottom tabs
+      screen: 'BottomTabs',       // bước 1: đi vào BottomTabs
       params: {
-        screen: 'AccountTabs',       // bước 2: vào account tab
+        screen: 'AccountTabs',    // bước 2: vào AccountTabs
         params: {
-          screen: 'AccountInfoScreen'
-
-        }
-      }
+          screen: 'AccountInfoScreen',  // bước 3: vào màn AccountInfoScreen
+          params: {
+            data: driver,              // truyền object driver
+          },
+        },
+      },
     });
   }
   const gotoInfoCar = () => {
@@ -92,8 +106,10 @@ export default function AccountScreen({ navigation }: Props) {
       params: {
         screen: 'AccountTabs',       // bước 2: vào account tab
         params: {
-          screen: 'CarInfoScreen'
-
+          screen: 'CarInfoScreen',
+          params: {
+            data: driver,              // truyền object driver
+          },
         }
       }
     });
@@ -102,18 +118,30 @@ export default function AccountScreen({ navigation }: Props) {
     <ScrollView style={{ flex: 1, backgroundColor: ColorsGlobal.backgroundWhite }}>
       <AppView flex={1} backgroundColor={ColorsGlobal.backgroundWhite} padding={16} gap={12}>
         <AppView justifyContent='center' alignItems='center' paddingBottom={10} gap={8} >
-          <AppView backgroundColor={ColorsGlobal.backgroundGray} radius={999} padding={20}>
-            <IconUser size={100} />
-          </AppView>
+          {driver?.image_car ?
+            <Image
+              source={{ uri: driver?.image_car }}
+              style={{
+                width: 150,
+                height: 150,
+                borderRadius: 999,
+              }}
+              resizeMode="cover"
+            />
+            :
+            <AppView backgroundColor={ColorsGlobal.backgroundGray} radius={999} padding={20}>
+              <IconUser size={100} />
+            </AppView>
+          }
           <AppView alignItems='center'>
-            <AppText bold color={ColorsGlobal.main}>{'Nguyen van a'}</AppText>
+            <AppText bold color={ColorsGlobal.main}>{driver?.full_name}</AppText>
             <AppText color={ColorsGlobal.main2}>{'Tài xế'}</AppText>
           </AppView>
 
         </AppView>
         <AppView gap={6} height={'auto'} >
           <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Tài khoản'}</AppText>
-          <FunctionSection label='Thông tin cá nhân' onPress={gotoInfoAccount} />
+          <FunctionSection label='Thông tin cá nhân' onPress={gotoInfoAccount} data={driver} />
         </AppView>
         <AppView gap={6} height={'auto'} >
           <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Thông tin xe'}</AppText>
@@ -131,12 +159,10 @@ export default function AccountScreen({ navigation }: Props) {
 
         </AppView>
 
-        <ModalUploadCarImage isDisplay={isDisplayModalUploadImage} onClose={() => setIsDisplayModalUploadImage(false)}
-          onSelectImage={(uri) => setImageUri(uri)} />
+
         <ModalChangePassword isVisible={isModalChangePw} onRequestClose={() => setIsModalChangePw(false)} />
       </AppView>
     </ScrollView>
   )
 }
 
-const styles = StyleSheet.create({})

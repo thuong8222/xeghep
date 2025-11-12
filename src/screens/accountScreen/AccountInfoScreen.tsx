@@ -1,5 +1,5 @@
-import { Image, StyleSheet, Text, View } from 'react-native'
-import React, { useState } from 'react'
+import { Alert, Image, StyleSheet, Text, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import AppView from '../../components/common/AppView'
 import AppInput from '../../components/common/AppInput'
 import { validatePhoneNumber } from '../../utils/Helper';
@@ -11,21 +11,86 @@ import ModalUploadCarImage from '../../components/component/modals/ModalUploadCa
 import AppText from '../../components/common/AppText';
 import IconCamera from '../../assets/icons/IconCamera';
 
+import { RouteProp, useRoute } from '@react-navigation/native';
+import { AccountTabsParamList } from '../../navigation/menuBottomTabs/AccountTabs';
+import { useDriverApi } from '../../redux/hooks/userDriverApi';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootParamList } from '../../../App';
+import ModalOnlySelectProvince from '../../components/component/modals/ModalOnlySelectProvince';
+type AccountScreenNavProp = NativeStackNavigationProp<RootParamList>;
 
-export default function AccountInfoScreen() {
-    const [nameDisplay, setNameDisplay] = useState('');
-    const [numberPhone, setNumberPhone] = useState('');
+interface Props {
+    navigation: AccountScreenNavProp;
+}
+
+export default function AccountInfoScreen({ navigation }: Props) {
+    // --- gọi hook useRoute bên trong component ---
+    const route = useRoute<RouteProp<AccountTabsParamList, 'AccountInfoScreen'>>();
+    const driverPre = route.params.data;
+    const { driver, loading, error, successMessage, editDriver, clear } = useDriverApi();
+ 
+
+    const [nameDisplay, setNameDisplay] = useState(driverPre?.full_name || '');
+    const [numberPhone, setNumberPhone] = useState(driverPre?.phone || '');
+    const [address, setAddress] = useState(driverPre?.address || '');
     const [phoneNumberError, setPhoneNumberError] = useState('');
-    const [address, setAddress] = useState('');
     const [isDisplayModalUploadImage, setIsDisplayModalUploadImage] = useState(false);
-    const [imageUri, setImageUri] = useState('');
-    const SaveChangeInfo = () => {
-        console.log('first')
-    }
+    const [imageUri, setImageUri] = useState(driverPre?.image_car || '');
+    const [isOpenModal, setIsOpenModal] = useState(false);
+    useEffect(() => {
+        if (successMessage) {
+            Alert.alert('Thành công', successMessage, [
+                {
+                    text: 'OK',
+                    onPress: () => {
+                        clear();
+                        navigation.navigate('RootNavigator');
+                    },
+                },
+            ]);
+        }
+
+        if (error) {
+            Alert.alert('Lỗi', error, [{ text: 'OK', onPress: clear }]);
+        }
+    }, [successMessage, error]);
+
+
+
+    const SaveChangeInfo = async () => {
+        try {
+            // Chuẩn bị dữ liệu từ state
+            const model = {
+                full_name: nameDisplay,          // từ state nameDisplay
+
+                address: address,                // từ state address
+                image_car: imageUri,             // từ state imageUri
+                license_number: '',              // nếu chưa có
+                name_car: '',                    // nếu chưa có
+                model_car: '',                   // nếu chưa có
+                year_car: '',                    // nếu chưa có
+                color_car: 'red',                // hoặc từ state/color picker
+                experience_years: '',            // nếu chưa có
+            };
+
+            // Gọi API thông qua hook hoặc dispatch redux
+            const res = await editDriver(model);
+         
+        } catch (err: any) {
+            Alert.alert('Thất bại', err?.message || 'Có lỗi xảy ra');
+        }
+    };
     const handleUploadPress = () => {
-        console.log('handleUploadPress')
         setIsDisplayModalUploadImage(true);
     }
+    const openSelectProvince = () => {
+
+        setIsOpenModal(true);
+    }
+    const handleProvinceSelected = (data: { province: any }) => {
+        setAddress(data.province.name); // cập nhật state với tên tỉnh
+        setIsOpenModal(false); // đóng modal
+    };
 
     return (
         <AppView flex={1} backgroundColor={ColorsGlobal.backgroundWhite} padding={16} >
@@ -78,21 +143,25 @@ export default function AccountInfoScreen() {
                         }}
                         error={phoneNumberError}
                         placeholder="Nhập số điện thoại"
-
+                        editable={false}
                     />
 
                 </AppView>
                 <AppView row>
                     <AppInput label="Địa chỉ"
                         value={address}
-                        keyboardType={'decimal-pad'}
+
                         onChangeText={(text) => {
                             setAddress(text)
-                            setPhoneNumberError(validatePhoneNumber(text))
+
                         }}
                         error={phoneNumberError}
                         placeholder="Chọn địa chỉ"
+                        type='select'
 
+
+
+                        toggleSelect={openSelectProvince}
                     />
 
                 </AppView>
@@ -102,6 +171,11 @@ export default function AccountInfoScreen() {
             </AppView>
             <ModalUploadCarImage isDisplay={isDisplayModalUploadImage} onClose={() => setIsDisplayModalUploadImage(false)}
                 onSelectImage={(uri) => setImageUri(uri)} />
+            <ModalOnlySelectProvince
+                isVisible={isOpenModal}
+                onClose={() => setIsOpenModal(false)}
+                onSelected={handleProvinceSelected}
+            />
         </AppView>
     )
 }

@@ -1,4 +1,4 @@
-import { Image, StyleSheet, View } from 'react-native';
+import { Alert, Image, StyleSheet, View } from 'react-native';
 import React, { useState } from 'react';
 import AppView from '../../components/common/AppView';
 import AppInput from '../../components/common/AppInput';
@@ -9,19 +9,27 @@ import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal';
 import IconCar from '../../assets/icons/iconCar';
 import IconCamera from '../../assets/icons/IconCamera';
 import ButtonSubmit from '../../components/common/ButtonSubmit';
+import { useDriverApi } from '../../redux/hooks/userDriverApi';
+import { AccountTabsParamList } from '../../navigation/menuBottomTabs/AccountTabs';
+import { RouteProp, useRoute } from '@react-navigation/native';
 
 export default function CarInfoScreen() {
+    // --- gọi hook useRoute bên trong component ---
+    const route = useRoute<RouteProp<AccountTabsParamList, 'CarInfoScreen'>>();
+    const { driver, loading, error, successMessage, editDriver, clear } = useDriverApi();
+    const driverPre = route.params.data;
+
     const [carInfo, setCarInfo] = useState({
-        name: '',
-        year: '',
+        name: driverPre.name_car || '',
+        year: driverPre.year_car || '',
         status: '',
-        licensePlate: '',
+        licensePlate: driverPre.license_number || '',
         brand: '',
-        model: '',
-        color: '',
+        model: driverPre.model_car || '',
+        color: driverPre.color_car || '',
         version: '',
-        type: '',
-        imageUri: '',
+        type: driverPre?.type_car || '',
+        imageUri: driverPre.image_car || '',
     });
 
     const [errors, setErrors] = useState({
@@ -36,9 +44,28 @@ export default function CarInfoScreen() {
         if (key === 'year') setErrors(prev => ({ ...prev, year: validateYear(value) }));
         if (key === 'licensePlate') setErrors(prev => ({ ...prev, licensePlate: validatePlateVN(value) }));
     };
-    const SaveChangeInfo = () => {
-        console.log('first')
-    }
+
+    const SaveChangeInfo = async () => {
+        try {
+            // Chuẩn bị dữ liệu từ state
+            const model = {
+
+                image_car: carInfo.imageUri || '',
+                license_number: carInfo.licensePlate || '',
+                name_car: carInfo.name || '',
+                model_car: carInfo.model || '',
+                year_car: carInfo.year || '',
+                color_car: carInfo.color || '',
+
+            };
+
+            // Gọi API thông qua hook hoặc dispatch redux
+            await editDriver(model);
+
+        } catch (err: any) {
+            Alert.alert('Thất bại', err?.message || 'Có lỗi xảy ra');
+        }
+    };
     const handleUploadPress = () => setIsDisplayModalUploadImage(true);
 
     return (
@@ -72,10 +99,10 @@ export default function CarInfoScreen() {
                 <AppView row gap={12}>
                     <AppInput
                         flex={1}
-                        value={carInfo.brand}
-                        onChangeText={(text) => handleChange('brand', text)}
+                        value={carInfo.name}
+                        onChangeText={(text) => handleChange('name', text)}
                         placeholder="Toyota, Kia..."
-                        label="Hãng xe"
+                        label="Tên xe"
                     />
                     <AppInput
                         flex={1}

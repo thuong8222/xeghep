@@ -1,25 +1,24 @@
 import React, { useState } from "react";
-import { View, TextInput, Button, StyleSheet, TouchableOpacity, SafeAreaView, Image, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
-import { createNativeStackNavigator, NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { View, StyleSheet, TouchableOpacity, SafeAreaView, Image, ScrollView, KeyboardAvoidingView, Platform, Alert } from "react-native";
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppButton from "../../components/common/AppButton";
 import AppInput from "../../components/common/AppInput";
 import ButtonSubmit from "../../components/common/ButtonSubmit";
-import Container from "../../components/common/Container";
-import AppView from "../../components/common/AppView";
-import FastImage from "react-native-fast-image";
+
+
 import AppText from "../../components/common/AppText";
 import { logo } from "../../assets/images";
-import { RootStackParamList } from "../../navigation/RootNavigator";
+
 import { StyleGlobal } from "../../components/base/StyleGlobal";
 import { ColorsGlobal } from "../../components/base/Colors/ColorsGlobal";
-import { Text } from "react-native-gesture-handler";
-import { AuthStackParamList } from "../../navigation/AuthNavigator";
+
 import ModalOnlySelectProvince from "../../components/component/modals/ModalOnlySelectProvince";
 import { RootParamList } from "../../../App";
 import { validateConfirmPassword, validatePassword, validatePhoneNumber } from "../../utils/Helper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-
+import AppView from "../../components/common/AppView";
+import { useAuthApi } from "../../redux/hooks/useAuthApi";
 
 
 type LoginParamList = NativeStackNavigationProp<RootParamList>;
@@ -35,17 +34,53 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   const [passwordError, setPasswordError] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
-  const [loading, setloading] = useState();
+
   const [isFormValid, setIsFocused] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [selectedProvince, setSelectedProvince] = useState<string>('');
+  const { register, loading, error, successMessage, clear } = useAuthApi();
 
   const handleLogin = () => {
     navigation.goBack()
   };
-const handleRegister =()=>{
-  
-}
+  const handleRegister = async () => {
+    const model =
+    {
+      full_name: username,
+      phone: phoneNumber,
+      password: password,
+      confirm_password: confirmPassword,
+      area: selectedProvince
+    };
+    console.log('first model: ', model)
+    if (!phoneNumber || !password || !confirmPassword || !selectedProvince || phoneNumberError || confirmPasswordError || passwordError) {
+      Alert.alert('Vui lòng nhập đầy đủ thông tin hợp lệ');
+      return;
+    }
+
+    try {
+      const model =
+      {
+        full_name: username,
+        phone: phoneNumber,
+        password: password,
+        confirm_password: confirmPassword,
+        area: selectedProvince
+      }
+
+      console.log('model: ', model);
+
+      const res = await register(model);
+      console.log('token: ', res)
+      Alert.alert('Drive 1-1',
+        res.payload
+      );
+      clear();
+    } catch (err: any) {
+      console.log('err: ', err)
+      Alert.alert('Lỗi', err || 'Đăng nhập thất bại');
+    }
+  }
   const gotoTerms = () => {
     navigation.navigate('Auth', {
       screen: 'BlankScreen',
