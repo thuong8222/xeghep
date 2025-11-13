@@ -1,9 +1,9 @@
-import { Alert, Image, StyleSheet, View } from 'react-native';
+import { Alert, Image, Platform, StyleSheet, View } from 'react-native';
 import React, { useState } from 'react';
 import AppView from '../../components/common/AppView';
 import AppInput from '../../components/common/AppInput';
 import AppButton from '../../components/common/AppButton';
-import { validatePlateVN, validateYear } from '../../utils/Helper';
+import { DRIVER_STATUS, DRIVER_STATUS_LABELS, validatePlateVN, validateYear } from '../../utils/Helper';
 import ModalUploadCarImage from '../../components/component/modals/ModalUploadCarImage';
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal';
 import IconCar from '../../assets/icons/iconCar';
@@ -12,22 +12,24 @@ import ButtonSubmit from '../../components/common/ButtonSubmit';
 import { useDriverApi } from '../../redux/hooks/userDriverApi';
 import { AccountTabsParamList } from '../../navigation/menuBottomTabs/AccountTabs';
 import { RouteProp, useRoute } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import ModalSelectStatus from '../../components/component/modals/ModalSelectStatusCar';
 
 export default function CarInfoScreen() {
     // --- gọi hook useRoute bên trong component ---
     const route = useRoute<RouteProp<AccountTabsParamList, 'CarInfoScreen'>>();
     const { driver, loading, error, successMessage, editDriver, clear } = useDriverApi();
     const driverPre = route.params.data;
-
+console.log('driverPre info xe: ',driverPre )
     const [carInfo, setCarInfo] = useState({
         name: driverPre.name_car || '',
         year: driverPre.year_car || '',
-        status: '',
+        status: driverPre.status_car || 1,
         licensePlate: driverPre.license_number || '',
-        brand: '',
+
         model: driverPre.model_car || '',
         color: driverPre.color_car || '',
-        version: '',
+
         type: driverPre?.type_car || '',
         imageUri: driverPre.image_car || '',
     });
@@ -38,7 +40,11 @@ export default function CarInfoScreen() {
     });
 
     const [isDisplayModalUploadImage, setIsDisplayModalUploadImage] = useState(false);
-
+    const [status, setStatus] = useState(driverPre?.status_car ?? DRIVER_STATUS.MAINTENANCE);
+    const [isStatusModalVisible, setIsStatusModalVisible] = useState(false);
+const closeModalSelectStatus =()=>{
+    setIsStatusModalVisible(false)
+}
     const handleChange = (key: keyof typeof carInfo, value: string) => {
         setCarInfo(prev => ({ ...prev, [key]: value }));
         if (key === 'year') setErrors(prev => ({ ...prev, year: validateYear(value) }));
@@ -47,19 +53,19 @@ export default function CarInfoScreen() {
 
     const SaveChangeInfo = async () => {
         try {
-            // Chuẩn bị dữ liệu từ state
-            const model = {
 
+            const model = {
                 image_car: carInfo.imageUri || '',
                 license_number: carInfo.licensePlate || '',
                 name_car: carInfo.name || '',
                 model_car: carInfo.model || '',
                 year_car: carInfo.year || '',
                 color_car: carInfo.color || '',
-
+                status_car: carInfo.status || '',
+                type_car: carInfo.type || ''
             };
+console.log('model: ',model)
 
-            // Gọi API thông qua hook hoặc dispatch redux
             await editDriver(model);
 
         } catch (err: any) {
@@ -67,9 +73,9 @@ export default function CarInfoScreen() {
         }
     };
     const handleUploadPress = () => setIsDisplayModalUploadImage(true);
-
+    const insets = useSafeAreaInsets()
     return (
-        <AppView flex={1} backgroundColor={ColorsGlobal.backgroundWhite} padding={16} gap={16}>
+        <AppView flex={1} backgroundColor={ColorsGlobal.backgroundWhite} padding={16} gap={16} paddingBottom={Platform.OS === 'ios' ? insets.bottom : 0}>
             {/* ====== ẢNH XE ====== */}
             <AppView justifyContent="center" alignItems="center" marginTop={8}>
                 <View style={{ position: 'relative' }}>
@@ -121,7 +127,7 @@ export default function CarInfoScreen() {
                         placeholder="Đỏ, Trắng, Đen..."
                         label="Màu xe"
                     />
-                    <AppInput
+                    {/* <AppInput
                         flex={1}
                         value={carInfo.year}
                         onChangeText={(text) => handleChange('year', text)}
@@ -129,7 +135,7 @@ export default function CarInfoScreen() {
                         error={errors.year}
                         placeholder="Năm sản xuất"
                         label="Năm"
-                    />
+                    /> */}
                 </AppView>
                 <AppInput
                     value={carInfo.licensePlate}
@@ -145,16 +151,19 @@ export default function CarInfoScreen() {
                     label="Loại xe"
                 />
                 <AppInput
-                    value={carInfo.status}
+                    value={DRIVER_STATUS_LABELS[status]||carInfo.status}
                     onChangeText={(text) => handleChange('status', text)}
-                    placeholder="Sẵn sàng/ Đang sửa..."
+                    placeholder="Sẵn sàng/ Đang bảo chì..."
                     label="Trạng thái xe"
+                    type='select'
+                    toggleSelect={()=>setIsStatusModalVisible(true)}
                 />
             </AppView>
             <AppView>
                 <ButtonSubmit title='Lưu thay đổi' onPress={SaveChangeInfo} />
             </AppView>
-
+<ModalSelectStatus isVisible={isStatusModalVisible} onClose={closeModalSelectStatus}  selectedStatus={status}
+  onSelect={(id) => setStatus(id)} />
             {/* MODAL UPLOAD ẢNH */}
             <ModalUploadCarImage
                 isDisplay={isDisplayModalUploadImage}

@@ -235,6 +235,14 @@ export const validatePhoneNumber = (value: string) => {
   // Nếu hợp lệ, trả về chuỗi rỗng
   return '';
 };
+export const validateExperienceYears = (value: string) => {
+
+  const num = Number(value);
+  if (isNaN(num)) return 'Giá trị phải là số';
+  if (num <= 0) return 'Số năm phải lớn hơn 0';
+  if (num > 60) return 'Số năm không hợp lệ (quá lớn)';
+  return '';
+};
 
 export const validatePassword = (value: string) => {
   // Kiểm tra nếu không có giá trị
@@ -338,7 +346,7 @@ export function validatePlateVN(input: string): string {
 
 
 
-export   const openMapSmart = (trip:any) => {
+export  const openMapSmart = (trip:any) => {
         const {
             lat_start,
             lng_start,
@@ -363,4 +371,13 @@ export   const openMapSmart = (trip:any) => {
             Alert.alert('Thiếu dữ liệu', 'Không có thông tin để mở Google Maps');
         }
 
+    };
+    export const DRIVER_STATUS = {
+      READY: 1,
+      MAINTENANCE: 0,
+    } as const;
+    
+    export const DRIVER_STATUS_LABELS: Record<number, string> = {
+      [DRIVER_STATUS.READY]: 'Sẵn sàng',
+      [DRIVER_STATUS.MAINTENANCE]: 'Đang bảo trì',
     };

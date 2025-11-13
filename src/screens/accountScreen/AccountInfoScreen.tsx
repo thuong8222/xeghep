@@ -1,8 +1,8 @@
-import { Alert, Image, StyleSheet, Text, View } from 'react-native'
+import { Alert, Image, Platform, StyleSheet, Text, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import AppView from '../../components/common/AppView'
 import AppInput from '../../components/common/AppInput'
-import { validatePhoneNumber } from '../../utils/Helper';
+import { validateExperienceYears, validatePhoneNumber } from '../../utils/Helper';
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal';
 import IconUser from '../../assets/icons/IconUser';
 import ButtonSubmit from '../../components/common/ButtonSubmit';
@@ -17,6 +17,7 @@ import { useDriverApi } from '../../redux/hooks/userDriverApi';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootParamList } from '../../../App';
 import ModalOnlySelectProvince from '../../components/component/modals/ModalOnlySelectProvince';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 type AccountScreenNavProp = NativeStackNavigationProp<RootParamList>;
 
 interface Props {
@@ -28,14 +29,17 @@ export default function AccountInfoScreen({ navigation }: Props) {
     const route = useRoute<RouteProp<AccountTabsParamList, 'AccountInfoScreen'>>();
     const driverPre = route.params.data;
     const { driver, loading, error, successMessage, editDriver, clear } = useDriverApi();
- 
+
 
     const [nameDisplay, setNameDisplay] = useState(driverPre?.full_name || '');
     const [numberPhone, setNumberPhone] = useState(driverPre?.phone || '');
     const [address, setAddress] = useState(driverPre?.address || '');
     const [phoneNumberError, setPhoneNumberError] = useState('');
+    const [experienceYearsError, setExperienceYearsError] = useState('');
+
     const [isDisplayModalUploadImage, setIsDisplayModalUploadImage] = useState(false);
-    const [imageUri, setImageUri] = useState(driverPre?.image_car || '');
+    const [imageUri, setImageUri] = useState(driverPre?.image_avatar || '');
+    const [experienceYears, setExperienceYears] = useState('');
     const [isOpenModal, setIsOpenModal] = useState(false);
     useEffect(() => {
         if (successMessage) {
@@ -59,23 +63,16 @@ export default function AccountInfoScreen({ navigation }: Props) {
 
     const SaveChangeInfo = async () => {
         try {
-            // Chuẩn bị dữ liệu từ state
             const model = {
-                full_name: nameDisplay,          // từ state nameDisplay
-
-                address: address,                // từ state address
-                image_car: imageUri,             // từ state imageUri
-                license_number: '',              // nếu chưa có
-                name_car: '',                    // nếu chưa có
-                model_car: '',                   // nếu chưa có
-                year_car: '',                    // nếu chưa có
-                color_car: 'red',                // hoặc từ state/color picker
-                experience_years: '',            // nếu chưa có
+                full_name: nameDisplay,
+                image_avatar: imageUri,
+                address: address,
+                experience_years: experienceYears,
             };
 
-            // Gọi API thông qua hook hoặc dispatch redux
-            const res = await editDriver(model);
-         
+
+            await editDriver(model);
+
         } catch (err: any) {
             Alert.alert('Thất bại', err?.message || 'Có lỗi xảy ra');
         }
@@ -91,9 +88,9 @@ export default function AccountInfoScreen({ navigation }: Props) {
         setAddress(data.province.name); // cập nhật state với tên tỉnh
         setIsOpenModal(false); // đóng modal
     };
-
+    const insets = useSafeAreaInsets()
     return (
-        <AppView flex={1} backgroundColor={ColorsGlobal.backgroundWhite} padding={16} >
+        <AppView flex={1} backgroundColor={ColorsGlobal.backgroundWhite} padding={16} paddingBottom={Platform.OS === 'ios' ? insets.bottom : 0} >
             <AppButton justifyContent='center' alignItems='center' paddingBottom={40} >
                 <AppView justifyContent="center" alignItems="center" marginTop={8}>
                     <View style={{ position: 'relative' }}>
@@ -162,6 +159,15 @@ export default function AccountInfoScreen({ navigation }: Props) {
 
 
                         toggleSelect={openSelectProvince}
+                    />
+
+                </AppView>
+                <AppView row>
+                    <AppInput value={experienceYears} onChangeText={(text) => {
+                        setExperienceYears(text)
+                        setExperienceYearsError(validateExperienceYears(text))
+                    }} placeholder='Nhập số năm kinh nghiệm' keyboardType={'decimal-pad'} label={'Năm kinh nghiệm'}
+                        error={experienceYearsError}
                     />
 
                 </AppView>

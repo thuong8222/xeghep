@@ -44,8 +44,10 @@ export default function ModalUploadCarImage({ isDisplay, onClose, onSelectImage 
       {
         mediaType: 'photo',
         quality: 0.8,
+        includeBase64: true,
       },
       (response) => {
+        console.log('response pickImage: ',response)
         if (response.didCancel) return;
         if (response.errorCode) {
           Alert.alert('Lỗi', response.errorMessage || 'Không thể chọn ảnh');
@@ -72,8 +74,10 @@ export default function ModalUploadCarImage({ isDisplay, onClose, onSelectImage 
       {
         mediaType: 'photo',
         quality: 0.8,
+        includeBase64: true,
       },
       (response) => {
+        console.log('response takePhoto: ',response)
         if (response.didCancel) return;
         if (response.errorCode) {
           Alert.alert('Lỗi', response.errorMessage || 'Không thể chụp ảnh');

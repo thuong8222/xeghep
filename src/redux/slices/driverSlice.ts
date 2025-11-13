@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export interface Driver {
     id: string;               // API trả về id là string (UUID)
     full_name: string;
+    image_avatar:string;
     phone: string;
     address?: string;
     birth_date?: string | null;
@@ -16,6 +17,8 @@ export interface Driver {
     is_active: boolean;
     created_at: string;
     updated_at: string;
+    type_car: string;
+    status_car: number;
     license_number?: string | null;
     color_car?: string | null;
     model_car?: string | null;

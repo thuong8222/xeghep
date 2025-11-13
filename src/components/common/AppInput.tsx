@@ -18,7 +18,7 @@ import { ViewBaseProps } from 'react-native/types_generated/Libraries/Components
 interface CustomInputProps extends TextInputProps {
     label?: string;
     flex?: ViewBaseProps['flex'];
-    value: string
+    value: string |number;
     onChangeText?: (text: string) => void;
     isLoading?: boolean;
     keyboardType?: TextInputProps['keyboardType'];

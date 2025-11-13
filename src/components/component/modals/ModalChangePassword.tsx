@@ -14,7 +14,7 @@ type ModalForgetProps = {
 }
 export default function ModalChangePassword({ isVisible, onRequestClose }: ModalForgetProps) {
   const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('dsfdsf!@#dddS1');
+  const [newPassword, setNewPassword] = useState('');
   const [newConfirmPassword, setNewConfirmPassword] = useState('');
   const [oldPasswordError, setOldPasswordError] = useState('');
   const [newPasswordError, setNewPasswordError] = useState('');
