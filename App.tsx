@@ -7,7 +7,7 @@
 
 import 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { NavigationContainer, NavigatorScreenParams } from "@react-navigation/native";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import RootNavigator, { RootStackParamList } from './src/navigation/RootNavigator';
@@ -16,6 +16,7 @@ import AuthNavigator, { AuthStackParamList } from './src/navigation/AuthNavigato
 import { requestUserPermission, listenForForegroundMessages, registerBackgroundHandler, getFcmToken, createAndroidChannel, displayNotification } from '../xeghep/src/utils/notificationService';
 import { Provider } from 'react-redux';
 import { store } from './src/redux/data/store';
+import CustomSplash from './src/screens/Splash';
 export type RootParamList = {
   RootNavigator: NavigatorScreenParams<RootStackParamList>
   Auth: NavigatorScreenParams<AuthStackParamList>;
@@ -25,7 +26,12 @@ export type RootParamList = {
 const Stack = createNativeStackNavigator<RootParamList>();
 
 const App = () => {
+  const [isSplashDone, setIsSplashDone] = useState(false);
 
+   // Các hook khác cũng khai báo ở đây, không ở trong if
+   useEffect(() => {
+    console.log('App mounted');
+  }, []);
   useEffect(() => {
     const initNotifications = async () => {
       console.log('App.tsx useEffect - initNotifications');
@@ -48,12 +54,16 @@ const App = () => {
   return (
     <Provider store={store}>
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName="Auth" screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Auth" component={AuthNavigator} />
-          <Stack.Screen name="RootNavigator" component={RootNavigator} />
-        </Stack.Navigator>
-      </NavigationContainer>
+    { !isSplashDone ? (
+          <CustomSplash onFinish={() => setIsSplashDone(true)} />
+        ) : (
+          <NavigationContainer>
+            <Stack.Navigator initialRouteName="Auth" screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="Auth" component={AuthNavigator} />
+              <Stack.Screen name="RootNavigator" component={RootNavigator} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        )}
     </GestureHandlerRootView>
     </Provider>
   );
