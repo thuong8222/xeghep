@@ -9,6 +9,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { ColorsGlobal } from '../components/base/Colors/ColorsGlobal';
+import moment from 'moment';
 type ScaleType = 'scale' | 'v' | 'm';
 
 export const autoScale = (
@@ -95,16 +96,57 @@ export function GetObjectProperty(obj: any, prop: any, defaultValue = '') {
   return defaultValue;
 }
 export const CONSTANT = {
-
   TRANSACTION_TYPE_BY_KEY: {
     buy_point: 'Mua điểm',
-    sell_point:'Bán điểm',
+    sell_point: 'Bán điểm',
     buy_trip: 'Mua chuyến',
     sell_trip: 'Bán chuyến',
   },
+  DIRECTIONS: {
+    1: '',
+  },
 };
+export function getDateRange(
+  selectedTime: 'now' | 'today' | 'tomorrow' | 'custom',
+  customDate?: { start: Date; end: Date },
+) {
+  console.log('selectedTime: ', selectedTime);
+  const now = moment();
 
-
+  switch (selectedTime) {
+    case 'now':
+      return {
+        start_date: now.format('YYYY-MM-DD HH:mm:ss'),
+        end_date: now.format('YYYY-MM-DD HH:mm:ss'),
+      };
+    case 'today':
+      return {
+        start_date: now.startOf('day').format('YYYY-MM-DD HH:mm:ss'),
+        end_date: now.endOf('day').format('YYYY-MM-DD HH:mm:ss'),
+      };
+      case 'tomorrow':
+        return {
+          start_date: now.clone().add(1, 'day').startOf('day').format('YYYY-MM-DD HH:mm:ss'),
+          end_date: now.clone().add(1, 'day').endOf('day').format('YYYY-MM-DD HH:mm:ss'),
+        };
+    case 'custom':
+      if (customDate) {
+        return {
+          start_date: moment(customDate.start).format('YYYY-MM-DD HH:mm:ss'),
+          end_date: moment(customDate.end).format('YYYY-MM-DD HH:mm:ss'),
+        };
+      }
+      return {
+        start_date: now.format('YYYY-MM-DD HH:mm:ss'),
+        end_date: now.format('YYYY-MM-DD HH:mm:ss'),
+      };
+    default:
+      return {
+        start_date: now.format('YYYY-MM-DD HH:mm:ss'),
+        end_date: now.format('YYYY-MM-DD HH:mm:ss'),
+      };
+  }
+}
 export type PriceInfo = {
   regularPrice: string | null;
   salePrice: string | null;
@@ -236,7 +278,6 @@ export const validatePhoneNumber = (value: string) => {
   return '';
 };
 export const validateExperienceYears = (value: string) => {
-
   const num = Number(value);
   if (isNaN(num)) return 'Giá trị phải là số';
   if (num <= 0) return 'Số năm phải lớn hơn 0';
@@ -284,12 +325,9 @@ export const validatePassword = (value: string) => {
   return '';
 };
 export const validateYear = (text: string) => {
-
-
   // Chỉ cho phép nhập số
   if (!/^\d*$/.test(text)) {
-    return("Chỉ được nhập số");
-  
+    return 'Chỉ được nhập số';
   }
 
   // Nếu đủ 4 ký tự thì kiểm tra hợp lệ
@@ -298,15 +336,21 @@ export const validateYear = (text: string) => {
     const currentYear = new Date().getFullYear();
 
     if (yearNumber < 1900 || yearNumber > currentYear) {
-      return(`Năm phải từ 1900 đến ${currentYear}`);
+      return `Năm phải từ 1900 đến ${currentYear}`;
     } else {
-      return("");
+      return '';
     }
   } else {
-    return("Năm phải gồm 4 chữ số");
+    return 'Năm phải gồm 4 chữ số';
   }
 };
-export const validateConfirmPassword = ({ value, password }: { value: string, password: string }) => {
+export const validateConfirmPassword = ({
+  value,
+  password,
+}: {
+  value: string;
+  password: string;
+}) => {
   if (value !== password) {
     return 'Mật khẩu nhập lại không khớp';
   }
@@ -314,70 +358,138 @@ export const validateConfirmPassword = ({ value, password }: { value: string, pa
 };
 
 export function validatePlateVN(input: string): string {
-  if (!input || typeof input !== "string") {
-    return "Không được để trống";
+  if (!input || typeof input !== 'string') {
+    return 'Không được để trống';
   }
 
-  const raw = input.trim().toUpperCase().replace(/\s+/g, "");
-  const normalized = raw.replace(/_/g, "-").replace(/—/g, "-");
+  const raw = input.trim().toUpperCase().replace(/\s+/g, '');
+  const normalized = raw.replace(/_/g, '-').replace(/—/g, '-');
 
   const provinceCodes = [
-    "11","12","14","15","16","17","18","19","20","21","22","23","24","25","26","27",
-    "28","29","30","31","32","33","34","35","36","37","38","43","47","48","49","50",
-    "51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66",
-    "67","68","69","70","71","72","73","74","75","76","77","78","79","80","81","82",
-    "83","84","85","86","88","89","90","92","93","94","95","97","98","99"
+    '11',
+    '12',
+    '14',
+    '15',
+    '16',
+    '17',
+    '18',
+    '19',
+    '20',
+    '21',
+    '22',
+    '23',
+    '24',
+    '25',
+    '26',
+    '27',
+    '28',
+    '29',
+    '30',
+    '31',
+    '32',
+    '33',
+    '34',
+    '35',
+    '36',
+    '37',
+    '38',
+    '43',
+    '47',
+    '48',
+    '49',
+    '50',
+    '51',
+    '52',
+    '53',
+    '54',
+    '55',
+    '56',
+    '57',
+    '58',
+    '59',
+    '60',
+    '61',
+    '62',
+    '63',
+    '64',
+    '65',
+    '66',
+    '67',
+    '68',
+    '69',
+    '70',
+    '71',
+    '72',
+    '73',
+    '74',
+    '75',
+    '76',
+    '77',
+    '78',
+    '79',
+    '80',
+    '81',
+    '82',
+    '83',
+    '84',
+    '85',
+    '86',
+    '88',
+    '89',
+    '90',
+    '92',
+    '93',
+    '94',
+    '95',
+    '97',
+    '98',
+    '99',
   ];
 
   const pattern = /^(\d{2})([A-Z]{1,2})-?(\d{3,5})(\.\d{2})?$/;
   const match = normalized.match(pattern);
 
-  if (!match) return "Định dạng không hợp lệ (vd: 30A-123.45, 59B1-12345)";
+  if (!match) return 'Định dạng không hợp lệ (vd: 30A-123.45, 59B1-12345)';
 
   const province = match[1];
   const numbers = match[3];
 
-  if (!provinceCodes.includes(province)) return `Mã tỉnh (${province}) không hợp lệ`;
+  if (!provinceCodes.includes(province))
+    return `Mã tỉnh (${province}) không hợp lệ`;
 
-  if (numbers.length < 4 || numbers.length > 5) return "Số thứ tự phải có 4–5 chữ số";
+  if (numbers.length < 4 || numbers.length > 5)
+    return 'Số thứ tự phải có 4–5 chữ số';
 
-  return "Biển số hợp lệ";
+  return 'Biển số hợp lệ';
 }
 
+export const openMapSmart = (trip: any) => {
+  const { lat_start, lng_start, lat_end, lng_end, place_start, place_end } =
+    trip;
 
+  // Ưu tiên dùng tọa độ nếu có
+  if (lat_start && lng_start && lat_end && lng_end) {
+    const url = `https://www.google.com/maps/dir/?api=1&origin=${lat_start},${lng_start}&destination=${lat_end},${lng_end}&travelmode=driving`;
+    Linking.openURL(url);
+    return;
+  }
 
-export  const openMapSmart = (trip:any) => {
-        const {
-            lat_start,
-            lng_start,
-            lat_end,
-            lng_end,
-            place_start,
-            place_end,
-        } = trip;
+  // Nếu không có tọa độ thì fallback sang địa chỉ
+  if (place_start && place_end) {
+    const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
+      place_start,
+    )}&destination=${encodeURIComponent(place_end)}&travelmode=driving`;
+    Linking.openURL(url);
+  } else {
+    Alert.alert('Thiếu dữ liệu', 'Không có thông tin để mở Google Maps');
+  }
+};
+export const DRIVER_STATUS = {
+  READY: 1,
+  MAINTENANCE: 0,
+} as const;
 
-        // Ưu tiên dùng tọa độ nếu có
-        if (lat_start && lng_start && lat_end && lng_end) {
-            const url = `https://www.google.com/maps/dir/?api=1&origin=${lat_start},${lng_start}&destination=${lat_end},${lng_end}&travelmode=driving`;
-            Linking.openURL(url);
-            return;
-        }
-
-        // Nếu không có tọa độ thì fallback sang địa chỉ
-        if (place_start && place_end) {
-            const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(place_start)}&destination=${encodeURIComponent(place_end)}&travelmode=driving`;
-            Linking.openURL(url);
-        } else {
-            Alert.alert('Thiếu dữ liệu', 'Không có thông tin để mở Google Maps');
-        }
-
-    };
-    export const DRIVER_STATUS = {
-      READY: 1,
-      MAINTENANCE: 0,
-    } as const;
-    
-    export const DRIVER_STATUS_LABELS: Record<number, string> = {
-      [DRIVER_STATUS.READY]: 'Sẵn sàng',
-      [DRIVER_STATUS.MAINTENANCE]: 'Đang bảo trì',
-    };
+export const DRIVER_STATUS_LABELS: Record<number, string> = {
+  [DRIVER_STATUS.READY]: 'Sẵn sàng',
+  [DRIVER_STATUS.MAINTENANCE]: 'Đang bảo trì',
+};

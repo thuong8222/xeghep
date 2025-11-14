@@ -17,13 +17,14 @@ export type BuyTripStackParamList = {
   BuyTrip: {
     nameGroup: string;
     countMember: number;
+    id_area: string;
   }
   SaleTrip: undefined;
   InfoGroup: {
     nameGroup: string;
     countMember: number;
   }
-  MemberGroup:undefined;
+  MemberGroup: undefined;
 }
 
 export const buyTripEmitter = new EventEmitter()

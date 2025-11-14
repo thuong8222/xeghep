@@ -14,21 +14,32 @@ import AppInput from '../../common/AppInput'
 interface ModalBuyTripProps {
   visible?: boolean;
   onRequestClose?: () => void;
-  onApplyFilter?: (filters: { direction: string; time: string }) => void;
+  onApplyFilter?: (filters: any, customDate?: Date | null) => void; // ✅ Thêm customDate parameter
 }
 
 export default function ModalBuyTrip({ visible, onRequestClose, onApplyFilter }: ModalBuyTripProps) {
   const [selectedDirection, setSelectedDirection] = useState<'all' | 'go' | 'back'>('all');
   const [selectedTime, setSelectedTime] = useState<'now' | 'today' | 'tomorrow' | 'custom'>('now');
-  const handleOk = () => {
-    onApplyFilter?.({
-      direction: selectedDirection,
-      time: selectedTime,
-    });
-    onRequestClose?.();
-  };
+  const [customDate, setCustomDate] = useState<Date | null>(null);
   const [placeStart, setPlaceStart] = useState('');
   const [placeEnd, setPlaceEnd] = useState('');
+
+  const handleOk = () => {
+    const payload: any = {
+      // Chỉ thêm nếu người dùng chọn
+      ...(selectedDirection !== 'all' && { direction: selectedDirection === 'go' ? 1 : 0 }),
+      time: selectedTime, // ✅ Chỉ truyền selectedTime, không truyền customDate vào đây
+      ...(placeStart && { place_start: placeStart }),
+      ...(placeEnd && { place_end: placeEnd }),
+    };
+
+    // ✅ Truyền customDate như tham số thứ 2
+    onApplyFilter?.(payload, selectedTime === 'custom' ? customDate : null);
+    onRequestClose?.();
+  };
+
+  console.log('customDate: ', customDate)
+  
   return (
     <Modal
       transparent
@@ -123,14 +134,18 @@ export default function ModalBuyTrip({ visible, onRequestClose, onApplyFilter }:
                   <AppText color={ColorsGlobal.textDark} fontWeight={500}>Chọn theo ngày</AppText>
                   <IconArowDown />
                 </AppButton>
-
-
               </AppView>
-              {selectedTime === 'custom' && <DateTimeFilter />}
-              <AppView >
+
+              {selectedTime === 'custom' && (
+                <DateTimeFilter
+                  value={customDate}
+                  onChange={setCustomDate}
+                />
+              )}
+
+              <AppView>
                 <AppInput value={placeStart} onChangeText={(text) => setPlaceStart(text)} type={'select'} placeholder='Điểm đón' />
                 <AppInput value={placeEnd} onChangeText={(text) => setPlaceEnd(text)} type={'select'} placeholder='Điểm trả' />
-
               </AppView>
             </AppView>
           </ScrollView>

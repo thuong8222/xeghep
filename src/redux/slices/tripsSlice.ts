@@ -1,0 +1,154 @@
+// redux/slices/tripsSlice.ts
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import axios from 'axios';
+import AppConfig from '../../services/config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// ---- INTERFACES ----
+export interface Trip {
+  id_trip: string;
+  driver_sell: string;
+  direction: number;
+  is_sold: number;
+  guests: number;
+  time_start: string;
+  price_sell: number;
+  place_start: string;
+  place_end: string;
+  point: number;
+  note: string;
+  area_id: string;
+  type_car: string;
+  cover_car: number;
+  created_at: string;
+  status: number;
+  drive_receive: string;
+  time_receive?: string | null;
+  phone_number_guest: string;
+  id_quick_note?: string | null;
+}
+
+export interface DriverArea {
+  id: string;
+  name: string;
+  province_code: string;
+  code: string;
+  description: string;
+  is_active: number;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+interface TripsState {
+  trips: Trip[];
+  driver_areas: DriverArea[];
+  input_area_id?: string;
+  trips_count: number;
+  loading: boolean;
+  error: string | null;
+  successMessage: string | null;
+}
+
+const initialState: TripsState = {
+  trips: [],
+  driver_areas: [],
+  input_area_id: undefined,
+  trips_count: 0,
+  loading: false,
+  error: null,
+  successMessage: null,
+};
+
+// ---- AXIOS INSTANCE ----
+export const api = axios.create({
+  baseURL: AppConfig.BASE_URL,
+  headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+});
+
+api.interceptors.request.use(async (config) => {
+  const token = await AsyncStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// ---- FETCH TRIPS ----
+export interface FetchTripsPayload {
+  area_id: string;
+  start_date: string;
+  end_date: string;
+  direction: number;
+}
+
+export const fetchTrips = createAsyncThunk<
+  TripsState,
+  FetchTripsPayload,
+  { rejectValue: string }
+>(
+  'trips/fetchTrips',
+  async (payload, { rejectWithValue }) => {
+    try {
+      // Chuyển payload thành query params
+      const response = await api.get('api/area/trips', {
+        params: {
+          area_id: payload.area_id,
+          start_date: payload.start_date,
+          end_date: payload.end_date,
+          direction: payload.direction,
+        },
+      });
+
+      console.log('response trips: ', response.data);
+
+      return {
+        trips: response.data.trips,
+        driver_areas: response.data.driver_areas,
+        input_area_id: response.data.input_area_id,
+        trips_count: response.data.trips_count,
+        loading: false,
+        error: null,
+        successMessage: 'Lấy danh sách trips thành công',
+      };
+    } catch (err: any) {
+      console.log('err: ', err);
+      return rejectWithValue(err.response?.data?.message || 'Lấy danh sách trips thất bại');
+    }
+  }
+);
+
+
+// ---- SLICE ----
+const tripsSlice = createSlice({
+  name: 'trips',
+  initialState,
+  reducers: {
+    clearTripsMessages: (state) => {
+      state.error = null;
+      state.successMessage = null;
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchTrips.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.successMessage = null;
+      })
+      .addCase(fetchTrips.fulfilled, (state, action: PayloadAction<TripsState>) => {
+        state.loading = false;
+        state.trips = action.payload.trips;
+        state.driver_areas = action.payload.driver_areas;
+        state.input_area_id = action.payload.input_area_id;
+        state.trips_count = action.payload.trips_count;
+        state.successMessage = action.payload.successMessage;
+      })
+      .addCase(fetchTrips.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Lấy danh sách trips thất bại';
+      });
+  },
+});
+
+export const { clearTripsMessages } = tripsSlice.actions;
+export default tripsSlice.reducer;

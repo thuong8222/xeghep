@@ -1,28 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { View, TextInput, Button, StyleSheet, TouchableOpacity, SafeAreaView, Image, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
+import { View, StyleSheet, TouchableOpacity,  Image, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppButton from "../../components/common/AppButton";
 import AppInput from "../../components/common/AppInput";
 import ButtonSubmit from "../../components/common/ButtonSubmit";
-import Container from "../../components/common/Container";
+
 import AppView from "../../components/common/AppView";
 import FastImage from "react-native-fast-image";
 import AppText from "../../components/common/AppText";
 import { logo } from "../../assets/images";
-import { RootStackParamList } from "../../navigation/RootNavigator";
+
 import { StyleGlobal } from "../../components/base/StyleGlobal";
 import { ColorsGlobal } from "../../components/base/Colors/ColorsGlobal";
-import { AuthStackParamList } from "../../navigation/AuthNavigator";
+
 import IconTouch from "../../assets/icons/IconTouch";
-import ReactNativeBiometrics, { BiometryTypes } from 'react-native-biometrics'
+import ReactNativeBiometrics from 'react-native-biometrics'
 import { RootParamList } from "../../../App";
 import ModalForgetPassword from "../../components/component/modals/ModalForgetPassword";
 import { validatePassword, validatePhoneNumber } from "../../utils/Helper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthApi } from "../../redux/hooks/useAuthApi";
-import { loginUser } from "../../redux/slices/ authSlice";
-import { useDispatch } from "react-redux";
-
 
 
 
@@ -34,7 +31,7 @@ interface Props {
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const { login, token, loading, error, successMessage, clear } = useAuthApi();
-  const [phoneNumber, setPhoneNumber] = useState("09876442312");
+  const [phoneNumber, setPhoneNumber] = useState("0987644333");
   const [password, setPassword] = useState("Admin123456@");
   const [phoneNumberError, setPhoneNumberError] = useState('');
   const [passwordError, setPasswordError] = useState('');

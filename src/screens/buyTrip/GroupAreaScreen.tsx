@@ -1,5 +1,5 @@
-import { FlatList, StyleSheet } from 'react-native'
-import React, { useState } from 'react'
+import { FlatList, RefreshControl, StyleSheet } from 'react-native'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import AppView from '../../components/common/AppView';
 import { scale } from '../../utils/Helper';
@@ -14,6 +14,7 @@ import ModalBuyTrip from '../../components/component/modals/ModalBuyTrip';
 import IconArrowDown from '../../assets/icons/IconArowDown';
 import IconList from '../../assets/icons/IconList';
 import IconGrid from '../../assets/icons/IconGrid';
+import { useAreaApi } from '../../redux/hooks/useAreaApi';
 
 type GroupAreaNavProp = NativeStackNavigationProp<BuyTripStackParamList, "BuyTrip">;
 
@@ -23,6 +24,34 @@ interface Props {
 export default function GroupAreaScreen({ navigation }: Props) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isViewList, setIsViewList] = useState(true);
+  const { groups, loading, error, getAreas, clear } = useAreaApi();
+  const [refreshing, setRefreshing] = useState(false);
+  console.log('groups: ', groups)
+  // Lấy danh sách khi mount
+  useEffect(() => {
+    fetchGroups();
+    return () => {
+      clear(); // reset error/success khi unmount
+    };
+  }, []);
+
+  const fetchGroups = useCallback(async () => {
+    try {
+      await getAreas();
+    } catch (err) {
+      console.log('Lỗi fetch groups:', err);
+    }
+  }, [getAreas]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await getAreas();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [getAreas]);
+
   const HeaderRightButton = () => (
     <AppView row>
       <AppButton onPress={() => setIsModalVisible(true)} paddingLeft={30}>
@@ -52,7 +81,8 @@ export default function GroupAreaScreen({ navigation }: Props) {
 
 
   const gotoDetailArea = (props) => {
-    navigation.navigate('BuyTrip', { nameGroup: props.group_area_name + ' - ' + props.type_car_name, countMember: props.count_trips })
+    console.log('props:', props)
+    navigation.navigate('BuyTrip', { nameGroup: props.name + ' - ' + props.province_code, countMember: props.count_member || 0, id_area: props.id })
   }
   const renderItem_groupArea = ({ item, index }) => {
     return (<>
@@ -65,12 +95,18 @@ export default function GroupAreaScreen({ navigation }: Props) {
   return (
     <AppView backgroundColor='#fff' flex={1} padding={16}>
       <FlatList
-        data={groupsArea}
+        data={groups}
         renderItem={renderItem_groupArea}
         horizontal={false} // luôn false khi List/Grid dùng numColumns
         numColumns={isViewList ? 1 : 3} // 1 cột cho list, 2 cột cho grid
         key={isViewList ? 'list' : 'grid'} // quan trọng: bắt FlatList re-render khi đổi layout
         ItemSeparatorComponent={isViewList ? () => <AppView height={1} backgroundColor={ColorsGlobal.borderColor} /> : undefined}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        ListEmptyComponent={
+          !loading && <AppView center><AppText>Không có khu vực nào</AppText></AppView>
+        }
       />
       <ModalBuyTrip visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)} />
     </AppView>
@@ -88,8 +124,8 @@ const Area = (props) => {
         <AppText fontSize={scale(18)} lineHeight={scale(26)} fontWeight={700} textAlign='center'>{props.data.count_trips > 99 ? '99+' : props.data.count_trips}</AppText>
       </AppView>
       <AppView alignItems={isList ? 'flex-start' : 'center'}>
-        <AppText color={props.data.is_read ? ColorsGlobal.textLight : ColorsGlobal.main} fontSize={16} fontWeight={700}>{props.data.type_car_name}</AppText>
-        <AppText color={props.data.is_read ? ColorsGlobal.textLight : ColorsGlobal.main} fontSize={12}>{'Khu vực ' + props.data.group_area_name}</AppText>
+        <AppText color={props.data.is_read ? ColorsGlobal.textLight : ColorsGlobal.main} fontSize={16} fontWeight={700}>{props.data.name}</AppText>
+        <AppText color={props.data.is_read ? ColorsGlobal.textLight : ColorsGlobal.main} fontSize={12}>{'Khu vực ' + props.data.province_code}</AppText>
       </AppView>
     </AppButton>
   )
