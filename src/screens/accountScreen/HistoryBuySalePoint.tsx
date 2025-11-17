@@ -15,6 +15,7 @@ import PointHistory from '../../components/component/PointHistory';
 import QuickNoteButton from '../../components/component/QuickNoteButton';
 import { CONSTANT } from '../../utils/Helper';
 import TypeFilterBar from '../../components/component/TypeFilterBar';
+import Container from '../../components/common/Container';
 
 export default function HistoryBuySalePoint() {
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
@@ -103,7 +104,7 @@ export default function HistoryBuySalePoint() {
   }, [selectedType, historyBuySalePoint]);
 
   return (
-    <AppView flex={1} backgroundColor='#fff' paddingHorizontal={16} paddingTop={10} position='relative' gap={10}>
+    <Container ignoreBottomInset  >
       <AppView row justifyContent={'space-between'} gap={12} alignItems={'center'} >
         <AppButton
           flex={1}
@@ -174,7 +175,7 @@ export default function HistoryBuySalePoint() {
         onConfirm={handleConfirmDate}
         onCancel={() => setIsDatePickerVisible(false)}
       />
-    </AppView>
+    </Container>
   );
 }
 

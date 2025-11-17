@@ -107,9 +107,11 @@ const AppView: React.FC<BaseViewProps> = ({
     alignSelf,
 
     ...(row && { flexDirection: 'row' }),
+    
   };
-
+ 
   return <View style={[viewStyle, style]}>{children}</View>;
+  
 };
 
 export default AppView;

@@ -1,5 +1,5 @@
-import { FlatList, StyleSheet, Text, View } from 'react-native'
-import React, { useState } from 'react'
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import AppView from '../../components/common/AppView';
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal';
 import AppInput from '../../components/common/AppInput';
@@ -8,16 +8,50 @@ import IconUser from '../../assets/icons/IconUser';
 import AppText from '../../components/common/AppText';
 import IconCalendar from '../../assets/icons/IconCalendar';
 import IconCar from '../../assets/icons/iconCar';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../redux/data/store';
+import { fetchAreaDriver } from '../../redux/slices/membersGroup';
+import { clearTripsMessages } from '../../redux/slices/tripsSlice';
+import { useAppContext } from '../../context/AppContext';
 
 export default function MemberGroupScreen({ }) {
+    const {idArea} = useAppContext();
     const [keysearch, setKeysearch] = useState('');
+    const dispatch = useDispatch<AppDispatch>();
 
+    const { data, loading, error } = useSelector(
+      (state: RootState) => state.memberGroup
+    );
+
+    useEffect(() => {
+      dispatch(fetchAreaDriver({ area_id:idArea }));
+  
+    
+    }, [idArea]);
+  
+    if (loading) {
+      return (
+        <View >
+          <ActivityIndicator size="large" color={ColorsGlobal.main}/>
+        </View>
+      );
+    }
+  
+    if (error) {
+      return (
+        <View >
+          <Text >{error}</Text>
+        </View>
+      );
+    }
+  
+
+  
     // Lọc các thành viên dựa trên từ khóa tìm kiếm
-    const filteredMembers = members.filter(member => {
+    const filteredMembers = !data? [] : data.filter(member => {
         return (
-            member.full_name.toLowerCase().includes(keysearch.toLowerCase()) ||  // Tìm kiếm theo full_name
-            member.user_name.toLowerCase().includes(keysearch.toLowerCase())      // Tìm kiếm theo user_name
-        );
+            member?.full_name.toLowerCase().includes(keysearch.toLowerCase())
+        ); 
     });
 
     const renderItem_members = ({ item, index }) => {
@@ -66,11 +100,11 @@ const Member = ({ data, index }) => {
             <AppView justifyContent='center'>
                 <AppView row gap={8} alignItems='center'>
                     <AppText bold>{data.full_name}</AppText>
-                    {data.role === 'driver' && <IconCar size={16} />}
+                    {data?.type_car && <IconCar size={16} />}
 
                 </AppView>
 
-                <AppText>{data.user_name}</AppText>
+                <AppText>{data.type_car}</AppText>
             </AppView>
         </AppView>
     );

@@ -7,19 +7,25 @@ interface ContainerProps {
   children?: React.ReactNode;
   style?: StyleProp<ViewStyle>;
   showTopInset?: boolean;
+  ignoreBottomInset?: boolean;
 }
 
-const Container: React.FC<ContainerProps> = ({ children, style, showTopInset = false }) => {
+const Container: React.FC<ContainerProps> = ({ children, style, showTopInset = false, ignoreBottomInset }) => {
 
-  const edges: Edge[] = showTopInset ? ['top', 'left', 'right'] : ['left', 'right', 'bottom'];
-  
+  const edges: Edge[] = [
+    ...(showTopInset ? ['top'] : []),
+    'left',
+    'right',
+    ...(ignoreBottomInset ? [] : ['bottom']),
+  ];
+
 
   return (
     <SafeAreaView
-      style={[{ flex: 1,backgroundColor:'#fff' }, style]}
+      style={{ flex: 1, backgroundColor: '#fff', padding: 16 }}
       edges={edges}
     >
-      <AppView flex={1} backgroundColor={'#fff'} >
+      <AppView flex={1} backgroundColor={'#fff'} style={style}>
         {children}
       </AppView>
     </SafeAreaView>

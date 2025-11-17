@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import AppView from "../../components/common/AppView";
 import { useAuthApi } from "../../redux/hooks/useAuthApi";
+import Container from "../../components/common/Container";
 
 
 type LoginParamList = NativeStackNavigationProp<RootParamList>;
@@ -119,8 +120,8 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   return (
 
-    <ScrollView style={{ flexGrow: 1, backgroundColor: ColorsGlobal.backgroundWhite }} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', }}>
-      <View style={[styles.container, { paddingBottom: insets.bottom }]}>
+    <ScrollView style={{ flexGrow: 1, backgroundColor: ColorsGlobal.backgroundWhite }} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', }} showsVerticalScrollIndicator={false}>
+     <Container>
         <AppView flex={1} justifyContent="center" >
 
           <AppView justifyContent="center" alignItems="center" gap={16}>
@@ -222,7 +223,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             </AppText>
           </AppButton>
         </AppView>
-      </View>
+        </Container>
       <ModalOnlySelectProvince
         isVisible={isOpenModal}
         onClose={() => setIsOpenModal(false)}

@@ -15,6 +15,8 @@ import IconArrowDown from '../../assets/icons/IconArowDown';
 import IconList from '../../assets/icons/IconList';
 import IconGrid from '../../assets/icons/IconGrid';
 import { useAreaApi } from '../../redux/hooks/useAreaApi';
+import { getNameByCode } from '../../utils/province';
+import Container from '../../components/common/Container';
 
 type GroupAreaNavProp = NativeStackNavigationProp<BuyTripStackParamList, "BuyTrip">;
 
@@ -26,7 +28,7 @@ export default function GroupAreaScreen({ navigation }: Props) {
   const [isViewList, setIsViewList] = useState(true);
   const { groups, loading, error, getAreas, clear } = useAreaApi();
   const [refreshing, setRefreshing] = useState(false);
-  console.log('groups: ', groups)
+
   // Lấy danh sách khi mount
   useEffect(() => {
     fetchGroups();
@@ -57,75 +59,67 @@ export default function GroupAreaScreen({ navigation }: Props) {
       <AppButton onPress={() => setIsModalVisible(true)} paddingLeft={30}>
         <IconSort />
       </AppButton>
-      <AppButton onPress={toggleView} paddingLeft={8}>
-        {isViewList ? <IconList /> : <IconGrid />}
 
-      </AppButton>
     </AppView>
   )
-  const toggleView = () => {
-    setIsViewList(!isViewList)
-  }
+
   React.useEffect(() => {
 
     navigation.setOptions({
       headerTitle: () => (
         <AppView justifyContent={'center'} alignItems={'center'}>
           <AppText fontWeight={700}>{'Nhóm khu vực'}</AppText>
-          <AppText fontSize={12} lineHeight={16} color={ColorsGlobal.textLight}>{'300 thành viên'}</AppText>
+          {/* <AppText fontSize={12} lineHeight={16} color={ColorsGlobal.textLight}>{'300 thành viên'}</AppText> */}
         </AppView>
       ),
-      headerRight: HeaderRightButton,
+      // headerRight: HeaderRightButton,
     });
-  }, [navigation, isViewList]);
+  }, [navigation]);
 
 
   const gotoDetailArea = (props) => {
-    console.log('props:', props)
-    navigation.navigate('BuyTrip', { nameGroup: props.name + ' - ' + props.province_code, countMember: props.count_member || 0, id_area: props.id })
+
+    navigation.navigate('BuyTrip', { nameGroup: props.name + ' - ' + getNameByCode(props.province_code), countMember: props.members_count || 0, id_area: props.id })
   }
   const renderItem_groupArea = ({ item, index }) => {
     return (<>
-
-      <Area data={item} gotoDetailAreaPress={() => gotoDetailArea(item)} isView={isViewList} />
+      <Area data={item} gotoDetailAreaPress={() => gotoDetailArea(item)} />
     </>
-
     )
   }
   return (
-    <AppView backgroundColor='#fff' flex={1} padding={16}>
+  <Container>
       <FlatList
         data={groups}
         renderItem={renderItem_groupArea}
-        horizontal={false} // luôn false khi List/Grid dùng numColumns
-        numColumns={isViewList ? 1 : 3} // 1 cột cho list, 2 cột cho grid
-        key={isViewList ? 'list' : 'grid'} // quan trọng: bắt FlatList re-render khi đổi layout
-        ItemSeparatorComponent={isViewList ? () => <AppView height={1} backgroundColor={ColorsGlobal.borderColor} /> : undefined}
+
+        numColumns={1} // 1 cột cho list, 2 cột cho grid
+
+        ItemSeparatorComponent={<AppView height={1} backgroundColor={ColorsGlobal.borderColor} />}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         ListEmptyComponent={
-          !loading && <AppView center><AppText>Không có khu vực nào</AppText></AppView>
+          !loading && <AppView alignItems='center'><AppText>Không có khu vực nào</AppText></AppView>
         }
       />
       <ModalBuyTrip visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)} />
-    </AppView>
+
+    </Container>
   )
 }
 const Area = (props) => {
   const detailArea = () => {
     props.gotoDetailAreaPress(props.data)
   }
-  console.log('props is view: ', props.isView);
-  const isList = props.isView
   return (
-    <AppButton onPress={detailArea} gap={8} row={isList} alignItems='center' paddingVertical={16} paddingLeft={12} flex={1} >
-      <AppView height={!isList ? 60 : 45} width={!isList ? 60 : 45} radius={9999} backgroundColor={ColorsGlobal.backgroundLight} alignItems='center' justifyContent='center' padding={4} >
-        <AppText fontSize={scale(18)} lineHeight={scale(26)} fontWeight={700} textAlign='center'>{props.data.count_trips > 99 ? '99+' : props.data.count_trips}</AppText>
+    <AppButton onPress={detailArea} gap={8} paddingVertical={16} paddingLeft={12} flex={1} row >
+      <AppView height={45} width={45} radius={9999} backgroundColor={ColorsGlobal.backgroundLight} alignItems='center' justifyContent='center' padding={4} >
+        <AppText fontSize={scale(18)} lineHeight={scale(26)} fontWeight={700} textAlign='center'>{props.data.members_count > 99 ? '99+' : props.data.members_count}</AppText>
       </AppView>
-      <AppView alignItems={isList ? 'flex-start' : 'center'}>
+      <AppView >
         <AppText color={props.data.is_read ? ColorsGlobal.textLight : ColorsGlobal.main} fontSize={16} fontWeight={700}>{props.data.name}</AppText>
-        <AppText color={props.data.is_read ? ColorsGlobal.textLight : ColorsGlobal.main} fontSize={12}>{'Khu vực ' + props.data.province_code}</AppText>
+        <AppText color={props.data.is_read ? ColorsGlobal.textLight : ColorsGlobal.main} fontSize={12}>{'Khu vực ' + getNameByCode(props.data.province_code)}</AppText>
       </AppView>
     </AppButton>
   )

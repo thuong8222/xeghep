@@ -9,7 +9,7 @@ import BlankScreen from '../screens/auth/BlankScreen';
 export type AuthStackParamList = {
   LoginScreen: undefined;
   RegisterScreen: undefined;
-  BlankScreen: { nameScreen: string };
+  BlankScreen: { typeScreen: string };
 };
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 export default function AuthNavigator() {
@@ -21,7 +21,7 @@ export default function AuthNavigator() {
         name="BlankScreen"
         component={BlankScreen}
         options={({ route }) => ({
-          title: route.params?.nameScreen || 'Default Title', // hiển thị nameScreen trên header
+          title: route.params?.typeScreen || 'Default Title', // hiển thị nameScreen trên header
         })}
       />
 

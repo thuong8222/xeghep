@@ -15,7 +15,7 @@ interface Props {
     navigation: BuyTripProps;
 }
 
-export default function InfoGroupScreen({ route, navigation }:Props) {
+export default function InfoGroupScreen({ route, navigation }: Props) {
     const { nameGroup, countMember } = route.params;
     const [isModalRequestJoinGroup, setIsModalRequestJoinGroup] = useState(false);
     const RequestJoinGroup = () => {
@@ -40,9 +40,9 @@ export default function InfoGroupScreen({ route, navigation }:Props) {
                     <AppText >{'Quy định nhóm'}</AppText>
                     <IconArowDown rotate={-90} size={20} />
                 </AppButton>
-                <AppButton onPress={RequestJoinGroup} row justifyContent={'space-between'} padding={12}>
+                {/* <AppButton onPress={RequestJoinGroup} row justifyContent={'space-between'} padding={12}>
                     <AppText >{'Xin vào nhóm'}</AppText>
-                </AppButton>
+                </AppButton> */}
             </AppView>
             <ModalRequestJoinGroup visible={isModalRequestJoinGroup} onRequestClose={() => setIsModalRequestJoinGroup(false)} />
         </AppView>

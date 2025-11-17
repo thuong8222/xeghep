@@ -99,7 +99,6 @@ export const fetchTrips = createAsyncThunk<
         },
       });
 
-      console.log('response trips: ', response.data);
 
       return {
         trips: response.data.trips,

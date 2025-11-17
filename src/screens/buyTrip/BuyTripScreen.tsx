@@ -18,15 +18,17 @@ import IconSort from '../../assets/icons/IconSort'
 import IconFilterRight from '../../assets/icons/IconFilterRight'
 import { getDateRange, scale } from '../../utils/Helper'
 import { useTripsApi } from '../../redux/hooks/useTripsApi'
+import { useAppContext } from '../../context/AppContext'
 
 
 type BuyTripProps = NativeStackNavigationProp<BuyTripStackParamList>;
 interface Props {
     navigation: BuyTripProps;
+    route: any;
 }
 export default function BuyTripScreen({ navigation, route }: Props) {
     const { trips, driver_areas, trips_count, loading, error, getTrips } = useTripsApi();
-
+    const { setIdArea } = useAppContext();
     const [refreshing, setRefreshing] = useState(false);
     const [selectedArea, setSelectedArea] = useState<string | undefined>(undefined);
     const [startDate, setStartDate] = useState(new Date());
@@ -34,13 +36,18 @@ export default function BuyTripScreen({ navigation, route }: Props) {
     const { nameGroup, countMember, id_area } = route.params;
     const [isModalVisible, setIsModalVisible] = useState(false)
     const [filters, setFilters] = useState<{ direction: string; time: string } | null>(null);
-    console.log('filters: ',filters)
+
+    const gotoInfoGroup = () => {
+    
+        setIdArea(id_area)
+        navigation.navigate('InfoGroup', { nameGroup: nameGroup, countMember: countMember })
+    }
     const HeaderRightButton = () => (
         <AppView row gap={6}>
             <AppButton onPress={() => setIsModalVisible(true)} paddingLeft={30}>
                 <IconSort />
             </AppButton>
-            <AppButton onPress={() => navigation.navigate('InfoGroup', { nameGroup: nameGroup, countMember: countMember })}>
+            <AppButton onPress={gotoInfoGroup}>
                 <IconFilterRight />
             </AppButton>
         </AppView>
@@ -91,7 +98,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
                 // end_date: endDate.toISOString().slice(0, 19).replace('T', ' '),
                 direction: filters?.direction,
             }
-            console.log('model: ', model)
+         
             await getTrips(model);
         } catch (err) {
             console.log('Lỗi fetch trips:', err);
@@ -140,38 +147,37 @@ export default function BuyTripScreen({ navigation, route }: Props) {
 
         )
     };
-    console.log('trips: ', trips)
+
 
     const handleApplyFilter = (filters: any) => {
-        console.log('handleApplyFilter');
-        console.log('filters handleApplyFilter:', filters);
-        
+   
+
         if (!id_area) return;
-      
+
         // Lấy customDate từ filters
         const customDate = filters.customDate;
-        console.log('customDate handleApplyFilter:', customDate);
-        
+    
+
         // Chuyển selectedTime thành start_date/end_date
         const { start_date, end_date } = getDateRange(filters.time, customDate);
-      
+
         const direction = filters.direction;
-      
+
         const model: any = {
-          area_id: id_area,
-          start_date,
-          end_date,
-          direction,
+            area_id: id_area,
+            start_date,
+            end_date,
+            direction,
         };
-        
-        console.log('model handleApplyFilter:', model);
-        
+
+       
+
         if (filters.place_start) model.place_start = filters.place_start;
         if (filters.place_end) model.place_end = filters.place_end;
-      
+
         getTrips(model);
         setIsModalVisible(false);
-      };
+    };
 
     return (
         <AppView flex={1} backgroundColor='#fff' padding={scale(16)} position='relative'>
@@ -193,11 +199,11 @@ export default function BuyTripScreen({ navigation, route }: Props) {
             <AppButton onPress={SaleTrips} position={'absolute'} right={36} bottom={34} width={48} height={48} radius={999} backgroundColor={ColorsGlobal.main} justifyContent='center' alignItems='center'>
                 <IconPlus size={20} />
             </AppButton>
-            <ModalBuyTrip 
-  visible={isModalVisible} 
-  onRequestClose={() => setIsModalVisible(false)}  
-  onApplyFilter={handleApplyFilter} // Không cần arrow function nữa
-/>
+            <ModalBuyTrip
+                visible={isModalVisible}
+                onRequestClose={() => setIsModalVisible(false)}
+                onApplyFilter={handleApplyFilter} // Không cần arrow function nữa
+            />
 
         </AppView>
     )

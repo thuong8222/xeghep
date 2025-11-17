@@ -23,6 +23,7 @@ export type BuyTripStackParamList = {
   InfoGroup: {
     nameGroup: string;
     countMember: number;
+
   }
   MemberGroup: undefined;
 }

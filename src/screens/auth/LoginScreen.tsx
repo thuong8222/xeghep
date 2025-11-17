@@ -20,6 +20,7 @@ import ModalForgetPassword from "../../components/component/modals/ModalForgetPa
 import { validatePassword, validatePhoneNumber } from "../../utils/Helper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthApi } from "../../redux/hooks/useAuthApi";
+import Container from "../../components/common/Container";
 
 
 
@@ -31,7 +32,7 @@ interface Props {
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const { login, token, loading, error, successMessage, clear } = useAuthApi();
-  const [phoneNumber, setPhoneNumber] = useState("0987644333");
+  const [phoneNumber, setPhoneNumber] = useState("09876442312");
   const [password, setPassword] = useState("Admin123456@");
   const [phoneNumberError, setPhoneNumberError] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -40,11 +41,6 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [isOpenModal, setIsOpenModal] = useState(false);
 
   const rnBiometrics = new ReactNativeBiometrics()
-
-  console.log('loading LoginScreen: ', loading)
-  console.log('successMessage LoginScreen: ', successMessage)
-  console.log('error LoginScreen: ', error);
-  console.log('token LoginScreen: ', token);
   useEffect(() => {
     if (successMessage) {
       Alert.alert('Thành công', successMessage, [
@@ -80,7 +76,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
   const gotoRegister = () => {
     navigation.navigate('Auth', { screen: 'RegisterScreen' });
-    console.log('gotoRegister')
+ 
   };
   const ForgotPassword = () => {
     setIsOpenModal(true);
@@ -88,14 +84,14 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const gotoTerms = () => {
     navigation.navigate('Auth', {
       screen: 'BlankScreen',
-      params: { nameScreen: 'Điều khoản sử dụng' }
+      params: { typeScreen: 'terms' }
     });
 
   }
   const gotoPolicy = () => {
     navigation.navigate('Auth', {
       screen: 'BlankScreen',
-      params: { nameScreen: 'Chính sách riêng tư' }
+      params: { typeScreen: 'privacy' }
     })
 
   }
@@ -130,8 +126,8 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets()
   return (
 
-    <ScrollView style={{ flexGrow: 1, backgroundColor: ColorsGlobal.backgroundWhite }} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', }}>
-      <View style={[styles.container, { paddingBottom: insets.bottom }]}>
+    <ScrollView style={{ flexGrow: 1, backgroundColor: ColorsGlobal.backgroundWhite }} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', }} showsVerticalScrollIndicator={false}>
+     <Container showTopInset>
         <AppView flex={1} justifyContent="center" >
 
           <AppView justifyContent="center" alignItems="center" marginBottom={20} gap={16}>
@@ -229,7 +225,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             </AppText>
           </AppButton>
         </AppView>
-      </View>
+        </Container>
       <ModalForgetPassword isVisible={isOpenModal} onRequestClose={() => setIsOpenModal(false)} />
     </ScrollView>
 

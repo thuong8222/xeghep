@@ -17,6 +17,7 @@ import { requestUserPermission, listenForForegroundMessages, registerBackgroundH
 import { Provider } from 'react-redux';
 import { store } from './src/redux/data/store';
 import CustomSplash from './src/screens/Splash';
+import { ContextProvider } from './src/context/AppContext';
 export type RootParamList = {
   RootNavigator: NavigatorScreenParams<RootStackParamList>
   Auth: NavigatorScreenParams<AuthStackParamList>;
@@ -28,8 +29,8 @@ const Stack = createNativeStackNavigator<RootParamList>();
 const App = () => {
   const [isSplashDone, setIsSplashDone] = useState(false);
 
-   // Các hook khác cũng khai báo ở đây, không ở trong if
-   useEffect(() => {
+  // Các hook khác cũng khai báo ở đây, không ở trong if
+  useEffect(() => {
     console.log('App mounted');
   }, []);
   useEffect(() => {
@@ -52,20 +53,24 @@ const App = () => {
     initNotifications();
   }, []);
   return (
+
     <Provider store={store}>
-    <GestureHandlerRootView style={{ flex: 1 }}>
-    { !isSplashDone ? (
-          <CustomSplash onFinish={() => setIsSplashDone(true)} />
-        ) : (
-          <NavigationContainer>
-            <Stack.Navigator initialRouteName="Auth" screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="Auth" component={AuthNavigator} />
-              <Stack.Screen name="RootNavigator" component={RootNavigator} />
-            </Stack.Navigator>
-          </NavigationContainer>
-        )}
-    </GestureHandlerRootView>
+      <ContextProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          {!isSplashDone ? (
+            <CustomSplash onFinish={() => setIsSplashDone(true)} />
+          ) : (
+            <NavigationContainer>
+              <Stack.Navigator initialRouteName="Auth" screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="Auth" component={AuthNavigator} />
+                <Stack.Screen name="RootNavigator" component={RootNavigator} />
+              </Stack.Navigator>
+            </NavigationContainer>
+          )}
+        </GestureHandlerRootView>
+      </ContextProvider>
     </Provider>
+
   );
 };
 
