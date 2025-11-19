@@ -22,8 +22,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthApi } from "../../redux/hooks/useAuthApi";
 import Container from "../../components/common/Container";
 
-
-
 type LoginParamList = NativeStackNavigationProp<RootParamList>;
 
 interface Props {
@@ -32,7 +30,7 @@ interface Props {
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const { login, token, loading, error, successMessage, clear } = useAuthApi();
-  const [phoneNumber, setPhoneNumber] = useState("09876442312");
+  const [phoneNumber, setPhoneNumber] = useState("09876342312");
   const [password, setPassword] = useState("Admin123456@");
   const [phoneNumberError, setPhoneNumberError] = useState('');
   const [passwordError, setPasswordError] = useState('');

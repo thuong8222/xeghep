@@ -7,6 +7,7 @@ import areaReducer from '../slices/areasSlice';
 import tripsReducer from '../slices/tripsSlice';
 import termsReducer from '../slices/termsPolicySlice';
 import memberGroupReducer from '../slices/membersGroup';
+import pointReducer from '../slices/pointSlice';
 
 export const store = configureStore({
   reducer: {
@@ -15,7 +16,8 @@ export const store = configureStore({
     areas: areaReducer,
     trips:tripsReducer,
     terms: termsReducer,
-    memberGroup: memberGroupReducer
+    memberGroup: memberGroupReducer,
+    point: pointReducer
   },
 });
 

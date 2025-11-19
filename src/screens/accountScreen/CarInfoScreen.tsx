@@ -20,7 +20,7 @@ export default function CarInfoScreen() {
     const route = useRoute<RouteProp<AccountTabsParamList, 'CarInfoScreen'>>();
     const { driver, loading, error, successMessage, editDriver, clear } = useDriverApi();
     const driverPre = route.params.data;
-console.log('driverPre info xe: ',driverPre )
+    console.log('driverPre info xe: ', driverPre)
     const [carInfo, setCarInfo] = useState({
         name: driverPre.name_car || '',
         year: driverPre.year_car || '',
@@ -42,9 +42,9 @@ console.log('driverPre info xe: ',driverPre )
     const [isDisplayModalUploadImage, setIsDisplayModalUploadImage] = useState(false);
     const [status, setStatus] = useState(driverPre?.status_car ?? DRIVER_STATUS.MAINTENANCE);
     const [isStatusModalVisible, setIsStatusModalVisible] = useState(false);
-const closeModalSelectStatus =()=>{
-    setIsStatusModalVisible(false)
-}
+    const closeModalSelectStatus = () => {
+        setIsStatusModalVisible(false)
+    }
     const handleChange = (key: keyof typeof carInfo, value: string) => {
         setCarInfo(prev => ({ ...prev, [key]: value }));
         if (key === 'year') setErrors(prev => ({ ...prev, year: validateYear(value) }));
@@ -64,7 +64,7 @@ const closeModalSelectStatus =()=>{
                 status_car: carInfo.status || '',
                 type_car: carInfo.type || ''
             };
-console.log('model: ',model)
+            console.log('model: ', model)
 
             await editDriver(model);
 
@@ -151,19 +151,19 @@ console.log('model: ',model)
                     label="Loại xe"
                 />
                 <AppInput
-                    value={DRIVER_STATUS_LABELS[status]||carInfo.status}
+                    value={DRIVER_STATUS_LABELS[status] || carInfo.status}
                     onChangeText={(text) => handleChange('status', text)}
                     placeholder="Sẵn sàng/ Đang bảo chì..."
                     label="Trạng thái xe"
                     type='select'
-                    toggleSelect={()=>setIsStatusModalVisible(true)}
+                    toggleSelect={() => setIsStatusModalVisible(true)}
                 />
             </AppView>
             <AppView>
                 <ButtonSubmit title='Lưu thay đổi' onPress={SaveChangeInfo} />
             </AppView>
-<ModalSelectStatus isVisible={isStatusModalVisible} onClose={closeModalSelectStatus}  selectedStatus={status}
-  onSelect={(id) => setStatus(id)} />
+            <ModalSelectStatus isVisible={isStatusModalVisible} onClose={closeModalSelectStatus} selectedStatus={status}
+                onSelect={(id) => setStatus(id)} />
             {/* MODAL UPLOAD ẢNH */}
             <ModalUploadCarImage
                 isDisplay={isDisplayModalUploadImage}

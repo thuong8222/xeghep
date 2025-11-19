@@ -194,6 +194,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
                 directionalDistanceChangeThreshold={2}
                 friction={8}
                 tension={50}
+                onRefresh={onRefresh}
                 onRowDidOpen={rowKey => console.log(`Hàng ${rowKey} đã mở`)}
             />
             <AppButton onPress={SaleTrips} position={'absolute'} right={36} bottom={34} width={48} height={48} radius={999} backgroundColor={ColorsGlobal.main} justifyContent='center' alignItems='center'>

@@ -1,29 +1,39 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
-import React, { useMemo, useState } from 'react'
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native'
+import React, { useEffect, useMemo, useState } from 'react'
 import AppView from '../../components/common/AppView';
 import AppButton from '../../components/common/AppButton';
 import AppInput from '../../components/common/AppInput';
 import { scale } from 'react-native-size-matters';
 import AppText from '../../components/common/AppText';
 import { FlatList } from 'react-native-gesture-handler';
-import { historyBuySalePoint, listHistoryTrips } from '../../dataDemoJson';
+import { historyBuySalePoint } from '../../dataDemoJson';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import TripHistory from '../../components/component/TripHistory';
-import Point from '../../components/component/Point';
-import IconFilterRight from '../../assets/icons/IconFilterRight';
+
 import PointHistory from '../../components/component/PointHistory';
-import QuickNoteButton from '../../components/component/QuickNoteButton';
-import { CONSTANT } from '../../utils/Helper';
+
 import TypeFilterBar from '../../components/component/TypeFilterBar';
 import Container from '../../components/common/Container';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../redux/data/store';
+import { fetchPointHistory } from '../../redux/slices/pointSlice';
+
 
 export default function HistoryBuySalePoint() {
+  const dispatch = useDispatch()
+  const { history, loading, error } = useSelector((state: RootState) => state.point);
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [selectedDateType, setSelectedDateType] = useState<'from' | 'to' | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [selectedType, setSelectedType] = useState<string | null>(null);
+
+  console.log('history: ', history)
+  useEffect(() => {
+    dispatch(fetchPointHistory());
+  }, [dispatch]);
+
+
   const renderItem_trip = ({ item }) => {
     return <PointHistory data={item} />;
   };
@@ -95,16 +105,23 @@ export default function HistoryBuySalePoint() {
     setIsDatePickerVisible(false);
     setSelectedDateType(null);
   };
-  const types = [...new Set(historyBuySalePoint.map(item => item.type))];
+  const types = [...new Set(history.map(item => item.related_type))];
   console.log(types);
   // Lọc dữ liệu theo selectedType
   const filteredHistory = useMemo(() => {
-    if (!selectedType) return historyBuySalePoint;
-    return historyBuySalePoint.filter((item) => item.type === selectedType);
-  }, [selectedType, historyBuySalePoint]);
+    if (!selectedType) return history;
+    return history.filter((item) => item.related_type === selectedType);
+  }, [selectedType, history]);
 
   return (
     <Container ignoreBottomInset  >
+      {loading && (
+        <ActivityIndicator size="large" color="#0000ff" />
+      )}
+
+      {error && (
+        <AppText color="red">{error}</AppText>
+      )}
       <AppView row justifyContent={'space-between'} gap={12} alignItems={'center'} >
         <AppButton
           flex={1}

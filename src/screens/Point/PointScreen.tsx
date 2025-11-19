@@ -1,21 +1,47 @@
-import { Alert, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import AppView from '../../components/common/AppView'
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal'
 import { SwipeListView } from 'react-native-swipe-list-view'
 import AppButton from '../../components/common/AppButton'
 
-import {  tranferPoints } from '../../dataDemoJson'
+import { tranferPoints } from '../../dataDemoJson'
 import Point from '../../components/component/Point'
 import IconPlus from '../../assets/icons/IconPlus'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 
 import { PointTabsParamList } from '../../navigation/menuBottomTabs/PointTabs'
+import { useTripsApi } from '../../redux/hooks/useTripsApi'
+import { useDispatch, useSelector } from 'react-redux'
+import { AppDispatch, RootState } from '../../redux/data/store'
+import { buyPointAction, fetchPointsOnSale } from '../../redux/slices/pointSlice'
+import ModalShowInfoTranferMoney from '../../components/component/modals/ModalShowInfoTranferMoney'
+
 type BuyTripProps = NativeStackNavigationProp<PointTabsParamList, 'PointAddScreen'>;
 interface Props {
     navigation: BuyTripProps;
 }
 export default function PointScreen({ navigation }: Props) {
+    const dispatch = useDispatch<AppDispatch>();
+    const [openModalTranferMoney, setOpenModalTranferMoney] = useState(false);
+    const [pointSelected, setPointSelected] = useState({});
+    const { points, loading, error } = useSelector(
+        (state: RootState) => state.point
+    );
+
+    useEffect(() => {
+        dispatch(fetchPointsOnSale());
+    }, []);
+
+    if (loading) {
+        return (
+            <View >
+                <ActivityIndicator size="large" color={ColorsGlobal.main} />
+            </View>
+        );
+    }
+
+
     const renderItem_trip = ({ item }) => {
         return (
             <Point data={item} />
@@ -26,21 +52,42 @@ export default function PointScreen({ navigation }: Props) {
             rowMap[rowKey].closeRow();
         }
     };
-    const buyTrip = (rowMap, rowKey) => {
-        closeRow(rowMap, rowKey);
-        // const newData = [...listData];
-        // const prevIndex = listData.findIndex(item => item.key === rowKey);
-        // newData.splice(prevIndex, 1);
-        // setListData(newData);
-        Alert.alert('thanh cong', `Mua diem thanh cong`);
 
-
+    const buyTrip = (rowMap, rowKey, data) => {
+        dispatch(
+            buyPointAction({
+                id: rowKey,
+            })
+        )
+            .unwrap()
+            .then(() => {
+                Alert.alert(
+                    'Thành công',
+                    'Mua điểm thành công',
+                    [
+                        {
+                            text: 'OK',
+                            onPress: () => {
+                                // Mở modal chuyển khoản
+                                setOpenModalTranferMoney(true);
+                                setPointSelected(data.item);
+                                // Nếu dùng swipe row, đóng row sau khi bấm
+                                closeRow && closeRow(rowMap, rowKey);
+                            },
+                        },
+                    ],
+                    { cancelable: false }
+                )
+            })
+            .catch(msg => {
+                Alert.alert('Lỗi', msg || 'Mua điểm thất bại');
+            });
     };
     const renderHiddenItem = (data, rowMap) => {
         return (
 
             <AppView flex={1} alignItems='center' backgroundColor={ColorsGlobal.backgroundBuyTrip} radius={12} row justifyContent={'flex-end'}>
-                <AppButton style={[styles.backBtn, styles.backBtnRight, { backgroundColor: ColorsGlobal.backgroundBuyTrip }]} onPress={() => buyTrip(rowMap, data.item.id)}>
+                <AppButton style={[styles.backBtn, styles.backBtnRight, { backgroundColor: ColorsGlobal.backgroundBuyTrip }]} onPress={() => buyTrip(rowMap, data.item.id, data)}>
                     <Text style={styles.backBtnText}>{'Mua điểm'}</Text>
                 </AppButton>
             </AppView>
@@ -50,10 +97,11 @@ export default function PointScreen({ navigation }: Props) {
     const SaleTrips = () => {
         navigation.navigate('PointAddScreen')
     }
+
     return (
         <AppView flex={1} padding={16} backgroundColor={ColorsGlobal.backgroundWhite}>
             <SwipeListView
-                data={tranferPoints}
+                data={points}
                 keyExtractor={(item) => item.id.toString()}
                 showsVerticalScrollIndicator={false}
                 renderItem={renderItem_trip} ItemSeparatorComponent={() => <AppView height={16} />}
@@ -68,8 +116,9 @@ export default function PointScreen({ navigation }: Props) {
 
                 onRowDidOpen={rowKey => console.log(`Hàng ${rowKey} đã mở`)} />
             <AppButton onPress={SaleTrips} position={'absolute'} right={36} bottom={34} width={48} height={48} radius={999} backgroundColor={ColorsGlobal.main} justifyContent='center' alignItems='center'>
-              <IconPlus size={20} />
+                <IconPlus size={20} />
             </AppButton>
+            <ModalShowInfoTranferMoney isVisible={openModalTranferMoney} data={pointSelected} onRequestClose={() => setOpenModalTranferMoney(false)} />
         </AppView>
     )
 }
