@@ -13,16 +13,33 @@ import AppInput from '../common/AppInput';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import TimeSelectSection from './TimeSelectSection';
 import { NumberFormat, scale, validatePrice } from '../../utils/Helper';
+import moment from 'moment';
 
-
-export default function TripOptionsSection() {
+interface TripOptionsSectionProps {
+    onTripOptionsChange?: (numGuests: number | null, price?: string, points?: string, guestType?: string, timeStart?: number) => void;
+}
+export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsSectionProps) {
 
     const [numGuests, setNumGuests] = useState(1);
     const [guestType, setGuestType] = useState<'normal' | 'car4' | 'car7'>('normal');
     const [price, setPrice] = useState(250);
     const [points, setPoints] = useState(1);
     const [priceError, setPriceError] = useState('');
+    const [timeStart, setTimeStart] = useState<number | null>(null);
     const [showGuestModal, setShowGuestModal] = useState(false);
+
+    // Helper gọi onTripOptionsChange
+    const notifyChange = (newNumGuests?: number, newPrice?: number, newPoints?: number, newGuestType?: typeof guestType, newTimeStart?: number | null) => {
+        if (onTripOptionsChange) {
+            onTripOptionsChange(
+                newNumGuests ?? numGuests,
+                (newPrice ?? price).toString(),
+                (newPoints ?? points).toString(),
+                newGuestType ?? guestType,
+                newTimeStart ?? timeStart
+            );
+        }
+    };
     const addPrice = () => setPrice(prev => prev + 10);
     const subPrice = () => setPrice(prev => Math.max(prev - 10, 0));
     const addPoint = () => setPoints(prev => Math.min(prev + 0.5, 10));
@@ -41,7 +58,12 @@ export default function TripOptionsSection() {
 
             >
                 {/* Thời gian */}
-                <TimeSelectSection />
+                <TimeSelectSection
+                    onTimeChange={(time) => {
+                        setTimeStart(time);
+                        notifyChange(undefined, undefined, undefined, undefined, time);
+                    }}
+                />
 
                 {/* Số khách */}
                 <AppView row justifyContent="space-between" alignItems='center' paddingVertical={9}>
@@ -95,25 +117,18 @@ export default function TripOptionsSection() {
                             }}
                         >
                             <AppView >
-                                <AppInput
-                                    value={NumberFormat(price.toString())}
-
-                                    onChangeText={(text) => {
-                                        // Chỉ cho phép nhập số
-                                        const numericValue = text.replace(/[^0-9]/g, '');
-                                        setPrice(numericValue === '' ? 0 : parseInt(numericValue, 10));
-                                        setPriceError(validatePrice(text))
-                                    }}
-                                    error={priceError}
-                                    keyboardType="numeric"
-                                    style={{
-                                        textAlign: 'center',
-                                        fontWeight: '700',
-                                        color: ColorsGlobal.textDark,
-                                        fontSize: 16,
-                                        padding: 0,
-                                    }}
-                                />
+                            <AppInput
+                            value={NumberFormat(price.toString())}
+                            onChangeText={(text) => {
+                                const numericValue = text.replace(/[^0-9]/g, '');
+                                const newVal = numericValue === '' ? 0 : parseInt(numericValue, 10);
+                                setPrice(newVal);
+                                notifyChange(undefined, newVal);
+                                setPriceError(validatePrice(text));
+                            }}
+                            error={priceError}
+                            keyboardType="numeric"
+                        />
                             </AppView>
                             <AppText fontWeight={600}>K</AppText>
                         </AppView>
@@ -147,20 +162,11 @@ export default function TripOptionsSection() {
                                     value={points.toString()}
                                     onChangeText={(text) => {
                                         const numericValue = text.replace(/[^0-9.]/g, '');
-
-                                        // Nếu người dùng xóa hết text, cho phép để trống
-                                        if (numericValue === '') {
-                                            setPoints(''); // tạm để rỗng
-                                            return;
-                                        }
-
-                                        let value = parseFloat(numericValue);
-
-                                        // Giới hạn giá trị hợp lệ
-                                        if (value < 1) value = 1;
-                                        if (value > 10) value = 10;
-
-                                        setPoints(value);
+                                        let newVal = numericValue === '' ? 1 : parseFloat(numericValue);
+                                        if (newVal < 1) newVal = 1;
+                                        if (newVal > 10) newVal = 10;
+                                        setPoints(newVal);
+                                        notifyChange(undefined, undefined, newVal);
                                     }}
                                     onBlur={() => {
                                         // Khi người dùng rời input, đảm bảo giá trị hợp lệ tối thiểu là 1
@@ -194,8 +200,8 @@ export default function TripOptionsSection() {
                 onClose={() => setShowGuestModal(false)}
                 guestType={guestType}
                 numGuests={numGuests}
-                setGuestType={setGuestType}
-                setNumGuests={setNumGuests}
+                setGuestType={(val) => { setGuestType(val); notifyChange(undefined, undefined, undefined, val); }}
+                setNumGuests={(val) => { setNumGuests(val); notifyChange(val); }}
             />
 
         </>

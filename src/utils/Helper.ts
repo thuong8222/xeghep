@@ -97,13 +97,17 @@ export function GetObjectProperty(obj: any, prop: any, defaultValue = '') {
 }
 export const CONSTANT = {
   TRANSACTION_TYPE_BY_KEY: {
-    buy_point: 'Mua điểm',
-    sell_point: 'Bán điểm',
+    point_buy: 'Mua điểm',
+    sell_points: 'Bán điểm',
+    point_sale: 'Bán điểm',
+    buy_points: 'Mua điểm',
+
     buy_trip: 'Mua chuyến',
     sell_trip: 'Bán chuyến',
   },
   DIRECTIONS: {
-    1: '',
+    1: 'Chiều đi',
+    0: 'Chiều về',
   },
 };
 export function getDateRange(
@@ -124,11 +128,19 @@ export function getDateRange(
         start_date: now.startOf('day').format('YYYY-MM-DD HH:mm:ss'),
         end_date: now.endOf('day').format('YYYY-MM-DD HH:mm:ss'),
       };
-      case 'tomorrow':
-        return {
-          start_date: now.clone().add(1, 'day').startOf('day').format('YYYY-MM-DD HH:mm:ss'),
-          end_date: now.clone().add(1, 'day').endOf('day').format('YYYY-MM-DD HH:mm:ss'),
-        };
+    case 'tomorrow':
+      return {
+        start_date: now
+          .clone()
+          .add(1, 'day')
+          .startOf('day')
+          .format('YYYY-MM-DD HH:mm:ss'),
+        end_date: now
+          .clone()
+          .add(1, 'day')
+          .endOf('day')
+          .format('YYYY-MM-DD HH:mm:ss'),
+      };
     case 'custom':
       if (customDate) {
         return {

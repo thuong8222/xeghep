@@ -107,7 +107,7 @@ export default function AccountInfoScreen({ navigation }: Props) {
                             <AppView backgroundColor={ColorsGlobal.backgroundGray} radius={999} padding={20}>
                                 <IconUser size={100} />
                             </AppView>}
-                        <AppButton
+                        {/* <AppButton
                             onPress={handleUploadPress}
                             style={{
                                 position: 'absolute',
@@ -122,7 +122,7 @@ export default function AccountInfoScreen({ navigation }: Props) {
                             }}
                         >
                             <IconCamera size={20} />
-                        </AppButton>
+                        </AppButton> */}
                     </View>
                 </AppView>
             </AppButton>

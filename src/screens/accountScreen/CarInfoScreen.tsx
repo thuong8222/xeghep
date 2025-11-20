@@ -91,12 +91,12 @@ export default function CarInfoScreen() {
                         </AppView>
                     )}
 
-                    <AppButton
+                    {/* <AppButton
                         onPress={handleUploadPress}
                         style={styles.cameraButton}
                     >
                         <IconCamera size={18} />
-                    </AppButton>
+                    </AppButton> */}
                 </View>
             </AppView>
 

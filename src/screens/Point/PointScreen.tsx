@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/data/store'
 import { buyPointAction, fetchPointsOnSale } from '../../redux/slices/pointSlice'
 import ModalShowInfoTranferMoney from '../../components/component/modals/ModalShowInfoTranferMoney'
+import ChatScreen from '../ChatScreen'
 
 type BuyTripProps = NativeStackNavigationProp<PointTabsParamList, 'PointAddScreen'>;
 interface Props {
@@ -52,37 +53,41 @@ export default function PointScreen({ navigation }: Props) {
             rowMap[rowKey].closeRow();
         }
     };
-
-    const buyTrip = (rowMap, rowKey, data) => {
-        dispatch(
-            buyPointAction({
-                id: rowKey,
-            })
-        )
-            .unwrap()
-            .then(() => {
-                Alert.alert(
-                    'Thành công',
-                    'Mua điểm thành công',
-                    [
-                        {
-                            text: 'OK',
-                            onPress: () => {
-                                // Mở modal chuyển khoản
-                                setOpenModalTranferMoney(true);
-                                setPointSelected(data.item);
-                                // Nếu dùng swipe row, đóng row sau khi bấm
-                                closeRow && closeRow(rowMap, rowKey);
-                            },
-                        },
-                    ],
-                    { cancelable: false }
-                )
-            })
-            .catch(msg => {
-                Alert.alert('Lỗi', msg || 'Mua điểm thất bại');
-            });
-    };
+    const buyTrip = (rowMap, rowKey, data) =>{
+        setPointSelected(data.item);
+        closeRow && closeRow(rowMap, rowKey);
+        navigation.navigate('ChatScreen', {data:data.item})
+    }
+    // const buyTrip = (rowMap, rowKey, data) => {
+    //     dispatch(
+    //         buyPointAction({
+    //             id: rowKey,
+    //         })
+    //     )
+    //         .unwrap()
+    //         .then(() => {
+    //             Alert.alert(
+    //                 'Thành công',
+    //                 'Mua điểm thành công',
+    //                 [
+    //                     {
+    //                         text: 'OK',
+    //                         onPress: () => {
+    //                             // Mở modal chuyển khoản
+    //                             setOpenModalTranferMoney(true);
+    //                             setPointSelected(data.item);
+    //                             // Nếu dùng swipe row, đóng row sau khi bấm
+    //                             closeRow && closeRow(rowMap, rowKey);
+    //                         },
+    //                     },
+    //                 ],
+    //                 { cancelable: false }
+    //             )
+    //         })
+    //         .catch(msg => {
+    //             Alert.alert('Lỗi', msg || 'Mua điểm thất bại');
+    //         });
+    // };
     const renderHiddenItem = (data, rowMap) => {
         return (
 

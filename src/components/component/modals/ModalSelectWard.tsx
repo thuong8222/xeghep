@@ -26,7 +26,10 @@ export default function SelectProvinceDistrictModal({ isVisible, onClose, onSele
       headers: { Accept: 'application/json' },
     })
       .then(res => res.json())
-      .then(data => setProvinces(data.provinces))
+      .then(data => {
+        console.log('✅ Dữ liệu trả về provinces:', data); // <-- thêm dòng này
+        setProvinces(data.provinces);
+      })
       .catch(err => console.error('❌ Lỗi tải tỉnh:', err));
   }, []);
 

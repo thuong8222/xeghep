@@ -154,6 +154,8 @@ export default function AccountScreen({ navigation }: Props) {
           <AppView gap={8}>
             <FunctionSection label='Đổi mật khẩu' onPress={() => setIsModalChangePw(true)} />
             <FunctionSection label='Lịch sử mua/bán điểm' onPress={gotoHistoryBuySalePoint} />
+            <FunctionSection label='Danh sách chuyến' onPress={gotoHistoryBuySalePoint} />
+            <FunctionSection label='Danh sách điểm' onPress={gotoHistoryBuySalePoint} />
             <FunctionSection label='Đăng xuất' onPress={Logout} />
           </AppView>
 

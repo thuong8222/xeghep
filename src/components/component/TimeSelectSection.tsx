@@ -11,23 +11,57 @@ import IconPlus from '../../assets/icons/IconPlus';
 import AppModal from '../common/AppModal';
 import { scale } from '../../utils/Helper';
 
-
-export default function TimeSelectSection() {
+interface TimeSelectSectionProps {
+    onTimeChange?: (timestampSeconds: number | null
+        
+        ) => void;
+  }
+  export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionProps) {
     const [isInstant, setIsInstant] = useState(true);
     const [time, setTime] = useState(0);
     const [showDropdown, setShowDropdown] = useState(false);
     const [showPicker, setShowPicker] = useState(false);
     const [selectedTime, setSelectedTime] = useState<Date | null>(null);
 
-    const addTime = () => setTime(prev => Math.min(prev + 15, 60)); // ⏫ Giới hạn tối đa 60 phút
-    const subTime = () => setTime(prev => Math.max(prev - 15, 0)); 
-
+    // const addTime = () => setTime(prev => Math.min(prev + 15, 60)); // ⏫ Giới hạn tối đa 60 phút
+    // const subTime = () => setTime(prev => Math.max(prev - 15, 0)); 
+    const addTime = () => {
+        setTime(prev => {
+          const newMinutes = Math.min(prev + 15, 60);
+      
+          // Tạo timestamp dựa trên now + newMinutes
+          const now = new Date();
+          const futureTime = new Date(now.getTime() + newMinutes * 60 * 1000);
+          const timestampSeconds = Math.floor(futureTime.getTime() / 1000);
+      
+          onTimeChange?.(timestampSeconds); // truyền ra parent
+          return newMinutes; // luôn trả về number
+        });
+      };
+      
+      const subTime = () => {
+        setTime(prev => {
+          const newMinutes = Math.max(prev - 15, 0);
+      
+          const now = new Date();
+          const futureTime = new Date(now.getTime() + newMinutes * 60 * 1000);
+          const timestampSeconds = Math.floor(futureTime.getTime() / 1000);
+      
+          onTimeChange?.(timestampSeconds); // truyền ra parent
+          return newMinutes; // luôn trả về number
+        });
+      };
+      
+    
     const handleSelectOption = (option: string) => {
         setShowDropdown(false);
         if (option === 'Đi ngay') {
             setIsInstant(true);
             setShowPicker(false);
             setTime(0); 
+            const now = new Date();
+            const futureTime = new Date(now.getTime());
+            onTimeChange?.(futureTime); ///truyen ra ngoai
         } else {
             setIsInstant(false);
             setShowPicker(true);
@@ -36,7 +70,11 @@ export default function TimeSelectSection() {
 
     const onChangeTime = (_: any, date?: Date) => {
         setShowPicker(false);
-        if (date) setSelectedTime(date);
+        if (date) {
+            setSelectedTime(date);
+            const timestampSeconds = Math.floor(date.getTime() / 1000);
+            onTimeChange?.(timestampSeconds, false); //////truyen ra ngoai
+          }
     };
 
     return (

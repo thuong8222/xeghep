@@ -38,7 +38,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
     const [filters, setFilters] = useState<{ direction: string; time: string } | null>(null);
 
     const gotoInfoGroup = () => {
-    
+
         setIdArea(id_area)
         navigation.navigate('InfoGroup', { nameGroup: nameGroup, countMember: countMember })
     }
@@ -60,7 +60,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
 
             headerTitle: () => (
                 <AppView justifyContent={'flex-start'} alignItems={'flex-start'}>
-                    <AppText fontWeight={700}>{nameGroup}</AppText>
+                    <AppText fontWeight={700} numberOfLines={1}>{nameGroup}</AppText>
                     <AppText fontSize={12} lineHeight={16} color={ColorsGlobal.textLight}>{countMember + ' thành viên'}</AppText>
                 </AppView>
             ),
@@ -81,7 +81,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
             buyTripEmitter.off('onFilterChanged', listener)
         }
     }, [])
-
+console.log('id_area: ',id_area)
     // Lấy trips khi mount
     useEffect(() => {
         if (id_area) {
@@ -92,18 +92,21 @@ export default function BuyTripScreen({ navigation, route }: Props) {
     const fetchTrips = useCallback(async () => {
         if (!id_area) return;
         try {
-            const model = {
-                area_id: id_area,
-                // start_date: startDate.toISOString().slice(0, 19).replace('T', ' '),
-                // end_date: endDate.toISOString().slice(0, 19).replace('T', ' '),
-                direction: filters?.direction,
-            }
-         
-            await getTrips(model);
+          const model: FetchTripsPayload = {
+            area_id: id_area,
+            // start_date: startDate.toISOString().slice(0, 19).replace('T', ' '),
+            // end_date: endDate.toISOString().slice(0, 19).replace('T', ' '),
+            direction: filters?.direction || 1,
+          }
+      
+          console.log('model: ', model)
+         const res =  await getTrips(model);
+         console.log('res: ',res)
+      
         } catch (err) {
-            console.log('Lỗi fetch trips:', err);
+          console.log('Lỗi fetch trips:', err);
         }
-    }, [id_area, startDate, endDate, getTrips]);
+      }, [id_area, startDate, endDate, filters, getTrips]);
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
@@ -150,13 +153,13 @@ export default function BuyTripScreen({ navigation, route }: Props) {
 
 
     const handleApplyFilter = (filters: any) => {
-   
+
 
         if (!id_area) return;
 
         // Lấy customDate từ filters
         const customDate = filters.customDate;
-    
+
 
         // Chuyển selectedTime thành start_date/end_date
         const { start_date, end_date } = getDateRange(filters.time, customDate);
@@ -170,7 +173,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
             direction,
         };
 
-       
+
 
         if (filters.place_start) model.place_start = filters.place_start;
         if (filters.place_end) model.place_end = filters.place_end;
@@ -182,6 +185,8 @@ export default function BuyTripScreen({ navigation, route }: Props) {
     return (
         <AppView flex={1} backgroundColor='#fff' padding={scale(16)} position='relative'>
             <SwipeListView
+
+                refreshing={refreshing}
                 data={trips}
                 keyExtractor={(item) => item.area_id.toString()}
                 showsVerticalScrollIndicator={false}

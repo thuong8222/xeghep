@@ -64,8 +64,23 @@ export const api = axios.create({
   baseURL: AppConfig.BASE_URL,
   headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
 });
+export interface CreateTripPayload {
+  direction: number;
+  guests: number;
+  time_start: string;
+  price_sell: number;
+  place_start: string;
+  place_end: string;
+  point: number;
+  note?: string;
+  area_id: string;
+  type_car?: string;
+  cover_car?: number;
+  time_receive?: string | null;
+  phone_number_guest: string;
+}
 
-api.interceptors.request.use(async (config) => {
+api.interceptors.request.use(async config => {
   const token = await AsyncStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -85,67 +100,100 @@ export const fetchTrips = createAsyncThunk<
   TripsState,
   FetchTripsPayload,
   { rejectValue: string }
+>('trips/fetchTrips', async (payload, { rejectWithValue }) => {
+  try {
+    // Chuyển payload thành query params
+    const response = await api.get('api/trips', {
+      params: {
+        area_id: payload.area_id,
+        // start_date: payload.start_date,
+        // end_date: payload.end_date,
+        // direction: payload.direction,
+      },
+    });
+
+    console.log('response: ', response);
+    return {
+      trips: response.data.data,
+      // driver_areas: response.data.driver_areas,
+      // input_area_id: response.data.input_area_id,
+      // trips_count: response.data.trips_count,
+
+      successMessage: response.data,
+    };
+  } catch (err: any) {
+    console.log('err: ', err);
+    return rejectWithValue(
+      err.response?.data?.message || 'Lấy danh sách trips thất bại',
+    );
+  }
+});
+
+export const createTrip = createAsyncThunk<
+  Trip, 
+  CreateTripPayload, 
+  { rejectValue: string }
 >(
-  'trips/fetchTrips',
+  'trips/createTrip',
   async (payload, { rejectWithValue }) => {
     try {
-      // Chuyển payload thành query params
-      const response = await api.get('api/area/trips', {
-        params: {
-          area_id: payload.area_id,
-          start_date: payload.start_date,
-          end_date: payload.end_date,
-          direction: payload.direction,
-        },
-      });
-
-
-      return {
-        trips: response.data.trips,
-        driver_areas: response.data.driver_areas,
-        input_area_id: response.data.input_area_id,
-        trips_count: response.data.trips_count,
-        loading: false,
-        error: null,
-        successMessage: 'Lấy danh sách trips thành công',
-      };
+      const response = await api.post('api/trips/create', payload);
+      return response.data.data || response.data; // tùy backend trả về cấu trúc
     } catch (err: any) {
-      console.log('err: ', err);
-      return rejectWithValue(err.response?.data?.message || 'Lấy danh sách trips thất bại');
+      console.log('err createTrip: ', err);
+      return rejectWithValue(
+        err.response?.data?.message || 'Tạo chuyến thất bại'
+      );
     }
   }
 );
-
-
 // ---- SLICE ----
 const tripsSlice = createSlice({
   name: 'trips',
   initialState,
   reducers: {
-    clearTripsMessages: (state) => {
+    clearTripsMessages: state => {
       state.error = null;
       state.successMessage = null;
     },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder
-      .addCase(fetchTrips.pending, (state) => {
+      .addCase(fetchTrips.pending, state => {
         state.loading = true;
         state.error = null;
         state.successMessage = null;
       })
-      .addCase(fetchTrips.fulfilled, (state, action: PayloadAction<TripsState>) => {
-        state.loading = false;
-        state.trips = action.payload.trips;
-        state.driver_areas = action.payload.driver_areas;
-        state.input_area_id = action.payload.input_area_id;
-        state.trips_count = action.payload.trips_count;
-        state.successMessage = action.payload.successMessage;
-      })
+      .addCase(
+        fetchTrips.fulfilled,
+        (state, action: PayloadAction<TripsState>) => {
+          state.loading = false;
+          state.trips = action.payload.trips;
+          state.driver_areas = action.payload.driver_areas;
+          state.input_area_id = action.payload.input_area_id;
+          state.trips_count = action.payload.trips_count;
+          state.successMessage = action.payload.successMessage;
+        },
+      )
       .addCase(fetchTrips.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Lấy danh sách trips thất bại';
-      });
+      })
+      // existing fetchTrips cases...
+    .addCase(createTrip.pending, state => {
+      state.loading = true;
+      state.error = null;
+      state.successMessage = null;
+    })
+    .addCase(createTrip.fulfilled, (state, action: PayloadAction<Trip>) => {
+      state.loading = false;
+      state.trips.unshift(action.payload); // thêm trip mới vào đầu list
+      state.successMessage = 'Tạo chuyến thành công';
+    })
+    .addCase(createTrip.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload || 'Tạo chuyến thất bại';
+    });
   },
 });
 
