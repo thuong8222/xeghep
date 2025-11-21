@@ -7,19 +7,20 @@ import ChatScreen from '../screens/ChatScreen';
 import { NavigatorScreenParams } from '@react-navigation/native';
 
 export type RootStackParamList = {
-    BottomTabs: NavigatorScreenParams<BottomTabParamList>;
-    ChatScreen: { data: string };
-   
-  };
+  BottomTabs: NavigatorScreenParams<BottomTabParamList>;
+  ChatScreen: { data: string };
+
+};
 const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function RootNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName='BottomTabs'>
-    <Stack.Screen name="BottomTabs" component={MenuBottomTabs} />
- 
-    <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerShown: false }} />
-   
+      <Stack.Screen name="BottomTabs" component={MenuBottomTabs} />
 
-  </Stack.Navigator>
+      <Stack.Screen name="ChatScreen" component={ChatScreen} options={{
+        headerShown: true,
+        title: 'Chat', // headerTitle cũng được, nhưng title là cách phổ biến
+      }} />
+    </Stack.Navigator>
   )
 }

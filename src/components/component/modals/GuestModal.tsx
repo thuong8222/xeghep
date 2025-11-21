@@ -9,17 +9,17 @@ import AppView from '../../common/AppView';
 interface GuestOption {
   label: string;
   value: number;
-  type: 'normal' | 'car4' | 'car7';
+  type: 'normal' | 'car5' | 'car7' | 'car16' | 'car35' | 'car45';
 }
 
 interface GuestModalProps {
-    isVisible: boolean;
-    onClose: () => void;
-    guestType: 'normal' | 'car4' | 'car7';
-    numGuests: number;
-    setGuestType: React.Dispatch<React.SetStateAction<'normal' | 'car4' | 'car7'>>;
-    setNumGuests: React.Dispatch<React.SetStateAction<number>>;
-  }
+  isVisible: boolean;
+  onClose: () => void;
+  guestType: 'normal' | 'car5' | 'car7' | 'car16' | 'car35' | 'car45';
+  numGuests: number;
+  setGuestType: React.Dispatch<React.SetStateAction<'normal' | 'car5' | 'car7' | 'car16' | 'car35' | 'car45'>>;
+  setNumGuests: React.Dispatch<React.SetStateAction<number>>;
+}
 
 export default function GuestModal({
   isVisible,
@@ -36,8 +36,11 @@ export default function GuestModal({
     { label: '4 khách', value: 4, type: 'normal' },
     { label: '5 khách', value: 5, type: 'normal' },
     { label: '6 khách', value: 6, type: 'normal' },
-    { label: 'Bao xe 4 chỗ', value: 0, type: 'car4' },
-    { label: 'Bao xe 7 chỗ', value: 0, type: 'car7' },
+    { label: 'Bao xe 5 chỗ', value: 7, type: 'car5' },
+    { label: 'Bao xe 7 chỗ', value: 8, type: 'car7' },
+    { label: 'Bao xe 16 chỗ', value: 8, type: 'car16' },
+    { label: 'Bao xe 35 chỗ', value: 8, type: 'car35' },
+    { label: 'Bao xe 45 chỗ', value: 8, type: 'car45' },
   ];
 
   const handleSelect = (item: GuestOption) => {
@@ -56,32 +59,35 @@ export default function GuestModal({
         Chọn số khách
       </AppText>
 
-      <FlatList
-        data={guestOptions}
-        keyExtractor={(item) => item.label}
-        renderItem={({ item }) => {
-          const isSelected =
-            (guestType === item.type && numGuests === item.value) ||
-            (guestType === item.type && item.type !== 'normal');
+      <AppView>
+    {guestOptions.map((item, index) => {
+      const isSelected =
+        (guestType === item.type && numGuests === item.value) ||
+        (guestType === item.type && item.type !== 'normal');
 
-          return (
-            <TouchableOpacity
-              onPress={() => handleSelect(item)}
-              style={styles.option}
+      return (
+        <React.Fragment key={item.type + '-' + item.value}>
+          <TouchableOpacity
+            onPress={() => handleSelect(item)}
+            style={styles.option}
+          >
+            <AppText
+              style={[
+                styles.optionText,
+                isSelected && { color: ColorsGlobal.main, fontWeight: '700' },
+              ]}
             >
-              <AppText
-                style={[
-                  styles.optionText,
-                  isSelected && { color: ColorsGlobal.main, fontWeight: '700' },
-                ]}
-              >
-                {item.label}
-              </AppText>
-            </TouchableOpacity>
-          );
-        }}
-        ItemSeparatorComponent={()=><AppView height={1} backgroundColor={ColorsGlobal.borderColor} />}
-      />
+              {item.label}
+            </AppText>
+          </TouchableOpacity>
+          {/* Separator */}
+          {index < guestOptions.length - 1 && (
+            <AppView height={1} backgroundColor={ColorsGlobal.borderColor} />
+          )}
+        </React.Fragment>
+      );
+    })}
+  </AppView>
     </AppModal>
   );
 }
@@ -93,7 +99,7 @@ const styles = StyleSheet.create({
   },
   option: {
     paddingVertical: 12,
-   
+
   },
   optionText: {
     textAlign: 'center',

@@ -21,6 +21,10 @@ export default function InfoGroupScreen({ route, navigation }: Props) {
     const RequestJoinGroup = () => {
         setIsModalRequestJoinGroup(true)
     }
+   
+    const gotoGroupRules =()=>{
+        navigation.navigate('GroupRules')
+    }
     return (
         <AppView padding={20} flex={1} backgroundColor={ColorsGlobal.backgroundWhite}>
             <AppView alignItems='center' padding={12}>
@@ -36,7 +40,7 @@ export default function InfoGroupScreen({ route, navigation }: Props) {
                     <AppText >{'Thông báo'}</AppText>
                     <IconArowDown rotate={-90} size={20} />
                 </AppButton>
-                <AppButton onPress={() => Alert.alert('Đang phát triển')} row justifyContent={'space-between'} padding={12}>
+                <AppButton onPress={gotoGroupRules} row justifyContent={'space-between'} padding={12}>
                     <AppText >{'Quy định nhóm'}</AppText>
                     <IconArowDown rotate={-90} size={20} />
                 </AppButton>

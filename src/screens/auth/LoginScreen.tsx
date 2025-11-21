@@ -30,7 +30,7 @@ interface Props {
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const { login, token, loading, error, successMessage, clear } = useAuthApi();
-  const [phoneNumber, setPhoneNumber] = useState("09876342312");
+  const [phoneNumber, setPhoneNumber] = useState("09876342711");
   const [password, setPassword] = useState("Admin123456@");
   const [phoneNumberError, setPhoneNumberError] = useState('');
   const [passwordError, setPasswordError] = useState('');

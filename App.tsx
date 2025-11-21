@@ -17,7 +17,7 @@ import { requestUserPermission, listenForForegroundMessages, registerBackgroundH
 import { Provider } from 'react-redux';
 import { store } from './src/redux/data/store';
 import CustomSplash from './src/screens/Splash';
-import { ContextProvider } from './src/context/AppContext';
+import { ContextProvider, useAppContext } from './src/context/AppContext';
 export type RootParamList = {
   RootNavigator: NavigatorScreenParams<RootStackParamList>
   Auth: NavigatorScreenParams<AuthStackParamList>;
@@ -28,7 +28,7 @@ const Stack = createNativeStackNavigator<RootParamList>();
 
 const App = () => {
   const [isSplashDone, setIsSplashDone] = useState(false);
-
+  const { user } = useAppContext();
   // Các hook khác cũng khai báo ở đây, không ở trong if
   useEffect(() => {
     console.log('App mounted');

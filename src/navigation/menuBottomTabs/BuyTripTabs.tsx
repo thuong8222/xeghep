@@ -11,6 +11,8 @@ import InfoGroupScreen from '../../screens/buyTrip/InfoGroupScreen'
 import AppView from '../../components/common/AppView'
 import AppText from '../../components/common/AppText'
 import MemberGroupScreen from '../../screens/buyTrip/MemberGroupScreen'
+import GroupRulesScreen from '../../screens/buyTrip/GroupRulesScreen'
+import NotificationScreen from './NotificationScreen'
 
 export type BuyTripStackParamList = {
   GroupArea: undefined
@@ -19,11 +21,18 @@ export type BuyTripStackParamList = {
     countMember: number;
     id_area: string;
   }
-  SaleTrip: undefined;
+  SaleTrip: {
+    id_area: string;
+  };
   InfoGroup: {
     nameGroup: string;
     countMember: number;
-
+  }
+  GroupRules: {
+    id_area?: string;
+  }
+  Notification: {
+    id_area?: string;
   }
   MemberGroup: undefined;
 }
@@ -79,6 +88,27 @@ export default function BuyTripTabs() {
               headerTitleAlign: 'center'
             }}
           />
+
+          <Stack.Screen
+            name="Notification"
+            component={NotificationScreen}
+            options={{
+              headerBackTitle: '',
+              headerTitle: 'Thông tin nhóm',
+              headerTitleAlign: 'center'
+            }}
+          />
+           <Stack.Screen
+            name="GroupRules"
+            component={GroupRulesScreen}
+            options={{
+              headerBackTitle: '',
+              headerTitle: 'Quy định nhóm',
+              headerTitleAlign: 'center'
+            }}
+          />
+          
+
         </Stack.Group>
         <Stack.Screen
           name="SaleTrip"

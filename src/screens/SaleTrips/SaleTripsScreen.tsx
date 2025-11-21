@@ -19,43 +19,79 @@ import SelectProvinceDistrictModal from '../../components/component/modals/Modal
 import TripOptionsSection from '../../components/component/TripOptionsSection'
 import { useDispatch } from 'react-redux'
 import { createTrip, CreateTripPayload } from '../../redux/slices/tripsSlice'
-
-export default function SaleTripsScreen() {
+interface Props {
+  route: any;
+}
+export default function SaleTripsScreen({ route }: Props) {
+  const { id_area } = route.params;
   const insets = useSafeAreaInsets();
-  const [selectedDirection, setSelectedDirection] = useState<1 | 0>(1);
+  const dispatch = useDispatch();
+  const [selectedDirection, setSelectedDirection] = useState(1);
   const [isCommuneWard, setIsCommuneWard] = useState(false);
   const [moreInputEnd, setMoreInputEnd] = useState(false);
   const [placeStart, setPlaceStart] = useState('');
   const [placeEnd, setPlaceEnd] = useState('');
   const [communeWard, setCommuneWard] = useState('');
-  const dispatch = useDispatch();
 
+  const [tripOptions, setTripOptions] = useState({
+    numGuests: 1,
+    price: '250',
+    points: '1',
+    guestType: 'normal',
+    timeStart: null as number | null,
+    typeCar: null as { type: string; name: string } | null
+  });
+  const [noteOptions, setNoteOptions] = useState();
+  console.log('tripOptions SaleTripsScreen: ', tripOptions)
+
+
+  // Hàm này sẽ được gọi mỗi khi TripOptionsSection thay đổi dữ liệu
+  const handleTripOptionsChange = (
+    numGuests: number | null,
+    price?: string,
+    points?: string,
+    guestType?: string,
+    timeStart?: number,
+    typeCar?: { type: string; name: string } | null
+  ) => {
+    setTripOptions({
+      numGuests: numGuests ?? tripOptions.numGuests,
+      price: price ?? tripOptions.price,
+      points: points ?? tripOptions.points,
+      guestType: guestType ?? tripOptions.guestType,
+      timeStart: timeStart ?? tripOptions.timeStart,
+      typeCar: typeCar ?? tripOptions.typeCar
+    });
+  };
+  const handleNoteChange = (val?: string) => {
+    setNoteOptions(val ?? "");
+    console.log("Ghi chú nhận được từ con:", val);
+  };
   const handleCreateTrip = async () => {
+
     const payload: CreateTripPayload = {
-      direction: selectedDirection,
-      guests: tripOptions?.numGuests||1,
-      time_start: tripOptions?.timeStart|| '2025-11-20 02:59:53',
-      price_sell: tripOptions?.price_sell|| 250000,
-      place_start: placeStart ||'Phở Bò',
-      place_end:placeEnd+', '+communeWard || 'Phở Cồ',
-      point: tripOptions?.point,
-      note: 'thích như nào cũng được',
-      area_id: '019a9a23-1780-717b-a07d-82bdfa06d772',
-      type_car: '7-cho',
-      cover_car: 0,
-      time_receive: '2025-11-20 15:59:53',
-      phone_number_guest: '0987654321'
+      area_id: id_area,
+      direction: selectedDirection ||1,
+      guests: tripOptions?.numGuests || 1,
+      time_start: tripOptions?.timeStart || (Math.floor(Date.now() / 1000)),
+      price_sell: tripOptions?.price_sell || 250,
+      place_start: placeStart ,
+      place_end: placeEnd + ', ' + communeWard,
+      point: tripOptions?.points,
+      note: noteOptions || '',
+      type_car: tripOptions.typeCar?.type || 'car5',
+      cover_car: tripOptions.typeCar ? 0 : 1,
     };
-    console.log('payload handleCreateTrip: ',payload)
-  return;
+    console.log('payload handleCreateTrip: ', payload)
+
     try {
       await dispatch(createTrip(payload)).unwrap();
-      console.log('Tạo chuyến thành công');
+      Alert.alert('Thành công', 'Tạo chuyến thành công!');
     } catch (err) {
       console.log('Lỗi tạo chuyến:', err);
     }
   };
-  
+
   const selectCommuneWard = () => {
     setIsCommuneWard(true); // mở modal chọn xã/phường
   };
@@ -63,38 +99,8 @@ export default function SaleTripsScreen() {
   const toggleMoreDetailEnd = () => {
     setMoreInputEnd(!moreInputEnd)
   }
-  const [tripOptions, setTripOptions] = useState({
-    numGuests: 1,
-    price: '250',
-    points: '1',
-    guestType: 'normal',
-    timeStart: null as number | null
-  });
-console.log('tripOptions: ',tripOptions)
-  // Hàm này sẽ được gọi mỗi khi TripOptionsSection thay đổi dữ liệu
-  const handleTripOptionsChange = (
-    numGuests: number | null,
-    price?: string,
-    points?: string,
-    guestType?: string,
-    timeStart?: number
-  ) => {
-    setTripOptions({
-      numGuests: numGuests ?? tripOptions.numGuests,
-      price: price ?? tripOptions.price,
-      points: points ?? tripOptions.points,
-      guestType: guestType ?? tripOptions.guestType,
-      timeStart: timeStart ?? tripOptions.timeStart
-    });
 
-    console.log('Trip Options Updated:', {
-      numGuests,
-      price,
-      points,
-      guestType,
-      timeStart
-    });
-  };
+
 
 
   return (
@@ -122,9 +128,7 @@ console.log('tripOptions: ',tripOptions)
                   onChangeText={setPlaceStart}
                   placeholder="Nhập điểm đón"
                 />
-
               </AppView>
-
             </AppView>
             <AppView gap={6}>
               <AppView row gap={8} alignItems='flex-end' justifyContent={'space-between'}>
@@ -154,7 +158,7 @@ console.log('tripOptions: ',tripOptions)
             </AppView>
           </AppView>
           <TripOptionsSection onTripOptionsChange={handleTripOptionsChange} />
-          <NoteInputSection />
+          <NoteInputSection onNoteChange={handleNoteChange} />
         </AppView>
       </ScrollView>
       <ButtonSubmit title='Đăng bán' onPress={handleCreateTrip} />
@@ -169,6 +173,7 @@ console.log('tripOptions: ',tripOptions)
           setCommuneWard(`${value.province.name} - ${value.district.name}`);
         }}
       />
+
     </AppView>
 
   )

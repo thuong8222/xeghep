@@ -19,6 +19,10 @@ import IconFilterRight from '../../assets/icons/IconFilterRight'
 import { getDateRange, scale } from '../../utils/Helper'
 import { useTripsApi } from '../../redux/hooks/useTripsApi'
 import { useAppContext } from '../../context/AppContext'
+import ModalConfirmBuyTrip from '../../components/component/modals/ModalConfirmBuyTrip'
+import { useDispatch, useSelector } from 'react-redux'
+import { AppDispatch, RootState } from '../../redux/data/store'
+import { buyTrip } from '../../redux/slices/tripsSlice'
 
 
 type BuyTripProps = NativeStackNavigationProp<BuyTripStackParamList>;
@@ -28,15 +32,20 @@ interface Props {
 }
 export default function BuyTripScreen({ navigation, route }: Props) {
     const { trips, driver_areas, trips_count, loading, error, getTrips } = useTripsApi();
+    const dispatch = useDispatch<AppDispatch>();
+    const { buyTripLoading, buyTripError, buyTripSuccess } = useSelector(
+        (state: RootState) => state.trips
+    );
     const { setIdArea } = useAppContext();
     const [refreshing, setRefreshing] = useState(false);
     const [selectedArea, setSelectedArea] = useState<string | undefined>(undefined);
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
     const { nameGroup, countMember, id_area } = route.params;
-    const [isModalVisible, setIsModalVisible] = useState(false)
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isModalConfirmBuyTrip, setIsModalConfirmBuyTrip] = useState(false);
     const [filters, setFilters] = useState<{ direction: string; time: string } | null>(null);
-
+    const [boughtTrip, setBoughtTrip] = useState();
     const gotoInfoGroup = () => {
 
         setIdArea(id_area)
@@ -81,7 +90,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
             buyTripEmitter.off('onFilterChanged', listener)
         }
     }, [])
-console.log('id_area: ',id_area)
+    console.log('id_area BuyScreen: ', id_area)
     // Lấy trips khi mount
     useEffect(() => {
         if (id_area) {
@@ -92,21 +101,21 @@ console.log('id_area: ',id_area)
     const fetchTrips = useCallback(async () => {
         if (!id_area) return;
         try {
-          const model: FetchTripsPayload = {
-            area_id: id_area,
-            // start_date: startDate.toISOString().slice(0, 19).replace('T', ' '),
-            // end_date: endDate.toISOString().slice(0, 19).replace('T', ' '),
-            direction: filters?.direction || 1,
-          }
-      
-          console.log('model: ', model)
-         const res =  await getTrips(model);
-         console.log('res: ',res)
-      
+            const model: FetchTripsPayload = {
+                area_id: id_area,
+                // start_date: startDate.toISOString().slice(0, 19).replace('T', ' '),
+                // end_date: endDate.toISOString().slice(0, 19).replace('T', ' '),
+                direction: filters?.direction || 1,
+            }
+
+            console.log('model: ', model)
+            const res = await getTrips(model);
+            console.log('res: ', res)
+
         } catch (err) {
-          console.log('Lỗi fetch trips:', err);
+            console.log('Lỗi fetch trips:', err);
         }
-      }, [id_area, startDate, endDate, filters, getTrips]);
+    }, [id_area, startDate, endDate, filters, getTrips]);
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
@@ -127,40 +136,37 @@ console.log('id_area: ',id_area)
             rowMap[rowKey].closeRow();
         }
     };
-    const buyTrip = (rowMap, rowKey) => {
+    const PressBuyTrip = (rowMap, rowKey, data) => {
+        console.log('data buyTrip: ', data?.item)
+        dispatch(buyTrip({ rowKey }));
+        setBoughtTrip(data.item)
         closeRow(rowMap, rowKey);
 
-        Alert.alert('thanh cong', `Mua Chuyến thanh cong`);
+        setIsModalConfirmBuyTrip(true)
 
 
     };
     const SaleTrips = () => {
-        navigation.navigate('SaleTrip')
+        navigation.navigate('SaleTrip', { id_area: id_area })
     }
+
     const renderHiddenItem = (data, rowMap) => {
 
         if (data.item.is_sold === 1) return null;
         return (
 
             <View style={styles.rowBack}>
-                <AppButton style={[styles.backBtn, styles.backBtnRight, { backgroundColor: ColorsGlobal.backgroundBuyTrip }]} onPress={() => buyTrip(rowMap, data.item.area_id)}>
+                <AppButton style={[styles.backBtn, styles.backBtnRight, { backgroundColor: ColorsGlobal.backgroundBuyTrip }]} onPress={() => PressBuyTrip(rowMap, data.item.area_id, data)}>
                     <Text style={styles.backBtnText}>{'Mua chuyến'}</Text>
                 </AppButton>
             </View>
 
         )
     };
-
-
     const handleApplyFilter = (filters: any) => {
-
-
         if (!id_area) return;
-
         // Lấy customDate từ filters
         const customDate = filters.customDate;
-
-
         // Chuyển selectedTime thành start_date/end_date
         const { start_date, end_date } = getDateRange(filters.time, customDate);
 
@@ -188,9 +194,10 @@ console.log('id_area: ',id_area)
 
                 refreshing={refreshing}
                 data={trips}
-                keyExtractor={(item) => item.area_id.toString()}
+                keyExtractor={(item) => item.id.toString()}
                 showsVerticalScrollIndicator={false}
-                renderItem={renderItem_trip} ItemSeparatorComponent={() => <AppView height={scale(16)} />}
+                renderItem={renderItem_trip}
+                ItemSeparatorComponent={() => <AppView height={scale(16)} />}
                 renderHiddenItem={renderHiddenItem}
                 rightOpenValue={-116}
                 leftOpenValue={0}
@@ -210,6 +217,8 @@ console.log('id_area: ',id_area)
                 onRequestClose={() => setIsModalVisible(false)}
                 onApplyFilter={handleApplyFilter} // Không cần arrow function nữa
             />
+            <ModalConfirmBuyTrip visible={isModalConfirmBuyTrip}
+                onRequestClose={() => setIsModalConfirmBuyTrip(false)} data={boughtTrip} />
 
         </AppView>
     )

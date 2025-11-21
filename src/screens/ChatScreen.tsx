@@ -9,6 +9,10 @@ import AppView from "../components/common/AppView";
 import AppButton from "../components/common/AppButton";
 import AppText from "../components/common/AppText";
 import { ColorsGlobal } from "../components/base/Colors/ColorsGlobal";
+import { checkWarningFilter } from "react-native/types_generated/Libraries/LogBox/Data/LogBoxData";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../redux/data/store";
+import { confirmPointAction } from "../redux/slices/pointSlice";
 
 type RootStackParamList = {
   Chat: { data: string };
@@ -128,42 +132,59 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
     );
   };
   console.log('toUser state:', toUser);
-  const bankInfo = data?.bank_info ? JSON.parse(data.bank_info) : {
-    bank_name: '',
-    account_number: '',
-    account_name: '',
+  console.log('data chat: ',data)
+  const seller= data?.seller
+
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading, error } = useSelector((state: RootState) => state.point);
+  const idPoint = data?.id;
+  console.log(idPoint,'idPoint')
+  const isOnwer = data?.buyer_id === data?.seller?.id;
+  console.log('isOnwer',isOnwer)
+  console.log('data?.buyer_id',data?.buyer_id)
+  console.log('data?.seller?.id',data?.seller?.id)
+  const handleConfirm = async () => {
+ 
+    const resultAction = await dispatch(confirmPointAction(idPoint));
+    console.log('resultAction',resultAction )
+    if (confirmPointAction.fulfilled.match(resultAction)) {
+      // Thành công
+      Alert.alert('Thành công', 'Xác nhận điểm thành công');
+    } else {
+      // Thất bại
+      Alert.alert('Lỗi', resultAction.payload || 'Xác nhận thất bại');
+    }
   };
-  const ListHeaderComponent =()=>{
-    return(
+  const ListHeaderComponent = () => {
+    return (
+  
       <AppView radius={16} padding={16} gap={6} backgroundColor={ColorsGlobal.backgroundGray}>
-      <AppView row justifyContent={'space-between'}>
-        <AppText fontSize={14}>{'Số tài khoản: '}</AppText>
-        <AppText fontSize={14}>{bankInfo.account_number}</AppText>
+        <AppView row justifyContent={'space-between'}>
+          <AppText fontSize={14}>{'Khách mua: '}</AppText>
+          <AppText fontSize={14}>{seller.full_name + ' - '+ seller.phone}</AppText>
+        </AppView>
+        <AppView row justifyContent={'space-between'}>
+          <AppText fontSize={14}>{'Điểm bán: '}</AppText>
+          <AppText fontSize={14}>{data?.points_amount +' Điểm'}</AppText>
+        </AppView>
+        <AppView row justifyContent={'space-between'}>
+          <AppButton>
+            <AppText fontSize={14} color={ColorsGlobal.main}>{'Huỷ'}</AppText>
+          </AppButton>
+          <AppButton onPress={handleConfirm}>
+            <AppText fontSize={14} color={ColorsGlobal.main2}>{'Xác nhận bán'}</AppText>
+          </AppButton>
+        </AppView>
       </AppView>
-      <AppView row justifyContent={'space-between'}>
-        <AppText fontSize={14}>{'Tên ngân hàng: '}</AppText>
-        <AppText fontSize={14}>{bankInfo.bank_name}</AppText>
-      </AppView>
-      <AppView row justifyContent={'space-between'}>
-        <AppText fontSize={14}>{'Chủ tài khoản: '}</AppText>
-        <AppText fontSize={14}>{bankInfo.account_name}</AppText>
-      </AppView>
-    </AppView>
     )
   }
   return (
-    <Container showTopInset >
-      <TextInput
-        placeholder="To (optional)"
-        value={toUser}
-        onChangeText={setToUser}
-        style={styles.input}
-      />
+    <Container  >
       <FlatList
         data={messages}
         keyExtractor={(_, i) => i.toString()}
         renderItem={renderItem}
-ListHeaderComponent={ListHeaderComponent}
+        ListHeaderComponent={isOnwer ? ListHeaderComponent : undefined}
       />
       <AppView row alignItems="center" >
         <AppView flex={1} height={40}>

@@ -105,6 +105,33 @@ export const CONSTANT = {
     buy_trip: 'Mua chuyến',
     sell_trip: 'Bán chuyến',
   },
+  TYPE_CAR_LIST: [
+    { id: 1, key: 'car5', name: 'Xe 5 chỗ' },
+    { id: 2, key: 'car7', name: 'Xe 7 chỗ' },
+    { id: 3, key: 'car9', name: 'Xe 9 chỗ' },
+    { id: 4, key: 'car16', name: 'Xe 16 chỗ' },
+    { id: 5, key: 'car35', name: 'Xe 35 chỗ' },
+    { id: 6, key: 'car45', name: 'Xe 45 chỗ' },
+  ],
+  QUIKCK_NOTE: [
+    'Có thú cưng',
+    'Không hút thuốc',
+    'Xin ghế đầu',
+    'Cần chở hàng nhỏ',
+    'Đi chung trẻ em',
+    'Khách mang nhiều hành lý',
+    'Không ngồi ghế cuối',
+    'Không cần gấp',
+    'Ưu tiên đi nhanh',
+    'Đi chậm, an toàn',
+    'Khách không dùng điện thoại',
+    'Khách khó tìm đường',
+    'Đón ở cổng chính',
+    'Đón ở cổng phụ',
+
+    'Cần hỗ trợ lên/xuống xe',
+  ],
+
   DIRECTIONS: {
     1: 'Chiều đi',
     0: 'Chiều về',

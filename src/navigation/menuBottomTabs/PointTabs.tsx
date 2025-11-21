@@ -7,7 +7,7 @@ import ChatScreen from '../../screens/ChatScreen';
 
 export type PointTabsParamList = {
   PointScreen: undefined;
-  PointAddScreen:undefined;
+  PointAddScreen: undefined;
   ChatScreen: { data: string };
 }
 
@@ -15,23 +15,22 @@ const Stack = createNativeStackNavigator<PointTabsParamList>();
 export default function PointTabs() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: true }}>
-   <Stack.Group screenOptions={{
-          headerShown: true,
-          // headerRight: HeaderRightButton,
-        }}>
-      <Stack.Screen name="PointScreen" component={PointScreen} options={{ headerTitle: 'Giao dịch điểm', headerTitleAlign: 'center' }} />
+      <Stack.Group screenOptions={{
+        headerShown: true,
+        // headerRight: HeaderRightButton,
+      }}>
+        <Stack.Screen name="PointScreen" component={PointScreen} options={{ headerTitle: 'Giao dịch điểm', headerTitleAlign: 'center' }} />
       </Stack.Group>
-       <Stack.Screen
-                name="PointAddScreen"
-                component={PointAddScreen}
-                options={{
-                  headerTitleAlign: 'center',
-                  headerTitle: 'Bán điểm'
-                  ,
-                  presentation: 'modal',
-                }}
-              />
-               {/* <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerShown: false }} /> */}
+      <Stack.Screen
+        name="PointAddScreen"
+        component={PointAddScreen}
+        options={{
+          headerTitleAlign: 'center',
+          headerTitle: 'Bán điểm',
+          presentation: 'modal',
+        }}
+      />
+      {/* <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerShown: false }} /> */}
     </Stack.Navigator>
   )
 }

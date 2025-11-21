@@ -12,11 +12,13 @@ import GuestModal from './modals/GuestModal';
 import AppInput from '../common/AppInput';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import TimeSelectSection from './TimeSelectSection';
-import { NumberFormat, scale, validatePrice } from '../../utils/Helper';
+import { CONSTANT, NumberFormat, scale, validatePrice } from '../../utils/Helper';
 import moment from 'moment';
+import ModalTypeCar from './modals/ModalTypeCar';
 
 interface TripOptionsSectionProps {
     onTripOptionsChange?: (numGuests: number | null, price?: string, points?: string, guestType?: string, timeStart?: number) => void;
+    typeCar?: { type: string; name: string } | null
 }
 export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsSectionProps) {
 
@@ -27,16 +29,27 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
     const [priceError, setPriceError] = useState('');
     const [timeStart, setTimeStart] = useState<number | null>(null);
     const [showGuestModal, setShowGuestModal] = useState(false);
+    const [showTypeCar,setShowTypeCar] = useState(false)
 
+    const [selectedCar, setSelectedCar] = useState<{ type: string; name: string } | null>(null);
+
+console.log('selectedCar; ',selectedCar)
     // Helper gọi onTripOptionsChange
-    const notifyChange = (newNumGuests?: number, newPrice?: number, newPoints?: number, newGuestType?: typeof guestType, newTimeStart?: number | null) => {
+    const notifyChange = (
+        newNumGuests?: number,
+        newPrice?: number,
+        newPoints?: number,
+        newGuestType?: typeof guestType,
+        newTimeStart?: number | null
+    ) => {
         if (onTripOptionsChange) {
             onTripOptionsChange(
                 newNumGuests ?? numGuests,
                 (newPrice ?? price).toString(),
                 (newPoints ?? points).toString(),
                 newGuestType ?? guestType,
-                newTimeStart ?? timeStart
+                newTimeStart ?? timeStart,
+                selectedCar     // ✔ luôn gửi selectedCar
             );
         }
     };
@@ -47,7 +60,14 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
 
     const addGuest = () => setNumGuests(prev => Math.min(prev + 1, 6));
     const subGuest = () => setNumGuests(prev => Math.max(prev - 1, 1));
-
+    const guestTypeNameMap: Record<string, string> = {
+        normal: `${numGuests} khách`,
+        car4: 'Bao xe 4 chỗ',
+        car7: 'Bao xe 7 chỗ',
+        car16: 'Bao xe 16 chỗ',
+        car35: 'Bao xe 35 chỗ',
+        car45: 'Bao xe 45 chỗ',
+      };
 
     return (
         <>
@@ -78,16 +98,22 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
                         )}
 
                         {/* Nút chọn khách / bao xe */}
-                        <AppButton row gap={4} onPress={() => setShowGuestModal(true)}>
-                            <AppText fontWeight={700}>
-                                {guestType === 'normal'
-                                    ? `${numGuests} khách`
-                                    : guestType === '4c'
-                                        ? 'Bao xe 4 chỗ'
-                                        : 'Bao xe 7 chỗ'}
-                            </AppText>
-                            <IconArrowDown color={ColorsGlobal.colorIconNoActive} />
-                        </AppButton>
+                        <AppView>
+                            <AppButton row gap={4} onPress={() => setShowGuestModal(true)}>
+                                {/* <AppText fontWeight={700}>
+                                    {guestType === 'normal'
+                                        ? `${numGuests} khách`
+                                        :  guestType === '4c'
+                                            ? 'Bao xe 4 chỗ'
+                                            : 'Bao xe 7 chỗ'}
+                                </AppText> */}
+                                <AppText fontWeight={700}>
+  {guestTypeNameMap[guestType] || `${numGuests} khách`}
+</AppText>
+                                <IconArrowDown color={ColorsGlobal.colorIconNoActive} />
+                            </AppButton>
+
+                        </AppView>
 
                         {/* Nút cộng (chỉ hiện khi KHÔNG phải bao xe) */}
                         {guestType === 'normal' && (
@@ -98,6 +124,20 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
                     </AppView>
                 </AppView>
 
+                {guestType === 'normal' &&
+                    <AppView row justifyContent="space-between" alignItems='center' paddingVertical={6} >
+                        <AppText>{'Loại xe:'}</AppText>
+                        <AppButton row gap={4} onPress={() => setShowTypeCar(true)}>
+                            {selectedCar? 
+                              <AppText >{selectedCar.name}</AppText>
+                              : 
+                              <AppText fontWeight={700}>{'Chọn loại xe'}</AppText>
+                            }
+                          
+                            <IconArrowDown color={ColorsGlobal.colorIconNoActive} />
+                        </AppButton>
+                    </AppView>
+                }
                 {/* Giá tiền */}
                 <AppView row justifyContent="space-between" alignItems='center' paddingVertical={2} >
                     <AppText>{'Giá tiền :'}</AppText>
@@ -117,18 +157,18 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
                             }}
                         >
                             <AppView >
-                            <AppInput
-                            value={NumberFormat(price.toString())}
-                            onChangeText={(text) => {
-                                const numericValue = text.replace(/[^0-9]/g, '');
-                                const newVal = numericValue === '' ? 0 : parseInt(numericValue, 10);
-                                setPrice(newVal);
-                                notifyChange(undefined, newVal);
-                                setPriceError(validatePrice(text));
-                            }}
-                            error={priceError}
-                            keyboardType="numeric"
-                        />
+                                <AppInput
+                                    value={NumberFormat(price.toString())}
+                                    onChangeText={(text) => {
+                                        const numericValue = text.replace(/[^0-9]/g, '');
+                                        const newVal = numericValue === '' ? 0 : parseInt(numericValue, 10);
+                                        setPrice(newVal);
+                                        notifyChange(undefined, newVal);
+                                        setPriceError(validatePrice(text));
+                                    }}
+                                    error={priceError}
+                                    keyboardType="numeric"
+                                />
                             </AppView>
                             <AppText fontWeight={600}>K</AppText>
                         </AppView>
@@ -203,6 +243,17 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
                 setGuestType={(val) => { setGuestType(val); notifyChange(undefined, undefined, undefined, val); }}
                 setNumGuests={(val) => { setNumGuests(val); notifyChange(val); }}
             />
+            <ModalTypeCar
+  isVisible={showTypeCar}
+  onClose={() => setShowTypeCar(false)}
+  onSelect={(car) => {
+    // car.type = 'car5'
+    // car.name = 'Xe 5 chỗ'
+    setSelectedCar(car);
+    notifyChange(); 
+  }}
+/>
+
 
         </>
     );

@@ -101,6 +101,7 @@ export const buyPointAction = createAsyncThunk<
 >('point/buyPoint', async ({ id, data }, { rejectWithValue, dispatch }) => {
   try {
     const response = await buyPoint(id, data);
+    console.log('point/buyPoint mua diem: ',response)
     if (response.data.status === 1) {
       dispatch(fetchPointsOnSale()); // refresh danh sách
       return response.data;
