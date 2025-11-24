@@ -79,17 +79,17 @@ export default function CarInfoScreen() {
             {/* ====== ẢNH XE ====== */}
             <AppView justifyContent="center" alignItems="center" marginTop={8}>
                 <View style={{ position: 'relative' }}>
-                    {carInfo.imageUri ? (
+                    {/* {carInfo.imageUri ? (
                         <Image
                             source={{ uri: carInfo.imageUri }}
                             style={styles.image}
                             resizeMode="cover"
                         />
-                    ) : (
+                    ) : ( */}
                         <AppView padding={40} backgroundColor={ColorsGlobal.backgroundGray} radius={12}>
                             <IconCar size={100} />
                         </AppView>
-                    )}
+                    {/* )} */}
 
                     {/* <AppButton
                         onPress={handleUploadPress}

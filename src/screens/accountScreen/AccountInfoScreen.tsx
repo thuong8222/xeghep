@@ -94,7 +94,7 @@ export default function AccountInfoScreen({ navigation }: Props) {
             <AppButton justifyContent='center' alignItems='center' paddingBottom={40} >
                 <AppView justifyContent="center" alignItems="center" marginTop={8}>
                     <View style={{ position: 'relative' }}>
-                        {imageUri ?
+                        {/* {imageUri ?
                             <Image
                                 source={{ uri: imageUri }}
                                 style={{
@@ -103,10 +103,11 @@ export default function AccountInfoScreen({ navigation }: Props) {
                                     borderRadius: 999,
                                 }}
                                 resizeMode="cover"
-                            /> :
-                            <AppView backgroundColor={ColorsGlobal.backgroundGray} radius={999} padding={20}>
-                                <IconUser size={100} />
-                            </AppView>}
+                            /> : */}
+                        <AppView backgroundColor={ColorsGlobal.backgroundGray} radius={999} padding={20}>
+                            <IconUser size={100} />
+                        </AppView>
+                        {/* } */}
                         {/* <AppButton
                             onPress={handleUploadPress}
                             style={{

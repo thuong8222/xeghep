@@ -32,9 +32,7 @@ export default function GroupAreaScreen({ navigation }: Props) {
   // Lấy danh sách khi mount
   useEffect(() => {
     fetchGroups();
-    return () => {
-      clear(); // reset error/success khi unmount
-    };
+    
   }, []);
 
   const fetchGroups = useCallback(async () => {

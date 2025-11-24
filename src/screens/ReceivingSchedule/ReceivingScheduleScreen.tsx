@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AppView from '../../components/common/AppView';
 
 import { listHistoryTrips } from '../../dataDemoJson';
@@ -12,14 +12,25 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import AppButton from '../../components/common/AppButton';
 import AppInput from '../../components/common/AppInput';
 import AppText from '../../components/common/AppText';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../redux/data/store';
+import { fetchReceivedTrips } from '../../redux/slices/tripsSlice';
+import { useAppContext } from '../../context/AppContext';
 
 export default function ReceivingScheduleScreen() {
+  const dispatch = useDispatch();
+  const {updateTrips} = useAppContext()
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [selectedDateType, setSelectedDateType] = useState<'from' | 'to' | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
+  const receivedTrips = useSelector((state: RootState) => state.trips.receivedTrips);
+  console.log('receivedTrips: ',receivedTrips)
+  useEffect(() => {
+    dispatch(fetchReceivedTrips());
+  }, [dispatch,updateTrips ]);
   const renderItem_trip = ({ item }) => {
     return <TripHistory data={item} />;
   };
@@ -141,8 +152,8 @@ export default function ReceivingScheduleScreen() {
       )}
 
       <FlatList
-        data={listHistoryTrips}
-        keyExtractor={(item) => item.Trip.id.toString()}
+        data={receivedTrips}
+        keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={false}
         renderItem={renderItem_trip}
         ItemSeparatorComponent={() => <AppView height={scale(16)} />}

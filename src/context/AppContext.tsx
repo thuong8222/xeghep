@@ -6,6 +6,9 @@ interface AppContextType {
   setIdArea: (val: string) => void;
   idArea: string;
   setUpdatePoints: (val: string) => void;
+  updateTrips:string;
+  setUpdateTrips: (val: string) => void;
+
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -19,10 +22,12 @@ export const useAppContext = () => {
 export const ContextProvider = ({ children }: { children: ReactNode }) => {
 const [idArea, setIdArea] = useState('');
 const [updatePoints,setUpdatePoints] = useState('');
+const [updateTrips,setUpdateTrips] = useState('');
   return (
     <AppContext.Provider value={{
       idArea, setIdArea,
-      updatePoints,setUpdatePoints
+      updatePoints,setUpdatePoints,
+      updateTrips,setUpdateTrips
     }}>
       {children}
     </AppContext.Provider>

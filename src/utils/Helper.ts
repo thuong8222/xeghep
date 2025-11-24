@@ -98,10 +98,12 @@ export function GetObjectProperty(obj: any, prop: any, defaultValue = '') {
 export const CONSTANT = {
   TRANSACTION_TYPE_BY_KEY: {
     point_buy: 'Mua điểm',
-    sell_points: 'Bán điểm',
     point_sale: 'Bán điểm',
+    sell_points: 'Bán điểm',
     buy_points: 'Mua điểm',
-
+    
+    trip_buy: 'Mua chuyến',
+    trip_sale: 'Bán chuyến',
     buy_trip: 'Mua chuyến',
     sell_trip: 'Bán chuyến',
   },

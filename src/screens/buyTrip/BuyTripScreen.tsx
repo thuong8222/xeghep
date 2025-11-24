@@ -22,7 +22,8 @@ import { useAppContext } from '../../context/AppContext'
 import ModalConfirmBuyTrip from '../../components/component/modals/ModalConfirmBuyTrip'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/data/store'
-import { buyTrip } from '../../redux/slices/tripsSlice'
+import { buyTrip, FetchTripsPayload } from '../../redux/slices/tripsSlice'
+import moment from 'moment'
 
 
 type BuyTripProps = NativeStackNavigationProp<BuyTripStackParamList>;
@@ -33,10 +34,11 @@ interface Props {
 export default function BuyTripScreen({ navigation, route }: Props) {
     const { trips, driver_areas, trips_count, loading, error, getTrips } = useTripsApi();
     const dispatch = useDispatch<AppDispatch>();
+
     const { buyTripLoading, buyTripError, buyTripSuccess } = useSelector(
         (state: RootState) => state.trips
     );
-    const { setIdArea } = useAppContext();
+    const { setIdArea, setUpdateTrips, updateTrips } = useAppContext();
     const [refreshing, setRefreshing] = useState(false);
     const [selectedArea, setSelectedArea] = useState<string | undefined>(undefined);
     const [startDate, setStartDate] = useState(new Date());
@@ -90,41 +92,48 @@ export default function BuyTripScreen({ navigation, route }: Props) {
             buyTripEmitter.off('onFilterChanged', listener)
         }
     }, [])
-    console.log('id_area BuyScreen: ', id_area)
-    // Lấy trips khi mount
+
+
     useEffect(() => {
         if (id_area) {
             fetchTrips();
         }
-    }, [id_area, startDate, endDate]);
+    }, [id_area, startDate, endDate, updateTrips]);
 
     const fetchTrips = useCallback(async () => {
         if (!id_area) return;
         try {
             const model: FetchTripsPayload = {
                 area_id: id_area,
-                // start_date: startDate.toISOString().slice(0, 19).replace('T', ' '),
-                // end_date: endDate.toISOString().slice(0, 19).replace('T', ' '),
-                direction: filters?.direction || 1,
+
             }
 
-            console.log('model: ', model)
-            const res = await getTrips(model);
-            console.log('res: ', res)
+
+            await getTrips(model);
+
 
         } catch (err) {
             console.log('Lỗi fetch trips:', err);
         }
-    }, [id_area, startDate, endDate, filters, getTrips]);
+    }, [id_area, startDate, endDate, filters, getTrips, updateTrips]);
 
-    const onRefresh = useCallback(async () => {
+    // const onRefresh = useCallback(async () => {
+    //     setRefreshing(true);
+    //     try {
+    //         await fetchTrips();
+    //     } finally {
+    //         setRefreshing(false);
+    //     }
+    // }, [fetchTrips]);
+    const onRefresh = async () => {
         setRefreshing(true);
         try {
             await fetchTrips();
-        } finally {
-            setRefreshing(false);
+        } catch (error) {
+            console.log("Lỗi refresh trips:", error);
         }
-    }, [fetchTrips]);
+        setRefreshing(false);
+    };
 
     const renderItem_trip = ({ item }) => {
         return (
@@ -136,16 +145,23 @@ export default function BuyTripScreen({ navigation, route }: Props) {
             rowMap[rowKey].closeRow();
         }
     };
-    const PressBuyTrip = (rowMap, rowKey, data) => {
-        console.log('data buyTrip: ', data?.item)
-        dispatch(buyTrip({ rowKey }));
-        setBoughtTrip(data.item)
-        closeRow(rowMap, rowKey);
-
-        setIsModalConfirmBuyTrip(true)
+    const PressBuyTrip = (rowMap: any, rowKey: string, data: any) => {
 
 
+        dispatch(buyTrip({ tripId: data.item.id }))
+            .unwrap()
+            .then((res) => {
+                setUpdateTrips(moment().unix());
+                setBoughtTrip(data.item);
+                closeRow(rowMap, data.item.id);
+                setIsModalConfirmBuyTrip(true);
+            })
+            .catch((err) => {
+                Alert.alert('Thông báo', err)
+                console.log('Mua chuyến thất bại:', err);
+            });
     };
+
     const SaleTrips = () => {
         navigation.navigate('SaleTrip', { id_area: id_area })
     }
@@ -164,6 +180,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
         )
     };
     const handleApplyFilter = (filters: any) => {
+
         if (!id_area) return;
         // Lấy customDate từ filters
         const customDate = filters.customDate;
@@ -177,21 +194,22 @@ export default function BuyTripScreen({ navigation, route }: Props) {
             start_date,
             end_date,
             direction,
+            pick_up: filters?.place_start,
+            drop_off: filters?.place_end
         };
-
-
 
         if (filters.place_start) model.place_start = filters.place_start;
         if (filters.place_end) model.place_end = filters.place_end;
+
 
         getTrips(model);
         setIsModalVisible(false);
     };
 
+
     return (
         <AppView flex={1} backgroundColor='#fff' padding={scale(16)} position='relative'>
             <SwipeListView
-
                 refreshing={refreshing}
                 data={trips}
                 keyExtractor={(item) => item.id.toString()}
@@ -208,6 +226,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
                 tension={50}
                 onRefresh={onRefresh}
                 onRowDidOpen={rowKey => console.log(`Hàng ${rowKey} đã mở`)}
+                ListEmptyComponent={() => <AppView alignItems='center' justifyContent='center'><AppText>{'Chưa có chuyến nào trong khu vực này'}</AppText></AppView>}
             />
             <AppButton onPress={SaleTrips} position={'absolute'} right={36} bottom={34} width={48} height={48} radius={999} backgroundColor={ColorsGlobal.main} justifyContent='center' alignItems='center'>
                 <IconPlus size={20} />

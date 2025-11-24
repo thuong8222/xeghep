@@ -1,4 +1,4 @@
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native'
 import React, { useState } from 'react'
 import AppView from '../../components/common/AppView'
 import AppText from '../../components/common/AppText'
@@ -18,14 +18,18 @@ import NoteInputSection from '../../components/component/NoteInputSection'
 import SelectProvinceDistrictModal from '../../components/component/modals/ModalSelectWard'
 import TripOptionsSection from '../../components/component/TripOptionsSection'
 import { useDispatch } from 'react-redux'
-import { createTrip, CreateTripPayload } from '../../redux/slices/tripsSlice'
+import { createTrip, CreateTripPayload, fetchTrips } from '../../redux/slices/tripsSlice'
+import moment from 'moment'
+import { useAppContext } from '../../context/AppContext'
 interface Props {
   route: any;
 }
 export default function SaleTripsScreen({ route }: Props) {
   const { id_area } = route.params;
   const insets = useSafeAreaInsets();
+
   const dispatch = useDispatch();
+  const { setUpdateTrips } = useAppContext()
   const [selectedDirection, setSelectedDirection] = useState(1);
   const [isCommuneWard, setIsCommuneWard] = useState(false);
   const [moreInputEnd, setMoreInputEnd] = useState(false);
@@ -35,7 +39,7 @@ export default function SaleTripsScreen({ route }: Props) {
 
   const [tripOptions, setTripOptions] = useState({
     numGuests: 1,
-    price: '250',
+    price: 250,
     points: '1',
     guestType: 'normal',
     timeStart: null as number | null,
@@ -68,27 +72,59 @@ export default function SaleTripsScreen({ route }: Props) {
     console.log("Ghi chú nhận được từ con:", val);
   };
   const handleCreateTrip = async () => {
+    console.log('tripOptions handleCreateTrip: ', tripOptions)
+    if (!placeStart || !placeEnd) {
+      Alert.alert('Điểm đi/ Điểm đến không được để trống!')
+      return;
+    }
+    console.log('tripOptions handleCreateTrip: ', tripOptions)
+    if (tripOptions.guestType === 'normal' && !tripOptions.typeCar) {
+      Alert.alert("Thiếu thông tin", "Vui lòng chọn loại xe!");
+      return;
+    }
 
+    console.log('handleCreateTrip')
     const payload: CreateTripPayload = {
       area_id: id_area,
-      direction: selectedDirection ||1,
+      direction: selectedDirection || 1,
       guests: tripOptions?.numGuests || 1,
       time_start: tripOptions?.timeStart || (Math.floor(Date.now() / 1000)),
-      price_sell: tripOptions?.price_sell || 250,
-      place_start: placeStart ,
+      price_sell: Number(tripOptions.price) || 250,
+      place_start: placeStart,
       place_end: placeEnd + ', ' + communeWard,
       point: tripOptions?.points,
       note: noteOptions || '',
-      type_car: tripOptions.typeCar?.type || 'car5',
+      type_car: tripOptions?.typeCar?.type || 'car5',
       cover_car: tripOptions.typeCar ? 0 : 1,
+
+
     };
     console.log('payload handleCreateTrip: ', payload)
 
     try {
-      await dispatch(createTrip(payload)).unwrap();
+      const res = await dispatch(createTrip(payload)).unwrap();
+      await fetchTrips(id_area); // nếu cần refetch
+      console.log("🎉 Kết quả API trả về:", res);
+      setUpdateTrips(moment().unix());
+      setSelectedDirection(1);
+      setPlaceStart("");
+      setPlaceEnd("");
+      setCommuneWard("");
+      setMoreInputEnd(false);
+
+      setTripOptions({
+        numGuests: 1,
+        price: '250',
+        points: '1',
+        guestType: 'normal',
+        timeStart: null,
+        typeCar: null
+      });
+
+      setNoteOptions("");
       Alert.alert('Thành công', 'Tạo chuyến thành công!');
     } catch (err) {
-      console.log('Lỗi tạo chuyến:', err);
+      console.log('Lỗi tạo chuyến:', JSON.stringify(err, null, 2));
     }
   };
 

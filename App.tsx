@@ -28,8 +28,8 @@ const Stack = createNativeStackNavigator<RootParamList>();
 
 const App = () => {
   const [isSplashDone, setIsSplashDone] = useState(false);
-  const { user } = useAppContext();
-  // Các hook khác cũng khai báo ở đây, không ở trong if
+
+  
   useEffect(() => {
     console.log('App mounted');
   }, []);

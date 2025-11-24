@@ -99,6 +99,7 @@ export default function SelectProvinceDistrictModal({ isVisible, onClose, onSele
             />
             <FlatList
               data={filteredProvinces}
+              scrollEnabled={false}
               keyExtractor={(item) => item.code}
               renderItem={renderProvince}
               ItemSeparatorComponent={() => (
@@ -123,6 +124,7 @@ export default function SelectProvinceDistrictModal({ isVisible, onClose, onSele
             />
             <FlatList
               data={filteredDistricts}
+              scrollEnabled={false}
               keyExtractor={(item) => item.code}
               renderItem={renderDistrict}
               ItemSeparatorComponent={() => (

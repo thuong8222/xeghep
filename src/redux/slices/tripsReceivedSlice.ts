@@ -43,7 +43,6 @@ export interface DriverArea {
 interface TripsState {
   trips: Trip[];
   driver_areas: DriverArea[];
-  receivedTrips: Trip[];     
   input_area_id?: string;
   trips_count: number;
   loading: boolean;
@@ -57,7 +56,6 @@ interface TripsState {
 const initialState: TripsState = {
   trips: [],
   driver_areas: [],
-  receivedTrips: [],    
   input_area_id: undefined,
   trips_count: 0,
   loading: false,
@@ -138,60 +136,13 @@ export const fetchTrips = createAsyncThunk<
     );
   }
 });
-// --- Thêm asyncThunk để fetch chuyến đã nhận ---
-export const fetchReceivedTrips = createAsyncThunk<
-  Trip[],
-  void,
-  { rejectValue: string }
->('trips/fetchReceivedTrips', async (_, { rejectWithValue }) => {
-  try {
-    const response = await api.get('api/trips/received');
-    console.log('fetchReceivedTrips res: ',response)
-    // Giả sử backend trả về { data: [...] }
-    return response.data.data;
-  } catch (err: any) {
-    console.log('err fetchReceivedTrips:', err);
-    return rejectWithValue(
-      err.response?.data?.message || 'Lấy chuyến đã nhận thất bại'
-    );
-  }
-});
-export const createTrip = createAsyncThunk<
-  Trip,
-  CreateTripPayload,
-  { rejectValue: string }
->('trips/createTrip', async (payload, { rejectWithValue }) => {
-  try {
-    const response = await api.post('api/trips/create', payload);
-    return response.data.data || response.data; // tùy backend trả về cấu trúc
-  } catch (err: any) {
-    console.log('err createTrip: ', err);
-    return rejectWithValue(
-      err.response?.data?.message || 'Tạo chuyến thất bại',
-    );
-  }
-});
+
+
 export interface BuyTripPayload {
   tripId: string;
 }
 
-export const buyTrip = createAsyncThunk<
-  any,
-  BuyTripPayload,
-  { rejectValue: string }
->('trips/buyTrip', async ({ tripId }, { rejectWithValue }) => {
-  try {
-    console.log('mua chueyesn : ',tripId)
-    const response = await api.post(`/api/trips/${tripId}/buy`);
-    console.log('trips/buyTrip: ', response);
-    return response.data;
-  } catch (err: any) {
-    console.log('mua chueyesn err: ',err)
-    return rejectWithValue(
-      err.response?.data?.message || 'Mua chuyến thất bại',
-    );
-  }
-});
+
 
 // ---- SLICE ----
 const tripsSlice = createSlice({
@@ -255,21 +206,6 @@ const tripsSlice = createSlice({
         state.buyTripLoading = false;
         state.buyTripError = action.payload || 'Mua chuyến thất bại';
         state.buyTripSuccess = false;
-      })
-      
-      // Case mới: fetchReceivedTrips
-      .addCase(fetchReceivedTrips.pending, state => {
-        state.loading = true;  // hoặc bạn có thể dùng state riêng như state.receivedLoading
-        state.error = null;
-      })
-      .addCase(fetchReceivedTrips.fulfilled, (state, action: PayloadAction<Trip[]>) => {
-        state.loading = false;
-        state.receivedTrips = action.payload;
-        // nếu muốn bạn có thể dùng successMessage riêng
-      })
-      .addCase(fetchReceivedTrips.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || 'Lấy chuyến đã nhận thất bại';
       });
   },
 });

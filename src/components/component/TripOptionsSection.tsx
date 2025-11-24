@@ -23,24 +23,25 @@ interface TripOptionsSectionProps {
 export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsSectionProps) {
 
     const [numGuests, setNumGuests] = useState(1);
-    const [guestType, setGuestType] = useState<'normal' | 'car4' | 'car7'>('normal');
+    const [guestType, setGuestType] = useState<'normal' | 'car5' | 'car7'>('normal');
     const [price, setPrice] = useState(250);
     const [points, setPoints] = useState(1);
     const [priceError, setPriceError] = useState('');
     const [timeStart, setTimeStart] = useState<number | null>(null);
     const [showGuestModal, setShowGuestModal] = useState(false);
-    const [showTypeCar,setShowTypeCar] = useState(false)
+    const [showTypeCar, setShowTypeCar] = useState(false)
 
     const [selectedCar, setSelectedCar] = useState<{ type: string; name: string } | null>(null);
 
-console.log('selectedCar; ',selectedCar)
+    console.log('selectedCar; ', selectedCar)
     // Helper gọi onTripOptionsChange
     const notifyChange = (
         newNumGuests?: number,
         newPrice?: number,
         newPoints?: number,
         newGuestType?: typeof guestType,
-        newTimeStart?: number | null
+        newTimeStart?: number | null,
+        newTypeCar?: { type: string; name: string } | null
     ) => {
         if (onTripOptionsChange) {
             onTripOptionsChange(
@@ -49,7 +50,7 @@ console.log('selectedCar; ',selectedCar)
                 (newPoints ?? points).toString(),
                 newGuestType ?? guestType,
                 newTimeStart ?? timeStart,
-                selectedCar     // ✔ luôn gửi selectedCar
+                newTypeCar ?? selectedCar     // ✔ luôn gửi selectedCar
             );
         }
     };
@@ -67,7 +68,7 @@ console.log('selectedCar; ',selectedCar)
         car16: 'Bao xe 16 chỗ',
         car35: 'Bao xe 35 chỗ',
         car45: 'Bao xe 45 chỗ',
-      };
+    };
 
     return (
         <>
@@ -108,8 +109,8 @@ console.log('selectedCar; ',selectedCar)
                                             : 'Bao xe 7 chỗ'}
                                 </AppText> */}
                                 <AppText fontWeight={700}>
-  {guestTypeNameMap[guestType] || `${numGuests} khách`}
-</AppText>
+                                    {guestTypeNameMap[guestType] || `${numGuests} khách`}
+                                </AppText>
                                 <IconArrowDown color={ColorsGlobal.colorIconNoActive} />
                             </AppButton>
 
@@ -128,12 +129,12 @@ console.log('selectedCar; ',selectedCar)
                     <AppView row justifyContent="space-between" alignItems='center' paddingVertical={6} >
                         <AppText>{'Loại xe:'}</AppText>
                         <AppButton row gap={4} onPress={() => setShowTypeCar(true)}>
-                            {selectedCar? 
-                              <AppText >{selectedCar.name}</AppText>
-                              : 
-                              <AppText fontWeight={700}>{'Chọn loại xe'}</AppText>
+                            {selectedCar ?
+                                <AppText >{selectedCar.name}</AppText>
+                                :
+                                <AppText fontWeight={700}>{'Chọn loại xe'}</AppText>
                             }
-                          
+
                             <IconArrowDown color={ColorsGlobal.colorIconNoActive} />
                         </AppButton>
                     </AppView>
@@ -168,6 +169,14 @@ console.log('selectedCar; ',selectedCar)
                                     }}
                                     error={priceError}
                                     keyboardType="numeric"
+                                    style={{
+                                        textAlign: 'center',
+                                        fontWeight: '700',
+                                        color: ColorsGlobal.textDark,
+                                        fontSize: 16,
+                                        padding: 0,
+
+                                    }}
                                 />
                             </AppView>
                             <AppText fontWeight={600}>K</AppText>
@@ -240,19 +249,20 @@ console.log('selectedCar; ',selectedCar)
                 onClose={() => setShowGuestModal(false)}
                 guestType={guestType}
                 numGuests={numGuests}
-                setGuestType={(val) => { setGuestType(val); notifyChange(undefined, undefined, undefined, val); }}
+                setGuestType={(val) => {
+                    setGuestType(val);
+                    notifyChange(undefined, undefined, undefined, val);
+                }}
                 setNumGuests={(val) => { setNumGuests(val); notifyChange(val); }}
             />
             <ModalTypeCar
-  isVisible={showTypeCar}
-  onClose={() => setShowTypeCar(false)}
-  onSelect={(car) => {
-    // car.type = 'car5'
-    // car.name = 'Xe 5 chỗ'
-    setSelectedCar(car);
-    notifyChange(); 
-  }}
-/>
+                isVisible={showTypeCar}
+                onClose={() => setShowTypeCar(false)}
+                onSelect={(car) => {
+                    setSelectedCar(car);
+                    notifyChange(undefined, undefined, undefined, undefined, undefined, car);
+                }}
+            />
 
 
         </>

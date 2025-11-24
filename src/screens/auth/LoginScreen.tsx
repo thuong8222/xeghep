@@ -190,7 +190,6 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             <ButtonSubmit title="Đăng nhập"
               isLoading={loading}
               onPress={handleLogin}
-
             />
           </AppView>
 

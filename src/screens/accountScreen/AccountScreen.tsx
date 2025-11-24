@@ -118,7 +118,7 @@ export default function AccountScreen({ navigation }: Props) {
     <ScrollView style={{ flex: 1, backgroundColor: ColorsGlobal.backgroundWhite }}>
       <AppView flex={1} backgroundColor={ColorsGlobal.backgroundWhite} padding={16} gap={12}>
         <AppView justifyContent='center' alignItems='center' paddingBottom={10} gap={8} >
-          {driver?.image_car ?
+          {/* {driver?.image_car ?
             <Image
               source={{ uri: driver?.image_car }}
               style={{
@@ -128,14 +128,14 @@ export default function AccountScreen({ navigation }: Props) {
               }}
               resizeMode="cover"
             />
-            :
-            <AppView backgroundColor={ColorsGlobal.backgroundGray} radius={999} padding={20}>
-              <IconUser size={100} />
-            </AppView>
-          }
+            : */}
+          <AppView backgroundColor={ColorsGlobal.backgroundGray} radius={999} padding={20}>
+            <IconUser size={100} />
+          </AppView>
+          {/* } */}
           <AppView alignItems='center'>
             <AppText bold color={ColorsGlobal.main}>{driver?.full_name}</AppText>
-            <AppText color={ColorsGlobal.main2}>{'Tài xế'}</AppText>
+            {/* <AppText color={ColorsGlobal.main2}>{'Tài xế'}</AppText> */}
           </AppView>
 
         </AppView>
@@ -154,7 +154,7 @@ export default function AccountScreen({ navigation }: Props) {
           <AppView gap={8}>
             <FunctionSection label='Đổi mật khẩu' onPress={() => setIsModalChangePw(true)} />
             <FunctionSection label='Lịch sử mua/bán điểm' onPress={gotoHistoryBuySalePoint} />
-            <FunctionSection label='Danh sách chuyến' onPress={gotoHistoryBuySalePoint} />
+            <FunctionSection label='Lịch sử mua/bán chuyến' onPress={gotoHistoryBuySalePoint} />
             <FunctionSection label='Danh sách điểm' onPress={gotoHistoryBuySalePoint} />
             <FunctionSection label='Đăng xuất' onPress={Logout} />
           </AppView>

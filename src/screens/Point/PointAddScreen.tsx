@@ -30,7 +30,10 @@ export default function PointAddScreen({ navigation }) {
 
 
     const postBuyPoint = async () => {
-
+        if (!pricePoint || !amountPoint) {
+            Alert.alert('Thông báo','Bạn phải điền đủ thông tin');
+            return;
+        }
         if (pointError || priceError) {
             Alert.alert('Dữ liệu không hợp lệ');
             return;
@@ -72,7 +75,7 @@ export default function PointAddScreen({ navigation }) {
                 label='Giá tiền'
                 placeholder='Nhập giá ...K/ điểm (1K=1000 VND)' keyboardType='decimal-pad'
                 error={priceError} />
-            <AppView gap={8} paddingVertical={30}>
+            {/* <AppView gap={8} paddingVertical={30}>
                 <AppText fontSize={13} fontStyle='italic' color={ColorsGlobal.main}>
                     {'\"Nhập thông tin tài khoản ngân hàng của bạn để người mua có thể chuyển khoản cho bạn\"'}
                 </AppText>
@@ -103,8 +106,11 @@ export default function PointAddScreen({ navigation }) {
                     label='Chủ tài khoản'
                     placeholder='Nhập họ tên chủ khoản ngân hàng nhận tiền'
                 />
+            </AppView> */}
+            <AppView paddingTop={20}>
+                <ButtonSubmit title='Đăng bán' onPress={postBuyPoint} isLoading={loading} />
             </AppView>
-            <ButtonSubmit title='Đăng bán' onPress={postBuyPoint} isLoading={loading} />
+
 
         </AppView>
     )
