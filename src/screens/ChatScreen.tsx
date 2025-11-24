@@ -9,10 +9,11 @@ import AppView from "../components/common/AppView";
 import AppButton from "../components/common/AppButton";
 import AppText from "../components/common/AppText";
 import { ColorsGlobal } from "../components/base/Colors/ColorsGlobal";
-import { checkWarningFilter } from "react-native/types_generated/Libraries/LogBox/Data/LogBoxData";
+
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../redux/data/store";
 import { confirmPointAction } from "../redux/slices/pointSlice";
+import { useDriverApi } from "../redux/hooks/userDriverApi";
 
 type RootStackParamList = {
   Chat: { data: string };
@@ -27,8 +28,26 @@ interface Props {
 
 const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
   const { data } = route.params;
-  console.log('data ChatScreen: ', data)
 
+  console.log('data ChatScreen: ', data)
+const { driver,getDriver } = useDriverApi();
+
+
+
+
+
+
+  // Lấy thông tin driver khi vào màn hình
+  useEffect(() => {
+    if (!driver) {
+      getDriver().catch(err => {
+        console.log('Lỗi lấy thông tin driver:', err);
+      });
+    }
+  }, [driver]);
+console.log('driver  ChatScreen: ',driver);
+
+const myId  = driver
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [toUser, setToUser] = useState("user2");
@@ -41,38 +60,35 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
 
   // 1️⃣ Register user & setup listeners
   useEffect(() => {
-    socket.emit("register_user", 'ten demo');
-    // socket.emit("register_user", username);
-
+    if (!data?.seller_id || !myId) return;
+  
+    socket.emit("register_user", myId);
+  
     socket.on("connect", () => {
       console.log("✅ Connected to server");
     });
-
-    // Lắng nghe tin nhắn load 1-1
-    const handleLoadMessages = (msgs: Message[]) => {
-      console.log("📜 Loaded messages:", msgs);
-      setMessages(msgs);
-    };
-
-    // Lắng nghe tin nhắn realtime
+  
+    // Load chat 1-1
+    socket.emit("load_chat_messages", { user_id: myId, chatWith: data.seller_id });
+  
     const handleReceiveMessage = (msg: Message) => {
+      // Dùng msg chứ không phải item
       if (
-        (msg.user === data.seller_id && msg.to === toUser) ||
-        (msg.user === toUser && msg.to === data.seller_id)
+        (msg.sender_id === myId && msg.receiver_id === data.seller_id) ||
+        (msg.sender_id === data.seller_id && msg.receiver_id === myId)
       ) {
         setMessages((prev) => [...prev, msg]);
       }
     };
-
-    socket.on("load_messages", handleLoadMessages);
+  
     socket.on("receive_message", handleReceiveMessage);
-
+  
     return () => {
-      socket.off("load_messages", handleLoadMessages);
       socket.off("receive_message", handleReceiveMessage);
       socket.off("connect");
     };
-  }, [data.id, toUser]); // toUser cần để filter realtime messages
+  }, [data.seller_id, myId]);
+  
 
   // 2️⃣ Load tin nhắn khi thay đổi người nhận
   // useEffect(() => {
@@ -86,51 +102,39 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
 
   // 3️⃣ Gửi tin nhắn
   const sendMessage = () => {
-    const to = toUser.trim();
-    if (!to) return Alert.alert("Info", "You must fill name receive user");
     if (!message.trim()) return;
-
-    const msgData: Message = {
-      user: data?.seller_id,
+    if (!myId || !data.seller_id) return;
+  
+    socket.emit("send_message", {
+      sender_id: myId,
+      receiver_id: data.seller_id, // gửi cho seller
       text: message,
-      to,
-    };
-
-    socket.emit("send_message", msgData);
+      image_url: null,
+    });
+  
     setMessage("");
   };
+  
 
   const renderItem = ({ item }: { item: Message }) => {
-    const isMine = item.user === data.seller_id;
-    const time = item.createdAt
-      ? new Date(item.createdAt).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
+    const isMine = item.sender_id === myId;
+    const time = item.created_at
+      ? new Date(item.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       : "";
-
+  
     return (
-
-      <View
-        style={[
-          styles.msgContainer,
-          isMine ? styles.myMsgContainer : styles.otherMsgContainer,
-        ]}
-      >
-        {!isMine && <Text style={styles.sender}>{item.user}</Text>}
-        <View
-          style={[
-            styles.bubble,
-            isMine ? styles.myBubble : styles.otherBubble,
-          ]}
-        >
-          <Text style={styles.text}>{item.text}</Text>
+      <View style={[styles.msgContainer, isMine ? styles.myMsgContainer : styles.otherMsgContainer]}>
+        {!isMine && <Text style={styles.sender}>{item.sender_id}</Text>}
+        <View style={[styles.bubble, isMine ? styles.myBubble : styles.otherBubble]}>
+          {item.text ? <Text style={styles.text}>{item.text}</Text> : null}
+          {item.image_url ? <Text style={styles.text}>[Ảnh]</Text> : null} 
           <Text style={styles.time}>{time}</Text>
         </View>
       </View>
-
     );
   };
+  
+  
   console.log('toUser state:', toUser);
   console.log('data chat: ',data)
   const seller= data?.seller

@@ -6,7 +6,7 @@ import AppInput from '../../common/AppInput';
 import ButtonSubmit from '../../common/ButtonSubmit';
 import AppView from '../../common/AppView';
 import { validatePhoneNumber } from '../../../utils/Helper';
-import auth from '@react-native-firebase/auth';
+
 
 type ModalForgetProps = {
   isVisible: boolean;
@@ -39,8 +39,8 @@ export default function ModalForgetPassword({ isVisible, onRequestClose }: Modal
       let phone = phoneNumber;
       if (phone.startsWith('0')) phone = '+84' + phone.substring(1);
 
-      const confirmObj = await auth().signInWithPhoneNumber(phone);
-      setConfirmation(confirmObj);
+      // const confirmObj = await auth().signInWithPhoneNumber(phone);
+      // setConfirmation(confirmObj);
 
       setLoading(false);
       setStep(2); // chuyển sang nhập OTP
