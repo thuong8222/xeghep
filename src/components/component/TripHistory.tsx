@@ -44,7 +44,11 @@ export default function TripHistory(props) {
                     </AppView>
 
                     <AppView row gap={8}>
-                        <AppText fontWeight={600}>{moment(props.data.time_receive).format('DD-MM-YYYY hh:mm')}</AppText>
+                        <AppText fontWeight={600}>
+                            {typeof props.data.time_receive === 'number' || /^\d+$/.test(props.data.time_receive)
+                                ? moment.unix(Number(props.data.time_receive)).format('DD-MM-YYYY HH:mm')
+                                : moment(props.data.time_receive).format('DD-MM-YYYY HH:mm')}
+                        </AppText>
 
                     </AppView>
                 </AppView>

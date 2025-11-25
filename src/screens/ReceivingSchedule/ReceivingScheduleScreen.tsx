@@ -1,155 +1,202 @@
-import { StyleSheet, Text, View } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, FlatList, RefreshControl } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
 import AppView from '../../components/common/AppView';
-
-import { listHistoryTrips } from '../../dataDemoJson';
 import { scale } from 'react-native-size-matters';
-
-import { FlatList } from 'react-native-gesture-handler';
-
 import TripHistory from '../../components/component/TripHistory';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import AppButton from '../../components/common/AppButton';
 import AppInput from '../../components/common/AppInput';
 import AppText from '../../components/common/AppText';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../redux/data/store';
-import { fetchReceivedTrips } from '../../redux/slices/tripsSlice';
+import { AppDispatch, RootState } from '../../redux/data/store';
+import { fetchReceivedTrips, FetchReceivedTripsParams } from '../../redux/slices/tripsSlice';
 import { useAppContext } from '../../context/AppContext';
+import moment from 'moment';
 
 export default function ReceivingScheduleScreen() {
-  const dispatch = useDispatch();
-  const {updateTrips} = useAppContext()
+  // 🔹 All hooks must be at the top level and in consistent order
+  const dispatch = useDispatch<AppDispatch>();
+  const { updateTrips } = useAppContext();
+  const { receivedTrips, loading, error } = useSelector((state: RootState) => state.trips);
+  
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [selectedDateType, setSelectedDateType] = useState<'from' | 'to' | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
-  const receivedTrips = useSelector((state: RootState) => state.trips.receivedTrips);
-  console.log('receivedTrips: ',receivedTrips)
-  useEffect(() => {
-    dispatch(fetchReceivedTrips());
-  }, [dispatch,updateTrips ]);
-  const renderItem_trip = ({ item }) => {
-    return <TripHistory data={item} />;
-  };
+  // 🔹 Format date
+  const formatDate = useCallback((date: Date) => {
+    return moment(date).format('DD/MM/YYYY');
+  }, []);
 
-  // ✅ Hàm chuyển đổi dd/mm/yyyy sang Date object
-  const parseDate = (dateString: string): Date | null => {
+  // 🔹 Parse date using moment
+  const parseDate = useCallback((dateString: string): moment.Moment | null => {
     if (!dateString) return null;
-    const [day, month, year] = dateString.split('/');
-    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-  };
+    const parsed = moment(dateString, 'DD/MM/YYYY', true);
+    return parsed.isValid() ? parsed : null;
+  }, []);
 
-  // ✅ Hàm format Date thành dd/mm/yyyy
-  const formatDate = (date: Date) => {
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
+  // 🔹 Convert dd/mm/yyyy to timestamp
+  const dateToTimestamp = useCallback((dateString: string): number | null => {
+    if (!dateString) return null;
+    return moment(dateString, 'DD/MM/YYYY').startOf('day').unix();
+  }, []);
 
-  // ✅ Xử lý khi chọn ngày
-  const handleConfirmDate = (selectedDate: Date) => {
-    const formattedDate = formatDate(selectedDate);
+  // 🔹 Load trips function
+  const loadTrips = useCallback(() => {
+    const start_date = dateToTimestamp(fromDate);
+    const end_date = dateToTimestamp(toDate);
+    const params: FetchReceivedTripsParams = {};
+    
+    if (start_date) params.start_date = start_date;
+    if (end_date) params.end_date = end_date;
 
-    if (selectedDateType === 'from') {
-      // Kiểm tra nếu "Từ ngày" > "Đến ngày" (khi đã có toDate)
-      if (toDate) {
-        const toDateObj = parseDate(toDate);
-        if (toDateObj && selectedDate > toDateObj) {
-          setErrorMessage('Ngày bắt đầu không thể sau ngày kết thúc.');
-          closeDatePicker()
-          return;
+    console.log('Dispatch fetchReceivedTrips with params:', params);
+    return dispatch(fetchReceivedTrips(params));
+  }, [dispatch, fromDate, toDate, dateToTimestamp]);
+
+  // 🔹 Initial load and reload when filters change
+  useEffect(() => {
+    loadTrips();
+  }, [loadTrips, updateTrips]);
+
+  // 🔹 Pull to refresh handler - clear filters and reload
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    setFromDate('');
+    setToDate('');
+    setErrorMessage('');
+    
+    // Dispatch without any date filters
+    await dispatch(fetchReceivedTrips({}));
+    setRefreshing(false);
+  }, [dispatch]);
+
+  // 🔹 Render trip item
+  const renderItem_trip = useCallback(
+    ({ item }) => <TripHistory data={item} />,
+    []
+  );
+
+  // 🔹 Handle date confirmation
+  const handleConfirmDate = useCallback(
+    (selectedDate: Date) => {
+      const formattedDate = formatDate(selectedDate);
+      const selectedMoment = moment(selectedDate);
+
+      if (selectedDateType === 'from') {
+        if (toDate) {
+          const toDateObj = parseDate(toDate);
+          if (toDateObj && selectedMoment.isAfter(toDateObj, 'day')) {
+            setErrorMessage('Ngày bắt đầu không thể sau ngày kết thúc.');
+            setIsDatePickerVisible(false);
+            setSelectedDateType(null);
+            return;
+          }
         }
+        setFromDate(formattedDate);
+        setErrorMessage('');
+      } else if (selectedDateType === 'to') {
+        if (fromDate) {
+          const fromDateObj = parseDate(fromDate);
+          if (fromDateObj && selectedMoment.isBefore(fromDateObj, 'day')) {
+            setErrorMessage('Ngày kết thúc không thể trước ngày bắt đầu.');
+            setIsDatePickerVisible(false);
+            setSelectedDateType(null);
+            return;
+          }
+        }
+        setToDate(formattedDate);
+        setErrorMessage('');
       }
 
-      setFromDate(formattedDate);
-      setErrorMessage('');
+      setIsDatePickerVisible(false);
+      setSelectedDateType(null);
+    },
+    [selectedDateType, toDate, fromDate, formatDate, parseDate]
+  );
 
-
-    } else if (selectedDateType === 'to') {
-      // Kiểm tra nếu "Đến ngày" < "Từ ngày" (khi đã có fromDate)
-      if (fromDate) {
-        const fromDateObj = parseDate(fromDate);
-        if (fromDateObj && selectedDate < fromDateObj) {
-          setErrorMessage('Ngày kết thúc không thể trước ngày bắt đầu.');
-          closeDatePicker()
-          return;
-        }
-      }
-
-      setToDate(formattedDate);
-      setErrorMessage('');
-
-    }
-
-    setIsDatePickerVisible(false);
-    setSelectedDateType(null);
-  };
-  const openSelectFromDate = () => {
-    console.log('openSelectFromDate')
+  // 🔹 Open date pickers
+  const openSelectFromDate = useCallback(() => {
     setSelectedDateType('from');
     setIsDatePickerVisible(true);
-  }
-  const openSelectFromTo = () => {
-    console.log('openSelectFromDate')
+  }, []);
+
+  const openSelectFromTo = useCallback(() => {
     setSelectedDateType('to');
     setIsDatePickerVisible(true);
-  }
-  const closeDatePicker = () => {
+  }, []);
+
+  const closeDatePicker = useCallback(() => {
     setIsDatePickerVisible(false);
     setSelectedDateType(null);
-  };
+  }, []);
+
+  // 🔹 Empty list component
+  const renderEmptyComponent = useCallback(() => {
+    if (loading && !refreshing) {
+      return (
+        <AppView paddingTop={32} alignItems="center">
+          <AppText title="Đang tải dữ liệu..." />
+        </AppView>
+      );
+    }
+    return (
+      <AppView paddingTop={32} alignItems="center">
+        <AppText title="Không có dữ liệu" />
+      </AppView>
+    );
+  }, [loading, refreshing]);
 
   return (
-    <AppView flex={1} backgroundColor='#fff' padding={scale(16)} position='relative'>
+    <AppView flex={1} backgroundColor="#fff" padding={scale(16)} position="relative">
+      {error && (
+        <AppView paddingBottom={8}>
+          <AppText color="red">{error}</AppText>
+        </AppView>
+      )}
+
       <AppView row justifyContent={'space-between'} gap={12} paddingBottom={16}>
-        <AppButton
-          flex={1}
-          onPress={openSelectFromDate}
-        >
+        <AppButton flex={1} onPress={openSelectFromDate}>
           <AppInput
-            keyboardType='numeric'
+            keyboardType="numeric"
             maxLength={10}
             editable={false}
             value={fromDate}
             onChangeText={setFromDate}
-            label='Từ ngày'
-            placeholder='Chọn ngày'
-            type='calendar'
+            label="Từ ngày"
+            placeholder="Chọn ngày"
+            type="calendar"
             onCalendarPress={openSelectFromDate}
           />
         </AppButton>
 
-        <AppButton
-          flex={1}
-          onPress={openSelectFromTo}
-        >
+        <AppButton flex={1} onPress={openSelectFromTo}>
           <AppInput
-            keyboardType='numeric'
+            keyboardType="numeric"
             maxLength={10}
             editable={false}
             value={toDate}
             onChangeText={setToDate}
-            label='Đến ngày'
-            placeholder='Chọn ngày'
-            type='calendar'
+            label="Đến ngày"
+            placeholder="Chọn ngày"
+            type="calendar"
             onCalendarPress={openSelectFromTo}
           />
         </AppButton>
       </AppView>
 
-      {errorMessage && (
-        <AppText
-          fontStyle='italic'
-          fontSize={14}
+      {errorMessage ? (
+        <AppText 
+          fontStyle="italic" 
+          fontSize={14} 
           style={{ color: 'red', marginBottom: 8 }}
         >
-          {"! " + errorMessage}
+          {'! ' + errorMessage}
         </AppText>
-      )}
+      ) : null}
 
       <FlatList
         data={receivedTrips}
@@ -157,13 +204,17 @@ export default function ReceivingScheduleScreen() {
         showsVerticalScrollIndicator={false}
         renderItem={renderItem_trip}
         ItemSeparatorComponent={() => <AppView height={scale(16)} />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        ListEmptyComponent={renderEmptyComponent}
       />
 
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"
         onConfirm={handleConfirmDate}
-        onCancel={() => setIsDatePickerVisible(false)}
+        onCancel={closeDatePicker}
       />
     </AppView>
   );

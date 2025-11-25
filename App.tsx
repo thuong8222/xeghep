@@ -18,6 +18,7 @@ import { Provider } from 'react-redux';
 import { store } from './src/redux/data/store';
 import CustomSplash from './src/screens/Splash';
 import { ContextProvider, useAppContext } from './src/context/AppContext';
+import { SocketProvider } from './src/context/SocketContext';
 export type RootParamList = {
   RootNavigator: NavigatorScreenParams<RootStackParamList>
   Auth: NavigatorScreenParams<AuthStackParamList>;
@@ -29,7 +30,7 @@ const Stack = createNativeStackNavigator<RootParamList>();
 const App = () => {
   const [isSplashDone, setIsSplashDone] = useState(false);
 
-  
+
   useEffect(() => {
     console.log('App mounted');
   }, []);
@@ -55,20 +56,22 @@ const App = () => {
   return (
 
     <Provider store={store}>
-      <ContextProvider>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          {!isSplashDone ? (
-            <CustomSplash onFinish={() => setIsSplashDone(true)} />
-          ) : (
-            <NavigationContainer>
-              <Stack.Navigator initialRouteName="Auth" screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="Auth" component={AuthNavigator} />
-                <Stack.Screen name="RootNavigator" component={RootNavigator} />
-              </Stack.Navigator>
-            </NavigationContainer>
-          )}
-        </GestureHandlerRootView>
-      </ContextProvider>
+      <SocketProvider>
+        <ContextProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            {!isSplashDone ? (
+              <CustomSplash onFinish={() => setIsSplashDone(true)} />
+            ) : (
+              <NavigationContainer>
+                <Stack.Navigator initialRouteName="Auth" screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="Auth" component={AuthNavigator} />
+                  <Stack.Screen name="RootNavigator" component={RootNavigator} />
+                </Stack.Navigator>
+              </NavigationContainer>
+            )}
+          </GestureHandlerRootView>
+        </ContextProvider>
+      </SocketProvider>
     </Provider>
 
   );

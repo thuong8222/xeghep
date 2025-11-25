@@ -13,7 +13,6 @@ import { ColorsGlobal } from "../components/base/Colors/ColorsGlobal";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../redux/data/store";
 import { confirmPointAction } from "../redux/slices/pointSlice";
-import { useSocket } from "../context/SocketContext";
 
 type RootStackParamList = {
   Chat: { data: string };
@@ -26,8 +25,7 @@ interface Props {
   navigation: any;
 }
 
-const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
-  const { socket, isConnected } = useSocket();
+const ChatScreenn: React.FC<Props> = ({ route, navigation }) => {
   const { data } = route?.params;
   console.log('data ChatScreen: ', data)
 
@@ -42,39 +40,39 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
   // }, [navigation ]);
 
   // 1️⃣ Register user & setup listeners
-  // useEffect(() => {
-  //   socket.emit("register_user", 'ten demo');
-  //   // socket.emit("register_user", username);
+  useEffect(() => {
+    socket.emit("register_user", 'ten demo');
+    // socket.emit("register_user", username);
 
-  //   socket.on("connect", () => {
-  //     console.log("✅ Connected to server");
-  //   });
+    socket.on("connect", () => {
+      console.log("✅ Connected to server");
+    });
 
-  //   // Lắng nghe tin nhắn load 1-1
-  //   const handleLoadMessages = (msgs: Message[]) => {
-  //     console.log("📜 Loaded messages:", msgs);
-  //     setMessages(msgs);
-  //   };
+    // Lắng nghe tin nhắn load 1-1
+    const handleLoadMessages = (msgs: Message[]) => {
+      console.log("📜 Loaded messages:", msgs);
+      setMessages(msgs);
+    };
 
-  //   // Lắng nghe tin nhắn realtime
-  //   const handleReceiveMessage = (msg: Message) => {
-  //     if (
-  //       (msg.user === data.seller_id && msg.to === toUser) ||
-  //       (msg.user === toUser && msg.to === data.seller_id)
-  //     ) {
-  //       setMessages((prev) => [...prev, msg]);
-  //     }
-  //   };
+    // Lắng nghe tin nhắn realtime
+    const handleReceiveMessage = (msg: Message) => {
+      if (
+        (msg.user === data.seller_id && msg.to === toUser) ||
+        (msg.user === toUser && msg.to === data.seller_id)
+      ) {
+        setMessages((prev) => [...prev, msg]);
+      }
+    };
 
-  //   socket.on("load_messages", handleLoadMessages);
-  //   socket.on("receive_message", handleReceiveMessage);
+    socket.on("load_messages", handleLoadMessages);
+    socket.on("receive_message", handleReceiveMessage);
 
-  //   return () => {
-  //     socket.off("load_messages", handleLoadMessages);
-  //     socket.off("receive_message", handleReceiveMessage);
-  //     socket.off("connect");
-  //   };
-  // }, [data.id, toUser]); 
+    return () => {
+      socket.off("load_messages", handleLoadMessages);
+      socket.off("receive_message", handleReceiveMessage);
+      socket.off("connect");
+    };
+  }, [data.id, toUser]); // toUser cần để filter realtime messages
 
   // 2️⃣ Load tin nhắn khi thay đổi người nhận
   // useEffect(() => {
@@ -88,17 +86,17 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
 
   // 3️⃣ Gửi tin nhắn
   const sendMessage = () => {
-    // const to = toUser.trim();
-    // if (!to) return Alert.alert("Info", "You must fill name receive user");
-    // if (!message.trim()) return;
+    const to = toUser.trim();
+    if (!to) return Alert.alert("Info", "You must fill name receive user");
+    if (!message.trim()) return;
 
-    // const msgData: Message = {
-    //   user: data?.seller_id,
-    //   text: message,
-    //   to,
-    // };
+    const msgData: Message = {
+      user: data?.seller_id,
+      text: message,
+      to,
+    };
 
-    // socket.emit("send_message", msgData);
+    socket.emit("send_message", msgData);
     setMessage("");
   };
 
@@ -182,12 +180,12 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
   }
   return (
     <Container  >
-      {/* <FlatList
+      <FlatList
         data={messages}
         keyExtractor={(_, i) => i.toString()}
         renderItem={renderItem}
         ListHeaderComponent={isOnwer ? ListHeaderComponent : undefined}
-      /> */}
+      />
       <AppView row alignItems="center" >
         <AppView flex={1} height={40}>
           <AppInput
@@ -207,7 +205,7 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
   );
 };
 
-export default ChatScreen;
+export default ChatScreenn;
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 10, backgroundColor: "#f2f2f2" },

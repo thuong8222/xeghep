@@ -35,8 +35,13 @@ export const getPoints = async () => {
   return api.get('api/points');
 };
 
-export const getHistoryTrandsactionPoints = async () => {
-  return api.get('api/points/history_transaction');
+interface PointHistoryParams {
+  start_date: number;
+  end_date: number;
+}
+
+export const getHistoryTrandsactionPoints = async (params: PointHistoryParams) => {
+  return api.get('api/points/history_transaction', { params });
 };
 export const createSale = async (data: any) => {
   return api.post('api/points/create_sale', data);

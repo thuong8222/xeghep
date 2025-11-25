@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, TouchableOpacity,  Image, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Image, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppButton from "../../components/common/AppButton";
 import AppInput from "../../components/common/AppInput";
@@ -37,6 +37,18 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
 
   const [isOpenModal, setIsOpenModal] = useState(false);
+  const orderData = {
+    id: 'bca9975a-f23d-4022-8f8a-ba16735f1710',
+    seller_id: '019a95e0-bfb2-7279-8e5a-a15712203b5e',
+    points_amount: 1,
+    price_per_point: '1000.00',
+    is_sold: 0,
+    status: 'pending_payment',
+    bank_info: '{"bank_name":"Vietcombank","account_number":"0123456789","account_name":"Nguyen Van A"}',
+    buyer_id: '019a95e0-eb69-7028-9c61-0c85593fa704',
+    created_at: '2025-11-20T01:15:50.000000Z',
+    updated_at: '2025-11-25T08:23:57.000000Z'
+  };
 
   const rnBiometrics = new ReactNativeBiometrics()
   useEffect(() => {
@@ -46,7 +58,13 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           text: 'OK',
           onPress: () => {
             clear();
+           
             navigation.navigate('RootNavigator');
+            // navigation.navigate("RootNavigator", {
+            //   screen: "ChatScreen",
+            //   params: { data: orderData },
+            // });
+
           },
         },
       ]);
@@ -74,7 +92,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
   const gotoRegister = () => {
     navigation.navigate('Auth', { screen: 'RegisterScreen' });
- 
+
   };
   const ForgotPassword = () => {
     setIsOpenModal(true);
@@ -125,7 +143,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   return (
 
     <ScrollView style={{ flexGrow: 1, backgroundColor: ColorsGlobal.backgroundWhite }} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', }} showsVerticalScrollIndicator={false}>
-     <Container showTopInset>
+      <Container showTopInset>
         <AppView flex={1} justifyContent="center" >
 
           <AppView justifyContent="center" alignItems="center" marginBottom={20} gap={16}>
@@ -222,7 +240,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             </AppText>
           </AppButton>
         </AppView>
-        </Container>
+      </Container>
       <ModalForgetPassword isVisible={isOpenModal} onRequestClose={() => setIsOpenModal(false)} />
     </ScrollView>
 

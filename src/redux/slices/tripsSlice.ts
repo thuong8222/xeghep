@@ -138,24 +138,25 @@ export const fetchTrips = createAsyncThunk<
     );
   }
 });
+export interface FetchReceivedTripsParams {
+  start_date?: number; // timestamp giây
+  end_date?: number;   // timestamp giây
+}
 // --- Thêm asyncThunk để fetch chuyến đã nhận ---
 export const fetchReceivedTrips = createAsyncThunk<
   Trip[],
-  void,
+  FetchReceivedTripsParams,
   { rejectValue: string }
->('trips/fetchReceivedTrips', async (_, { rejectWithValue }) => {
+>('trips/fetchReceivedTrips', async (params, { rejectWithValue }) => {
   try {
-    const response = await api.get('api/trips/received');
-    console.log('fetchReceivedTrips res: ',response)
-    // Giả sử backend trả về { data: [...] }
+    console.log('params slice: ',params)
+    const response = await api.get('api/trips/received', { params });
     return response.data.data;
   } catch (err: any) {
-    console.log('err fetchReceivedTrips:', err);
-    return rejectWithValue(
-      err.response?.data?.message || 'Lấy chuyến đã nhận thất bại'
-    );
+    return rejectWithValue(err.response?.data?.message || 'Lấy chuyến thất bại');
   }
 });
+
 export const createTrip = createAsyncThunk<
   Trip,
   CreateTripPayload,
