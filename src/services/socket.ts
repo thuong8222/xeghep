@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
 // ⚠️ Đổi IP này thành IP máy Mac bạn (không dùng localhost khi test trên điện thoại thật)
-const socket = io("http://192.168.120.75:3000", {
+const socket = io("http://15.235.167.241:3000", {
   transports: ["websocket"],
 });
 

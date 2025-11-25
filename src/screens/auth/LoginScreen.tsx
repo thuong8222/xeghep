@@ -21,6 +21,7 @@ import { validatePassword, validatePhoneNumber } from "../../utils/Helper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthApi } from "../../redux/hooks/useAuthApi";
 import Container from "../../components/common/Container";
+import { useSocket } from "../../context/SocketContext";
 
 type LoginParamList = NativeStackNavigationProp<RootParamList>;
 
@@ -59,11 +60,11 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           onPress: () => {
             clear();
            
-            navigation.navigate('RootNavigator');
-            // navigation.navigate("RootNavigator", {
-            //   screen: "ChatScreen",
-            //   params: { data: orderData },
-            // });
+            // navigation.navigate('RootNavigator');
+            navigation.navigate("RootNavigator", {
+              screen: "ChatScreen",
+              params: { data: orderData },
+            });
 
           },
         },
@@ -140,6 +141,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
   const insets = useSafeAreaInsets()
+  const { isConnected } = useSocket();
   return (
 
     <ScrollView style={{ flexGrow: 1, backgroundColor: ColorsGlobal.backgroundWhite }} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', }} showsVerticalScrollIndicator={false}>
@@ -147,7 +149,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         <AppView flex={1} justifyContent="center" >
 
           <AppView justifyContent="center" alignItems="center" marginBottom={20} gap={16}>
-
+          <AppText>Socket status: {isConnected ? "✅ Connected" : "❌ Disconnected"}</AppText>
             <Image source={logo} style={styles.logo} resizeMode="contain" />
             <AppView gap={6}>
               <AppText

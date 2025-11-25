@@ -9,7 +9,7 @@ import React, {
   import { io, Socket } from "socket.io-client";
   
   // ⚠️ IP server của bạn
-  const SOCKET_URL = "http://192.168.120.75:3000";
+  const SOCKET_URL = "http://15.235.167.241:3000";
   
   // Type cho Context
   interface SocketContextType {
@@ -32,32 +32,48 @@ import React, {
     const [isConnected, setIsConnected] = useState(false);
   
     useEffect(() => {
-      // Khởi tạo socket ONE-TIME
       socketRef.current = io(SOCKET_URL, {
-        transports: ["websocket"],
+        transports: ["polling", "websocket"], // ĐỔI THỨ TỰ: polling trước
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: 10,
+        timeout: 20000,
+        forceNew: true,
       });
-  
+    
       const socket = socketRef.current;
-  
+    
       socket.on("connect", () => {
         console.log("🟢 Socket connected:", socket.id);
+        console.log("🔌 Transport:", socket.io.engine.transport.name);
         setIsConnected(true);
       });
-  
+    
       socket.on("connect_error", (err) => {
         console.log("🔴 Socket connection error:", err.message);
+        console.log("🔴 Trying transport:", socket.io.engine.transport.name);
       });
-  
+    
+      socket.io.on("error", (error) => {
+        console.log("❌ Socket.IO error:", error);
+      });
+    
       socket.on("disconnect", (reason) => {
         console.log("⚪️ Socket disconnected:", reason);
         setIsConnected(false);
+        
+        if (reason === "io server disconnect") {
+          // Server chủ động ngắt, cần reconnect thủ công
+          socket.connect();
+        }
       });
-  
+    
       return () => {
         socket.disconnect();
       };
     }, []);
-  
+   
     return (
       <SocketContext.Provider
         value={{ socket: socketRef.current, isConnected }}
