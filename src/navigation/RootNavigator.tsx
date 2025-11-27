@@ -30,7 +30,7 @@ export default function RootNavigator() {
     };
     fetchDriver();
   }, []);
-  console.log('first driver AsyncStorage  in root navigator', driver?.id)
+  console.log('driver?.id AsyncStorage  in root navigator', driver?.id)
  const {currentDriver } = useAppContext();
  console.log('currentDriver in root navigator', currentDriver.id)
 

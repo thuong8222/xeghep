@@ -59,9 +59,9 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         const driver_ = JSON.parse(driverString);
         if (!driver_?.id) return;
 
-        console.log('first driver id in socket context', driver_.id)
+        console.log('registerUser driver id in socket context', driver_.id)
 
-        socket.emit("register_user socket context", driver_.id);
+        socket.emit("register_user", driver_.id);
         console.log("📌 Register user online socket context:", driver_.id);
       } catch (error) {
         console.log("❌ Error register user socket context:", error);
@@ -85,10 +85,6 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     socket.io.on("error", (error) => { 
       console.log("❌ Socket.IO error:", error);
     });
-    // Demo: nhận message từ server
-    // socket.on("message", (msg) => {
-    //   console.log("Server gửi:", msg);
-    // });
 
     socket.on("disconnect", (reason) => {
       console.log("⚪️ Socket disconnected:", reason);
