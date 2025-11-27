@@ -1,6 +1,8 @@
 export interface Message {
-    user: string;
-    text: string;
-    createdAt?: string;
-    to?: string; // người nhận cụ thể (nếu có)
-  }
+  id: string;
+  sender_id: string;
+  receiver_id: string | null;
+  text: string | null;
+  image_url: string | null;
+  created_at: Date | string; // ✅ Đổi từ createdAt thành created_at
+}

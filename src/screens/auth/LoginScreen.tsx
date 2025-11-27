@@ -22,6 +22,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthApi } from "../../redux/hooks/useAuthApi";
 import Container from "../../components/common/Container";
 import { useSocket } from "../../context/SocketContext";
+import { useAppContext } from "../../context/AppContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type LoginParamList = NativeStackNavigationProp<RootParamList>;
 
@@ -35,7 +37,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [password, setPassword] = useState("Admin123456@");
   const [phoneNumberError, setPhoneNumberError] = useState('');
   const [passwordError, setPasswordError] = useState('');
-
+const {setCurrentDriver } = useAppContext();
 
   const [isOpenModal, setIsOpenModal] = useState(false);
   const orderData = {
@@ -60,11 +62,11 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           onPress: () => {
             clear();
            
-            // navigation.navigate('RootNavigator');
-            navigation.navigate("RootNavigator", {
-              screen: "ChatScreen",
-              params: { data: orderData },
-            });
+             navigation.navigate('RootNavigator');
+            // navigation.navigate("RootNavigator", {
+            //   screen: "ChatScreen",
+            //   params: { data: orderData },
+            // });
 
           },
         },
@@ -84,6 +86,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
     try {
       await login({ phone: phoneNumber, password });
+      setCurrentDriver(JSON.parse((await AsyncStorage.getItem("driver")) || 'null'));
     } catch (err: any) {
       Alert.alert('Đăng nhập thất bại', err || 'Có lỗi xảy ra');
     }

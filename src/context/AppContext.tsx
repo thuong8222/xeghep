@@ -8,7 +8,8 @@ interface AppContextType {
   setUpdatePoints: (val: string) => void;
   updateTrips:string;
   setUpdateTrips: (val: string) => void;
-
+currentDriver: string;
+  setCurrentDriver: (val: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -23,11 +24,13 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
 const [idArea, setIdArea] = useState('');
 const [updatePoints,setUpdatePoints] = useState('');
 const [updateTrips,setUpdateTrips] = useState('');
+const [currentDriver, setCurrentDriver] = useState('');
   return (
     <AppContext.Provider value={{
       idArea, setIdArea,
       updatePoints,setUpdatePoints,
-      updateTrips,setUpdateTrips
+      updateTrips,setUpdateTrips,
+      currentDriver, setCurrentDriver
     }}>
       {children}
     </AppContext.Provider>

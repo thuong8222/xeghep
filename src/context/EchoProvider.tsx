@@ -1,7 +1,7 @@
 // context/EchoProvider.tsx
 import React, { createContext, useEffect } from 'react';
 import Echo from 'laravel-echo';
-import Pusher from 'pusher-js/react-native';
+import Pusher from '@pusher/pusher-websocket-react-native';
 import { Alert } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { fetchPointsForSale } from '../redux/slices/pointSlice';

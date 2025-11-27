@@ -3,12 +3,14 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import AppConfig from '../../services/config';
+import { useAppContext } from '../../context/AppContext';
 
 interface AuthState {
   token: string | null;
   loading: boolean;
   error: string | null;
   successMessage: string | null;
+  driver?: string | null; 
 }
 
 const initialState: AuthState = {
@@ -56,12 +58,20 @@ export const loginUser = createAsyncThunk<
   try {
     const response = await api.post('/api/auth/login', payload);
     console.log('response login: ', response);
+    console.log('response login driver: ', response.data.data.driver);
     console.log('response login  message: ', response.data.message);
 
     const token = response.data.data.token;
     const successMessage = response.data.message || 'Đăng nhập thành công'; // ✅ lấy message
-    await AsyncStorage.setItem('token', token);
-    return { token, successMessage };
+    const driver = response.data.data.driver;
+    await AsyncStorage.setItem('token',token );
+
+    await AsyncStorage.setItem(
+      'driver',
+      JSON.stringify(response.data.data.driver)
+    );
+   
+    return { token, successMessage, driver};
   } catch (err: any) {
     return rejectWithValue(
       err.response?.data?.message || err.message || 'Đăng nhập thất bại',
@@ -133,6 +143,7 @@ const authSlice = createSlice({
           state.loading = false;
           state.token = action.payload.token;
           state.successMessage = action.payload.successMessage;
+          state.driver = action.payload.driver;
         },
       )
       .addCase(loginUser.rejected, (state, action) => {

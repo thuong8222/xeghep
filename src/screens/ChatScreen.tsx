@@ -1,10 +1,9 @@
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import { View, TextInput, Button, FlatList, Text, StyleSheet, Alert } from "react-native";
-import socket from "../services/socket";
+
 import { Message } from "../types/Message";
 import { RouteProp } from "@react-navigation/native";
-import Container from "../components/common/Container";
-import AppInput from "../components/common/AppInput";
+
 import AppView from "../components/common/AppView";
 import AppButton from "../components/common/AppButton";
 import AppText from "../components/common/AppText";
@@ -14,6 +13,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../redux/data/store";
 import { confirmPointAction } from "../redux/slices/pointSlice";
 import { useSocket } from "../context/SocketContext";
+import Container from "../components/common/Container";
+import AppInput from "../components/common/AppInput";
+import IconSent from "../assets/icons/IconSent";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAppContext } from "../context/AppContext";
 
 type RootStackParamList = {
   Chat: { data: string };
@@ -28,84 +32,136 @@ interface Props {
 
 const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
   const { socket, isConnected } = useSocket();
+  const dispatch = useDispatch<AppDispatch>();
   const { data } = route?.params;
-  console.log('data ChatScreen: ', data)
+  console.log('data chat screen', data)
+  const { currentDriver } = useAppContext();
 
+  console.log('currentDriver in chat screen', currentDriver)
+
+  const currentUserId = currentDriver?.id // ví dụ: người mua là người đang login
+  const chatWith =
+    currentUserId === data?.buyer_id ? data?.seller_id : data?.buyer_id;
+  console.log(chatWith, 'chatWith id')
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
-  const [toUser, setToUser] = useState("user2");
 
-  // useLayoutEffect(() => {
-  //   navigation.setOptions({
-  //     title: `${}`,
-  //   });
-  // }, [navigation ]);
+  const idPoint = data?.id;
 
-  // 1️⃣ Register user & setup listeners
-  // useEffect(() => {
-  //   socket.emit("register_user", 'ten demo');
-  //   // socket.emit("register_user", username);
+  const isOnwer = currentUserId === data?.seller_id;
+  console.log('first currentUserId in chat screen', isOnwer)
+  const nameChatWith = isOnwer ? data?.buyer.full_name : data?.seller.full_name;
 
-  //   socket.on("connect", () => {
-  //     console.log("✅ Connected to server");
-  //   });
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: `${nameChatWith}`,
+    });
+  }, [navigation, data?.buyer?.full_name]);
 
-  //   // Lắng nghe tin nhắn load 1-1
-  //   const handleLoadMessages = (msgs: Message[]) => {
-  //     console.log("📜 Loaded messages:", msgs);
-  //     setMessages(msgs);
-  //   };
+  useEffect(() => {
+    if (!socket) {
+      console.log("⚠️ Socket chưa sẵn sàng");
+      return;
+    }
 
-  //   // Lắng nghe tin nhắn realtime
-  //   const handleReceiveMessage = (msg: Message) => {
-  //     if (
-  //       (msg.user === data.seller_id && msg.to === toUser) ||
-  //       (msg.user === toUser && msg.to === data.seller_id)
-  //     ) {
-  //       setMessages((prev) => [...prev, msg]);
-  //     }
-  //   };
+    console.log("✅ Setting up socket listeners, socket id:", socket.id);
 
-  //   socket.on("load_messages", handleLoadMessages);
-  //   socket.on("receive_message", handleReceiveMessage);
+    socket.on("connect", () => {
+      console.log("🔌 Socket connected, id:", socket.id);
+      socket.emit("register_user", currentUserId);
+      console.log("📌 Register user:", currentUserId);
+    });
 
-  //   return () => {
-  //     socket.off("load_messages", handleLoadMessages);
-  //     socket.off("receive_message", handleReceiveMessage);
-  //     socket.off("connect");
-  //   };
-  // }, [data.id, toUser]); 
+    // ✅ QUAN TRỌNG: Nếu đã connected rồi thì emit luôn
+    if (socket.connected) {
+      socket.emit("register_user", currentUserId);
+      console.log("📌 Register user (already connected):", currentUserId);
+    }
 
-  // 2️⃣ Load tin nhắn khi thay đổi người nhận
-  // useEffect(() => {
-  //   const to = toUser.trim();
-  //   if (!to) return;
+    return () => {
+      socket.off("connect");
+    };
+  }, [socket, currentUserId]);
 
-  //   setMessages([]); // reset trước khi load
-  //   console.log("🔄 Loading chat messages for:", to);
-  //   socket.emit("load_chat_messages", { data.seller_id, chatWith: to });
-  // }, [toUser, data?.seller_id]);
 
-  // 3️⃣ Gửi tin nhắn
+  // Load messages
+  useEffect(() => {
+    if (!socket || !socket.connected) {
+      console.log("⚠️ Socket not ready for loading messages");
+      return;
+    }
+
+    console.log("🔄 Loading chat messages...");
+    socket.emit("load_chat_messages", {
+      user_id: currentUserId,
+      chatWith: chatWith,
+    });
+
+    const handleLoadMessages = (msgs: Message[]) => {
+      console.log("📜 Loaded messages:", msgs.length);
+      setMessages(msgs);
+    };
+
+    const handleReceiveMessage = (msg: Message) => {
+      console.log("📨 Received message:", msg);
+      console.log("📨 msg.sender_id === currentUserId && msg.receiver_id === chatWith):", msg.sender_id == currentUserId && msg.receiver_id === chatWith);
+      console.log("📨 msg.sender_id === chatWith && msg.receiver_id === currentUserId:", msg.sender_id === chatWith && msg.receiver_id == currentUserId);
+      if (
+        (msg.sender_id === currentUserId && msg.receiver_id === chatWith) ||
+        (msg.sender_id === chatWith && msg.receiver_id === currentUserId)
+      ) {
+        setMessages((prev) => [...prev, msg]);
+      }
+    };
+
+    socket.on("load_messages", handleLoadMessages);
+    socket.on("receive_message", handleReceiveMessage);
+
+    return () => {
+      socket.off("load_messages", handleLoadMessages);
+      socket.off("receive_message", handleReceiveMessage);
+    };
+  }, [socket, currentUserId, chatWith]);
+
   const sendMessage = () => {
-    // const to = toUser.trim();
-    // if (!to) return Alert.alert("Info", "You must fill name receive user");
-    // if (!message.trim()) return;
+    if (!message.trim()) return;
 
-    // const msgData: Message = {
-    //   user: data?.seller_id,
-    //   text: message,
-    //   to,
-    // };
+    if (!socket) {
+      console.error("❌ Socket is null!");
+      Alert.alert("Lỗi", "Chưa kết nối tới server");
+      return;
+    }
 
-    // socket.emit("send_message", msgData);
+    if (!socket.connected) {
+      console.error("❌ Socket not connected!");
+      Alert.alert("Lỗi", "Mất kết nối tới server");
+      return;
+    }
+
+    console.log("✅ Socket connected:", socket.id);
+    console.log("📤 Emitting send_message...");
+
+    const payload = {
+      sender_id: currentUserId,
+      receiver_id: chatWith,
+      text: message,
+    };
+
+    console.log("📦 Payload:", payload);
+
+    socket.emit("send_message", payload, (response: any) => {
+      // ✅ Callback để xác nhận server nhận được
+      console.log("✅ Server acknowledged:", response);
+    });
+
     setMessage("");
   };
 
   const renderItem = ({ item }: { item: Message }) => {
-    const isMine = item.user === data.seller_id;
-    const time = item.createdAt
-      ? new Date(item.createdAt).toLocaleTimeString([], {
+    const isMine = item.sender_id === currentUserId;
+    // Sửa tên trường phù hợp với server
+    const time = item.created_at // ✅ Dùng created_at thay vì createdAt
+      ? new Date(item.created_at).toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       })
@@ -133,22 +189,11 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
 
     );
   };
-  console.log('toUser state:', toUser);
-  console.log('data chat: ',data)
-  const seller= data?.seller
 
-  const dispatch = useDispatch<AppDispatch>();
-  const { loading, error } = useSelector((state: RootState) => state.point);
-  const idPoint = data?.id;
-  console.log(idPoint,'idPoint')
-  const isOnwer = data?.buyer_id === data?.seller?.id;
-  console.log('isOnwer',isOnwer)
-  console.log('data?.buyer_id',data?.buyer_id)
-  console.log('data?.seller?.id',data?.seller?.id)
   const handleConfirm = async () => {
- 
+
     const resultAction = await dispatch(confirmPointAction(idPoint));
-    console.log('resultAction',resultAction )
+    console.log('resultAction', resultAction)
     if (confirmPointAction.fulfilled.match(resultAction)) {
       // Thành công
       Alert.alert('Thành công', 'Xác nhận điểm thành công');
@@ -159,15 +204,15 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
   };
   const ListHeaderComponent = () => {
     return (
-  
+
       <AppView radius={16} padding={16} gap={6} backgroundColor={ColorsGlobal.backgroundGray}>
         <AppView row justifyContent={'space-between'}>
           <AppText fontSize={14}>{'Khách mua: '}</AppText>
-          <AppText fontSize={14}>{seller.full_name + ' - '+ seller.phone}</AppText>
+          <AppText fontSize={14}>{data?.buyer?.full_name + ' - ' + data?.buyer?.phone}</AppText>
         </AppView>
         <AppView row justifyContent={'space-between'}>
           <AppText fontSize={14}>{'Điểm bán: '}</AppText>
-          <AppText fontSize={14}>{data?.points_amount +' Điểm'}</AppText>
+          <AppText fontSize={14}>{data?.points_amount + ' Điểm'}</AppText>
         </AppView>
         <AppView row justifyContent={'space-between'}>
           <AppButton>
@@ -182,24 +227,24 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
   }
   return (
     <Container  >
-      {/* <FlatList
+      <FlatList
         data={messages}
         keyExtractor={(_, i) => i.toString()}
         renderItem={renderItem}
         ListHeaderComponent={isOnwer ? ListHeaderComponent : undefined}
-      /> */}
+      />
       <AppView row alignItems="center" >
         <AppView flex={1} height={40}>
           <AppInput
             value={message}
             onChangeText={setMessage}
             placeholder="Type a message..."
-            style={{ paddingTop: 0 }}
+            style={{ paddingTop: 0, borderWidth: 1 }}
           ></AppInput>
         </AppView>
 
         <AppButton onPress={sendMessage} >
-          <AppText title="Send" />
+          <IconSent />
         </AppButton>
       </AppView>
 
@@ -213,7 +258,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 10, backgroundColor: "#f2f2f2" },
 
   msgContainer: {
-    marginVertical: 6,
+    marginVertical: 3,
   },
   myMsgContainer: {
     alignItems: "flex-end",

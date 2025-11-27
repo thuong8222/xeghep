@@ -1,4 +1,4 @@
-const baseUrl = 'https://driver11.bzotech.com/';
+const baseUrl = 'https://app.xeghepnd.com/';
 
 const AppConfig = {
   BASE_URL: baseUrl,

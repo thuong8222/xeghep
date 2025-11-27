@@ -122,7 +122,6 @@ export const fetchTrips = createAsyncThunk<
       },
     });
 
-    console.log('response: ', response);
     return {
       trips: response.data.data,
       // driver_areas: response.data.driver_areas,
