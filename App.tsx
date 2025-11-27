@@ -6,34 +6,22 @@
  */
 
 import 'react-native-gesture-handler';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 import React, { useEffect, useState } from "react";
 import { NavigationContainer, NavigatorScreenParams } from "@react-navigation/native";
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import RootNavigator, { RootStackParamList } from './src/navigation/RootNavigator';
-import AuthNavigator, { AuthStackParamList } from './src/navigation/AuthNavigator';
 
-import { requestUserPermission, listenForForegroundMessages, registerBackgroundHandler, getFcmToken, createAndroidChannel, displayNotification } from '../xeghep/src/utils/notificationService';
+
+import { requestUserPermission, listenForForegroundMessages,  createAndroidChannel, displayNotification } from '../xeghep/src/utils/notificationService';
 import { Provider } from 'react-redux';
 import { store } from './src/redux/data/store';
-import CustomSplash from './src/screens/Splash';
-import { ContextProvider, useAppContext } from './src/context/AppContext';
-import { SocketProvider } from './src/context/SocketContext';
-export type RootParamList = {
-  RootNavigator: NavigatorScreenParams<RootStackParamList>
-  Auth: NavigatorScreenParams<AuthStackParamList>;
-  Chat: { username: string };
-};
 
-const Stack = createNativeStackNavigator<RootParamList>();
+import { ContextProvider } from './src/context/AppContext';
+import { SocketProvider } from './src/context/SocketContext';
+import MainNavigator from './src/navigation/MainNavigator';
+
 
 const App = () => {
-  const [isSplashDone, setIsSplashDone] = useState(false);
 
-
-  useEffect(() => {
-    console.log('App mounted');
-  }, []);
   useEffect(() => {
     const initNotifications = async () => {
       console.log('App.tsx useEffect - initNotifications');
@@ -58,18 +46,9 @@ const App = () => {
     <Provider store={store}>
       <SocketProvider>
         <ContextProvider>
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            {!isSplashDone ? (
-              <CustomSplash onFinish={() => setIsSplashDone(true)} />
-            ) : (
-              <NavigationContainer>
-                <Stack.Navigator initialRouteName="Auth" screenOptions={{ headerShown: false }}>
-                  <Stack.Screen name="Auth" component={AuthNavigator} />
-                  <Stack.Screen name="RootNavigator" component={RootNavigator} />
-                </Stack.Navigator>
-              </NavigationContainer>
-            )}
-          </GestureHandlerRootView>
+          <NavigationContainer>
+            <MainNavigator />
+          </NavigationContainer>
         </ContextProvider>
       </SocketProvider>
     </Provider>

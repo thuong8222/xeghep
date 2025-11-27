@@ -70,6 +70,7 @@ const {setCurrentDriver } = useAppContext();
 
     try {
       await login({ phone: phoneNumber, password });
+     
       setCurrentDriver(JSON.parse((await AsyncStorage.getItem("driver")) || 'null'));
     } catch (err: any) {
       Alert.alert('Đăng nhập thất bại', err || 'Có lỗi xảy ra');

@@ -17,6 +17,7 @@ import { AppDispatch, RootState } from '../../redux/data/store'
 import { buyPointAction, fetchPointsOnSale } from '../../redux/slices/pointSlice'
 import ModalShowInfoTranferMoney from '../../components/component/modals/ModalShowInfoTranferMoney'
 import ChatScreen from '../ChatScreen'
+import AppText from '../../components/common/AppText'
 
 type BuyTripProps = NativeStackNavigationProp<PointTabsParamList, 'PointAddScreen'>;
 interface Props {
@@ -74,7 +75,7 @@ export default function PointScreen({ navigation }: Props) {
                         {
                             text: 'OK',
                             onPress: () => {
-                           console.log('result: ',result)
+                                console.log('result: ', result)
                                 setPointSelected(data.item);
                                 closeRow && closeRow(rowMap, rowKey);
                                 navigation.navigate('ChatScreen', { data: result.data })
@@ -119,7 +120,11 @@ export default function PointScreen({ navigation }: Props) {
                 directionalDistanceChangeThreshold={2}
                 friction={8}
                 tension={50}
-
+                ListEmptyComponent={() => (
+                    <AppView flex={1} justifyContent='center' alignItems='center' marginTop={50}>
+                        <AppText>Không có điểm nào đang bán</AppText>
+                    </AppView>
+                )}
                 onRowDidOpen={rowKey => console.log(`Hàng ${rowKey} đã mở`)} />
             <AppButton onPress={SaleTrips} position={'absolute'} right={36} bottom={34} width={48} height={48} radius={999} backgroundColor={ColorsGlobal.main} justifyContent='center' alignItems='center'>
                 <IconPlus size={20} />

@@ -4,7 +4,14 @@ import axios from 'axios';
 import AppConfig from '../../services/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PointerType } from 'react-native-gesture-handler';
-import { buyPoint, confirmPoint, createSale, getHistoryTrandsactionPoints, getPoints, uploadTransferProof } from '../data/API';
+import {
+  buyPoint,
+  confirmPoint,
+  createSale,
+  getHistoryTrandsactionPoints,
+  getPoints,
+  uploadTransferProof,
+} from '../data/API';
 
 // ---- INTERFACE ----
 export interface Point {
@@ -20,7 +27,7 @@ export interface Point {
 
 interface PointState {
   points: Point[];
-  history: any[],
+  history: any[];
   loading: boolean;
   error: string | null;
   successMessage: string | null;
@@ -37,7 +44,7 @@ interface UploadProofPayload {
 const initialState: PointState = {
   points: [],
   loading: false,
-  history:[],
+  history: [],
   error: null,
   successMessage: null,
 };
@@ -75,11 +82,10 @@ export const fetchPointsOnSale = createAsyncThunk<
   { rejectValue: string }
 >('point/fetchPointsOnSale', async (_, { rejectWithValue }) => {
   try {
-    // const response = await api.get('api/points');  
-     const response = await getPoints();
-    console.log('fetchPointsOnSale: ',response.data.data)
+    // const response = await api.get('api/points');
+    const response = await getPoints();
+    console.log('fetchPointsOnSale: ', response.data.data);
     if (response.data.status === 1) {
-   
       return response.data.data;
     } else {
       return rejectWithValue(
@@ -87,7 +93,7 @@ export const fetchPointsOnSale = createAsyncThunk<
       );
     }
   } catch (err: any) {
-    console.log('fetchPointsOnSale err: ',err)
+    console.log('fetchPointsOnSale err: ', err);
     return rejectWithValue(
       err.response?.data?.message || 'Lấy danh sách điểm thất bại',
     );
@@ -96,12 +102,12 @@ export const fetchPointsOnSale = createAsyncThunk<
 // 1️⃣ Mua điểm
 export const buyPointAction = createAsyncThunk<
   any, // trả về data từ API
-  { id: string},
+  { id: string },
   { rejectValue: string }
 >('point/buyPoint', async ({ id, data }, { rejectWithValue, dispatch }) => {
   try {
     const response = await buyPoint(id, data);
-    console.log('point/buyPoint mua diem: ',response)
+    console.log('point/buyPoint mua diem: ', response);
     if (response.data.status === 1) {
       dispatch(fetchPointsOnSale()); // refresh danh sách
       return response.data;
@@ -127,15 +133,15 @@ export const uploadTransferProofAction = createAsyncThunk<
         return response.data;
       } else {
         return rejectWithValue(
-          response.data.message || 'Upload chứng từ thất bại'
+          response.data.message || 'Upload chứng từ thất bại',
         );
       }
     } catch (err: any) {
       return rejectWithValue(
-        err.response?.data?.message || 'Upload chứng từ thất bại'
+        err.response?.data?.message || 'Upload chứng từ thất bại',
       );
     }
-  }
+  },
 );
 
 // 3️⃣ Xác nhận điểm
@@ -164,8 +170,8 @@ export const fetchPointHistory = createAsyncThunk<
 >('point/fetchPointHistory', async (_, { rejectWithValue }) => {
   try {
     const response = await getHistoryTrandsactionPoints();
-    console.log('fetchPointHistory: ',response.data.data)
-    console.log('fetchPointHistory: ',response.data)
+    console.log('fetchPointHistory: ', response.data.data);
+    console.log('fetchPointHistory: ', response.data);
     if (response.data.status === true) {
       return response.data.data; // trả về danh sách giao dịch
     } else {
@@ -173,17 +179,17 @@ export const fetchPointHistory = createAsyncThunk<
     }
   } catch (err: any) {
     return rejectWithValue(
-      err.response?.data?.message || 'Lấy lịch sử thất bại'
+      err.response?.data?.message || 'Lấy lịch sử thất bại',
     );
   }
 });
 export const createSalePoint = createAsyncThunk<
-string,                 // return type (response.data.data)
-CreateSalePayload,      // payload type
-{ rejectValue: string } // reject type
->('point/createSalePoint', async (payload, { rejectWithValue ,dispatch}) => {
+  string, // return type (response.data.data)
+  CreateSalePayload, // payload type
+  { rejectValue: string } // reject type
+>('point/createSalePoint', async (payload, { rejectWithValue, dispatch }) => {
   try {
-    const response = await createSale(payload)
+    const response = await createSale(payload);
 
     if (response.data.status === 1) {
       dispatch(fetchPointsOnSale());
@@ -194,7 +200,7 @@ CreateSalePayload,      // payload type
       );
     }
   } catch (err: any) {
-    console.log('createSalePoint err: ',err)
+    console.log('createSalePoint err: ', err);
     return rejectWithValue(
       err.response?.data?.message || 'Lấy danh sách điểm thất bại',
     );
@@ -230,7 +236,7 @@ const pointSlice = createSlice({
         state.loading = false;
         state.error = action.payload || 'Lấy danh sách điểm đang bán thất bại';
       })
-//tao moi point
+      //tao moi point
       .addCase(createSalePoint.pending, state => {
         state.loading = true;
         state.error = null;
@@ -242,7 +248,8 @@ const pointSlice = createSlice({
           state.loading = false;
           state.points = action.payload;
           state.successMessage = 'Đăng bán điểm thành công';
-        })
+        },
+      )
       .addCase(createSalePoint.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Đăng bán điểm thất bại';
@@ -260,7 +267,7 @@ const pointSlice = createSlice({
         state.loading = false;
         state.error = action.payload || 'Mua điểm thất bại';
       })
-    
+
       .addCase(uploadTransferProofAction.pending, state => {
         state.loading = true;
         state.error = null;
@@ -274,7 +281,7 @@ const pointSlice = createSlice({
         state.loading = false;
         state.error = action.payload || 'Upload thất bại';
       })
-    
+
       .addCase(confirmPointAction.pending, state => {
         state.loading = true;
         state.error = null;
@@ -293,16 +300,19 @@ const pointSlice = createSlice({
         state.error = null;
         state.successMessage = null;
       })
-      .addCase(fetchPointHistory.fulfilled, (state, action: PayloadAction<any[]>) => {
-        state.loading = false;
-        state.history = action.payload;
-        state.successMessage = 'Lấy lịch sử giao dịch thành công';
-      })
+      .addCase(
+        fetchPointHistory.fulfilled,
+        (state, action: PayloadAction<any[]>) => {
+          state.loading = false;
+          state.history = action.payload;
+          state.successMessage = 'Lấy lịch sử giao dịch thành công';
+        },
+      )
       .addCase(fetchPointHistory.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Lấy lịch sử giao dịch thất bại';
       });
-  }
+  },
 });
 
 export const { clearPointMessages } = pointSlice.actions;

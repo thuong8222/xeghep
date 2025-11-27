@@ -122,7 +122,43 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
       socket.off("receive_message", handleReceiveMessage);
     };
   }, [socket, currentUserId, chatWith]);
+  
+  // ✅ ĐÚNG: Chỉ đăng ký 1 lần trong useEffect
+  useEffect(() => {
+    console.log('Xác nhận điểm từ server - useEffect triggered');
+    console.log('socket in useEffect', socket);
+    console.log('first currentUserId in chat screen', currentUserId);
+    if (!socket || !socket.connected) return;
+  
+    const handlePointConfirmed = (data: any) => {
+      console.log("📢 Xác nhận điểm từ server:", data);
+      
+      // Cập nhật trạng thái UI
+      if (data.buyer_id === currentUserId) {
+        Alert.alert(
+          "✅ Giao dịch thành công",
+          data.message || "Người bán đã xác nhận bán điểm",
+          [
+            { 
+              text: "OK", 
+              onPress: () => {
+                // Có thể reload hoặc navigate
+                // navigation.goBack();
+              }
+            }
+          ]
+        );
+      }
+    };
+  
+    socket.on("point_sale_confirmed", handlePointConfirmed);
+  
+    return () => {
+      socket.off("point_sale_confirmed", handlePointConfirmed);
+    };
+  }, [socket, currentUserId]); 
 
+  // ✅ ĐÚNG: Không đăng ký event listener trong hàm này
   const sendMessage = () => {
     if (!message.trim()) return;
 
@@ -153,7 +189,8 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
       // ✅ Callback để xác nhận server nhận được
       console.log("✅ Server acknowledged:", response);
     });
-
+    
+    // ✅ ĐÚNG: Xóa input sau khi gửi
     setMessage("");
   };
 
@@ -168,7 +205,6 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
       : "";
 
     return (
-
       <View
         style={[
           styles.msgContainer,
@@ -186,25 +222,68 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
           <Text style={styles.time}>{time}</Text>
         </View>
       </View>
-
     );
   };
 
   const handleConfirm = async () => {
-
-    const resultAction = await dispatch(confirmPointAction(idPoint));
-    console.log('resultAction', resultAction)
-    if (confirmPointAction.fulfilled.match(resultAction)) {
-      // Thành công
-      Alert.alert('Thành công', 'Xác nhận điểm thành công');
-    } else {
-      // Thất bại
-      Alert.alert('Lỗi', resultAction.payload || 'Xác nhận thất bại');
+    console.log('🔄 Starting confirmation for point ID:', idPoint);
+    console.log('📋 Point data:', data);
+    
+    // ✅ Kiểm tra điều kiện trước khi confirm
+    if (!idPoint) {
+      Alert.alert("Lỗi", "Không tìm thấy ID giao dịch");
+      return;
+    }
+  
+    if (!isOnwer) {
+      Alert.alert("Lỗi", "Bạn không phải người bán");
+      return;
+    }
+  
+    if (data?.status === 'completed') {
+      Alert.alert("Thông báo", "Giao dịch đã được xác nhận trước đó");
+      return;
+    }
+  
+    try {
+      console.log('📤 Dispatching confirmPointAction...');
+      const resultAction = await dispatch(confirmPointAction(idPoint));
+      
+      console.log('📥 Result action:', resultAction);
+  
+      if (confirmPointAction.fulfilled.match(resultAction)) {
+        console.log('✅ Confirmation successful:', resultAction.payload);
+        
+        Alert.alert(
+          "Thành công", 
+          "Bạn đã xác nhận bán điểm",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                // Navigate về màn hình trước
+                navigation.goBack();
+              }
+            }
+          ]
+        );
+      } else {
+        // ✅ Log chi tiết lỗi
+        console.error('❌ Confirmation failed');
+        console.error('❌ Payload:', resultAction.payload);
+        console.error('❌ Error:', resultAction.error);
+        
+        const errorMessage = resultAction.payload as string || "Xác nhận thất bại";
+        Alert.alert("Lỗi", errorMessage);
+      }
+    } catch (error) {
+      console.error('❌ Unexpected error:', error);
+      Alert.alert("Lỗi", "Đã xảy ra lỗi không mong muốn");
     }
   };
+  
   const ListHeaderComponent = () => {
     return (
-
       <AppView radius={16} padding={16} gap={6} backgroundColor={ColorsGlobal.backgroundGray}>
         <AppView row justifyContent={'space-between'}>
           <AppText fontSize={14}>{'Khách mua: '}</AppText>
@@ -225,29 +304,29 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
       </AppView>
     )
   }
+
   return (
-    <Container  >
+    <Container>
       <FlatList
         data={messages}
         keyExtractor={(_, i) => i.toString()}
         renderItem={renderItem}
         ListHeaderComponent={isOnwer ? ListHeaderComponent : undefined}
       />
-      <AppView row alignItems="center" >
+      <AppView row alignItems="center">
         <AppView flex={1} height={40}>
           <AppInput
             value={message}
             onChangeText={setMessage}
             placeholder="Type a message..."
-            style={{ paddingTop: 0, borderWidth: 1 }}
-          ></AppInput>
+            style={{ paddingTop: 0, borderWidth: 1 , backgroundColor: ColorsGlobal.backgroundLight, borderRadius: 20, height: 40 }}
+          />
         </AppView>
 
-        <AppButton onPress={sendMessage} >
+        <AppButton onPress={sendMessage}>
           <IconSent />
         </AppButton>
       </AppView>
-
     </Container>
   );
 };
@@ -312,6 +391,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginRight: 8,
     backgroundColor: "#fff",
-
   },
 });

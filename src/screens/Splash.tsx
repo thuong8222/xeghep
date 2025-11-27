@@ -9,6 +9,13 @@ const LottieSplash = ({ onFinish }) => {
   useEffect(() => {
     // Ẩn native splash
     SplashScreen.hide();
+
+    // // Thời gian chờ để hiển thị animation (nếu cần)
+    // const timer = setTimeout(() => {
+    //   SplashScreen.hide(); // Ẩn native splash sau khi animation kết thúc
+    // }, 3000); // Thời gian chờ (3 giây)
+
+    // return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -20,7 +27,7 @@ const LottieSplash = ({ onFinish }) => {
         onAnimationFinish={onFinish} // Khi animation xong -> vào app chính
         style={styles.animation}
       />
-      <Text style={styles.title}>Welcome to My App</Text>
+     
     </View>
   );
 };
@@ -33,7 +40,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   animation: { width: 250, height: 250 },
-  title: { fontSize: 24, color: '#fff', fontWeight: 'bold', marginTop: 20 },
+  
 });
 
 export default LottieSplash;

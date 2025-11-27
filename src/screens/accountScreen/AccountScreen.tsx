@@ -14,6 +14,8 @@ import ModalChangePassword from '../../components/component/modals/ModalChangePa
 import FunctionSection from '../../components/component/FunctionSection'
 import IconUser from '../../assets/icons/IconUser'
 import { useDriverApi } from '../../redux/hooks/userDriverApi'
+import { useAppContext } from '../../context/AppContext'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 type AccountScreenNavProp = NativeStackNavigationProp<RootParamList>;
 
@@ -23,8 +25,8 @@ interface Props {
 export default function AccountScreen({ navigation }: Props) {
 
   const { driver, loading, error, successMessage, getDriver, clear } = useDriverApi();
-
-
+const { setCurrentDriver } = useAppContext();
+console.log('first driver in account screen', driver);
   const [isModalChangePw, setIsModalChangePw] = useState(false);
 
 
@@ -48,7 +50,32 @@ export default function AccountScreen({ navigation }: Props) {
     }
   }, [error, successMessage]);
 
+
+
   const Logout = () => {
+    const handleLogout = async () => {
+      try {
+        // Xóa token trong AsyncStorage
+        await AsyncStorage.removeItem('token');
+        await AsyncStorage.removeItem("driver")
+        // Xóa driver khỏi context
+        setCurrentDriver('');
+  
+        // Xóa user state ở Redux nếu cần
+        // dispatch(clearUser());
+  
+        // Điều hướng về màn hình login
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Auth', state: { routes: [{ name: 'LoginScreen' }] } }],
+        });
+  
+        console.log('✅ Đã đăng xuất');
+      } catch (error) {
+        console.error('❌ Lỗi khi đăng xuất:', error);
+      }
+    };
+  
     Alert.alert(
       'Xeghep',
       'Bạn có muốn đăng xuất?',
@@ -59,19 +86,12 @@ export default function AccountScreen({ navigation }: Props) {
         },
         {
           text: 'Đăng xuất',
-          onPress: () => {
-            //Xoá token / user state ở redux hay context
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'Auth', state: { routes: [{ name: 'LoginScreen' }] } }],
-            });
-            console.log('Đã đăng xuất');
-          },
+          onPress: handleLogout, // gọi hàm async ở đây
         },
       ]
     );
-
-  }
+  };
+  
   const gotoHistoryBuySalePoint = () => {
     console.log('gotoHistoryBuySalePoint')
     navigation.navigate('RootNavigator', {
@@ -154,8 +174,8 @@ export default function AccountScreen({ navigation }: Props) {
           <AppView gap={8}>
             <FunctionSection label='Đổi mật khẩu' onPress={() => setIsModalChangePw(true)} />
             <FunctionSection label='Lịch sử mua/bán điểm' onPress={gotoHistoryBuySalePoint} />
-            <FunctionSection label='Lịch sử mua/bán chuyến' onPress={gotoHistoryBuySalePoint} />
-            <FunctionSection label='Danh sách điểm' onPress={gotoHistoryBuySalePoint} />
+            {/* <FunctionSection label='Lịch sử mua/bán chuyến' onPress={gotoHistoryBuySalePoint} />
+            <FunctionSection label='Danh sách điểm' onPress={gotoHistoryBuySalePoint} /> */}
             <FunctionSection label='Đăng xuất' onPress={Logout} />
           </AppView>
 
