@@ -212,6 +212,35 @@ const pointSlice = createSlice({
   name: 'point',
   initialState,
   reducers: {
+     // ✅ Thêm giao dịch mới
+     addTransaction: (state, action: PayloadAction<any>) => {
+      // Chỉ thêm nếu chưa tồn tại
+      const exists = state.history.find(t => t.id === action.payload.id);
+      if (!exists) {
+        state.history.unshift(action.payload); // Thêm vào đầu
+      }
+    },
+     // ✅ Thêm điểm mới
+     addPoint: (state, action: PayloadAction<any>) => {
+      // Chỉ thêm nếu chưa tồn tại
+      const exists = state.points.find(p => p.id === action.payload.id);
+      if (!exists) {
+        state.points.unshift(action.payload); // Thêm vào đầu
+      }
+    },
+
+    // ✅ Cập nhật điểm
+    updatePoint: (state, action: PayloadAction<any>) => {
+      const index = state.points.findIndex(p => p.id === action.payload.id);
+      if (index !== -1) {
+        state.points[index] = action.payload;
+      }
+    },
+
+    // ✅ Xóa điểm
+    removePoint: (state, action: PayloadAction<string>) => {
+      state.points = state.points.filter(p => p.id !== action.payload);
+    },
     clearPointMessages: state => {
       state.error = null;
       state.successMessage = null;
@@ -315,5 +344,5 @@ const pointSlice = createSlice({
   },
 });
 
-export const { clearPointMessages } = pointSlice.actions;
+export const {addTransaction, addPoint, updatePoint, removePoint, clearPointMessages } = pointSlice.actions;
 export default pointSlice.reducer;

@@ -16,6 +16,12 @@ import { useSocket } from '../context/SocketContext';
 import { useSellerNotifications } from '../hooks/useSellerNotifications';
 import { useBuyerNotifications } from '../hooks/useBuyerNotifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { usePointsListRealtime } from '../hooks/usePointsListRealtime';
+import { useTransactionHistoryRealtime } from '../hooks/useTransactionHistoryRealtime';
+import { useTripSellerNotifications } from '../hooks/useTripSellerNotifications';
+import { useTripBuyerNotifications } from '../hooks/useTripBuyerNotifications';
+import { useTripsListRealtime } from '../hooks/useTripsListRealtime';
+import { useReceivedTripsRealtime } from '../hooks/useReceivedTripsRealtime';
 const Stack = createNativeStackNavigator<RootParamList>();
 export default function MainNavigator() {
   const { currentDriver } = useAppContext();
@@ -38,8 +44,6 @@ export default function MainNavigator() {
     socket.emit("register_user", currentDriver.id);
   }, [socket, isConnected, currentDriver?.id]);
 
-
-
   console.log('driver?.id AsyncStorage  in root navigator', driver?.id)
 
   console.log('currentDriver in root navigator', currentDriver.id)
@@ -47,6 +51,13 @@ export default function MainNavigator() {
   // ✅ Listen cả 2 loại thông báo (vì user có thể vừa là buyer vừa là seller)
   useSellerNotifications(currentDriver?.id || driver?.id);
   useBuyerNotifications(currentDriver?.id || driver?.id);
+  usePointsListRealtime();                          // Cập nhật danh sách điểm
+  useTransactionHistoryRealtime(currentDriver?.id);
+  // ✅ Kích hoạt tất cả hooks real-time
+  useTripSellerNotifications(currentDriver?.id || undefined); // Nhận thông báo khi có người mua chuyến của mình
+  useTripBuyerNotifications(currentDriver?.id || undefined);  // Nhận thông báo khi mua chuyến thành công
+  useTripsListRealtime();                          // Auto update danh sách chuyến
+  useReceivedTripsRealtime(currentDriver?.id || undefined);   // Auto update danh sách chuyến đã nhận
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       {!isSplashDone ? (

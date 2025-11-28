@@ -1,8 +1,8 @@
 const baseUrl = 'https://app.xeghepnd.com/';
-
+  const SOCKET_URL = "http://15.235.167.241:5000"
 const AppConfig = {
   BASE_URL: baseUrl,
-
+  SOCKET_URL: SOCKET_URL,
   Config: {
     link_post_register: baseUrl + 'api/auth/register',
     link_post_login: baseUrl + '/api/auth/login',

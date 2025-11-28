@@ -66,13 +66,13 @@ const styles = StyleSheet.create({
   content: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "center",gap: 8
   },
   textInner: {
     fontSize: 16,
     lineHeight: 24,
     fontWeight: "bold",
     textAlign: "center",
-    width:'100%'
+    
   },
 });

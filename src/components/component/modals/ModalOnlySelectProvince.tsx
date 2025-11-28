@@ -58,6 +58,7 @@ export default function ModalOnlySelectProvince({
           <FlatList
             data={filteredProvinces}
             keyExtractor={(item) => item.code}
+            scrollEnabled={false}
             renderItem={renderProvince}
             keyboardShouldPersistTaps="handled"
             ItemSeparatorComponent={() => (

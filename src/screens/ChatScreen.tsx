@@ -306,7 +306,7 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
   }
 
   return (
-    <Container>
+    <Container >
       <FlatList
         data={messages}
         keyExtractor={(_, i) => i.toString()}

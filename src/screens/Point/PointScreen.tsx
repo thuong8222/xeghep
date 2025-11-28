@@ -1,4 +1,4 @@
-import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, Alert, Button, StyleSheet, Text, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import AppView from '../../components/common/AppView'
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal'
@@ -18,6 +18,8 @@ import { buyPointAction, fetchPointsOnSale } from '../../redux/slices/pointSlice
 import ModalShowInfoTranferMoney from '../../components/component/modals/ModalShowInfoTranferMoney'
 import ChatScreen from '../ChatScreen'
 import AppText from '../../components/common/AppText'
+import { usePointsListRealtime } from '../../hooks/usePointsListRealtime'
+import { useSocket } from '../../context/SocketContext'
 
 type BuyTripProps = NativeStackNavigationProp<PointTabsParamList, 'PointAddScreen'>;
 interface Props {
@@ -25,12 +27,12 @@ interface Props {
 }
 export default function PointScreen({ navigation }: Props) {
     const dispatch = useDispatch<AppDispatch>();
+    const { socket } = useSocket();
     const [openModalTranferMoney, setOpenModalTranferMoney] = useState(false);
     const [pointSelected, setPointSelected] = useState({});
-    const { points, loading, error } = useSelector(
-        (state: RootState) => state.point
-    );
-
+    const { points, loading, error } = useSelector((state: RootState) => state.point);
+  // ✅ Kích hoạt real-time updates
+  usePointsListRealtime();
     useEffect(() => {
         dispatch(fetchPointsOnSale());
     }, []);
@@ -104,9 +106,10 @@ export default function PointScreen({ navigation }: Props) {
     const SaleTrips = () => {
         navigation.navigate('PointAddScreen')
     }
-
+ 
     return (
         <AppView flex={1} padding={16} backgroundColor={ColorsGlobal.backgroundWhite}>
+           
             <SwipeListView
                 data={points}
                 keyExtractor={(item) => item.id.toString()}

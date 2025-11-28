@@ -70,7 +70,7 @@ const {setCurrentDriver } = useAppContext();
 
     try {
       await login({ phone: phoneNumber, password });
-     
+     navigation.navigate('RootNavigator');
       setCurrentDriver(JSON.parse((await AsyncStorage.getItem("driver")) || 'null'));
     } catch (err: any) {
       Alert.alert('Đăng nhập thất bại', err || 'Có lỗi xảy ra');
@@ -133,7 +133,7 @@ const {setCurrentDriver } = useAppContext();
   return (
 
     <ScrollView style={{ flexGrow: 1, backgroundColor: ColorsGlobal.backgroundWhite }} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', }} showsVerticalScrollIndicator={false}>
-      <Container showTopInset>
+      <Container showTopInset loading={loading}>
         <AppView flex={1} justifyContent="center" >
 
           <AppView justifyContent="center" alignItems="center" marginBottom={20} gap={16}>

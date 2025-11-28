@@ -16,11 +16,15 @@ import Container from '../../components/common/Container';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../redux/data/store';
 import { fetchPointHistory } from '../../redux/slices/pointSlice';
+import { useTransactionHistoryRealtime } from '../../hooks/useTransactionHistoryRealtime';
+import { useAppContext } from '../../context/AppContext';
+import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal';
 
 
 export default function HistoryBuySalePoint() {
   const dispatch = useDispatch()
   const { history, loading, error } = useSelector((state: RootState) => state.point);
+  const { currentDriver } = useAppContext();
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
@@ -29,6 +33,8 @@ export default function HistoryBuySalePoint() {
   const [selectedType, setSelectedType] = useState<string | null>(null);
 
   console.log('history: ', history)
+    // ✅ Kích hoạt real-time updates
+    useTransactionHistoryRealtime(currentDriver?.id);
   useEffect(() => {
     dispatch(fetchPointHistory());
   }, [dispatch]);
@@ -114,10 +120,8 @@ export default function HistoryBuySalePoint() {
   }, [selectedType, history]);
 
   return (
-    <Container ignoreBottomInset  >
-      {loading && (
-        <ActivityIndicator size="large" color="#0000ff" />
-      )}
+    <Container ignoreBottomInset style={{ gap: 6}} loading={loading}>
+    
 
       {error && (
         <AppText color="red">{error}</AppText>

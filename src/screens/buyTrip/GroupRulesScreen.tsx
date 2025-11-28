@@ -28,11 +28,10 @@ export default function GroupRulesScreen() {
     );
   };
 
-  if (loading) return <ActivityIndicator size="large" color="#0000ff" />;
-  if (error) return <Text>Error: {error}</Text>;
+  
 
   return (
-    <Container>
+    <Container loading={loading} >
       <FlatList
         data={categories.data} // nếu slice trả về { data: [...] } thì mới dùng .data
         keyExtractor={(item) => item.id}

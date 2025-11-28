@@ -8,6 +8,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import HtmlContent from '../../components/component/HtmlContent';
 
 type AuthNavProp = NativeStackNavigationProp<AuthStackParamList>;
 
@@ -56,7 +57,7 @@ export default function BlankScreen({ route, navigation }: Props) {
   const insets = useSafeAreaInsets()
   return (
     <ScrollView style={{ flexGrow: 1, backgroundColor: ColorsGlobal.backgroundWhite }} contentContainerStyle={[styles.container, { paddingBottom: insets.bottom }]}>
-      <AppText>{dataToShow?.content}</AppText>
+    <HtmlContent html={dataToShow?.content} />
     </ScrollView>
   );
 }

@@ -8,12 +8,10 @@ import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal';
 import AppButton from '../../components/common/AppButton';
 import { BuyTripStackParamList } from '../../navigation/menuBottomTabs/BuyTripTabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { groupsArea } from '../../dataDemoJson';
+
 import IconSort from '../../assets/icons/IconSort';
 import ModalBuyTrip from '../../components/component/modals/ModalBuyTrip';
-import IconArrowDown from '../../assets/icons/IconArowDown';
-import IconList from '../../assets/icons/IconList';
-import IconGrid from '../../assets/icons/IconGrid';
+
 import { useAreaApi } from '../../redux/hooks/useAreaApi';
 import { getNameByCode } from '../../utils/province';
 import Container from '../../components/common/Container';
@@ -86,13 +84,11 @@ export default function GroupAreaScreen({ navigation }: Props) {
     )
   }
   return (
-  <Container>
+  <Container loading={loading} >
       <FlatList
         data={groups}
         renderItem={renderItem_groupArea}
-
         numColumns={1} // 1 cột cho list, 2 cột cho grid
-
         ItemSeparatorComponent={<AppView height={1} backgroundColor={ColorsGlobal.borderColor} />}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -108,6 +104,7 @@ export default function GroupAreaScreen({ navigation }: Props) {
 }
 const Area = (props) => {
   const detailArea = () => {
+    console.log('detail area pressed', props.data)
     props.gotoDetailAreaPress(props.data)
   }
   return (

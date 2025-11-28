@@ -121,7 +121,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   return (
 
     <ScrollView style={{ flexGrow: 1, backgroundColor: ColorsGlobal.backgroundWhite }} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', }} showsVerticalScrollIndicator={false}>
-     <Container>
+     <Container  loading={loading}>
         <AppView flex={1} justifyContent="center" >
 
           <AppView justifyContent="center" alignItems="center" gap={16}>

@@ -1,4 +1,4 @@
-import { Alert, Linking, StyleSheet, Text, View } from 'react-native'
+
 import React, { useState } from 'react'
 import AppView from '../common/AppView';
 import { ColorsGlobal } from '../base/Colors/ColorsGlobal';
@@ -8,7 +8,7 @@ import { CONSTANT, NumberFormat } from '../../utils/Helper';
 
 
 export default function PointHistory(props) {
-    console.log('props PointHistory: ', props)
+
     const isBuy = props.data.related_type === 'point_buy' || props.data.related_type === 'buy_trip'
 const key_related = props.data.related_type ;
 const name_related = CONSTANT.TRANSACTION_TYPE_BY_KEY[key_related];

@@ -198,6 +198,43 @@ const tripsSlice = createSlice({
   name: 'trips',
   initialState,
   reducers: {
+    // ✅ THÊM: Real-time actions cho trips
+    addTrip: (state, action: PayloadAction<Trip>) => {
+      // Thêm chuyến mới vào danh sách (khi có người tạo chuyến mới)
+      const exists = state.trips.find(t => t.id_trip === action.payload.id_trip);
+      if (!exists) {
+        state.trips.unshift(action.payload); // Thêm vào đầu danh sách
+      }
+    },
+
+    updateTrip: (state, action: PayloadAction<Trip>) => {
+      // Cập nhật thông tin chuyến
+      const index = state.trips.findIndex(t => t.id_trip === action.payload.id_trip);
+      if (index !== -1) {
+        state.trips[index] = action.payload;
+      }
+    },
+
+    removeTrip: (state, action: PayloadAction<string>) => {
+      // Xóa chuyến khỏi danh sách (khi đã bán hoặc xóa)
+      state.trips = state.trips.filter(t => t.id_trip !== action.payload);
+    },
+
+    // ✅ THÊM: Action cho danh sách chuyến đã nhận
+    addReceivedTrip: (state, action: PayloadAction<Trip>) => {
+      // Thêm chuyến vào danh sách "Chuyến đã nhận"
+      const exists = state.receivedTrips.find(t => t.id_trip === action.payload.id_trip);
+      if (!exists) {
+        state.receivedTrips.unshift(action.payload);
+      }
+    },
+
+    updateReceivedTrip: (state, action: PayloadAction<Trip>) => {
+      const index = state.receivedTrips.findIndex(t => t.id_trip === action.payload.id_trip);
+      if (index !== -1) {
+        state.receivedTrips[index] = action.payload;
+      }
+    },
     clearTripsMessages: state => {
       state.error = null;
       state.successMessage = null;
@@ -274,5 +311,9 @@ const tripsSlice = createSlice({
   },
 });
 
-export const { clearTripsMessages } = tripsSlice.actions;
+export const {addTrip,
+  updateTrip,
+  removeTrip,
+  addReceivedTrip,
+  updateReceivedTrip, clearTripsMessages } = tripsSlice.actions;
 export default tripsSlice.reducer;

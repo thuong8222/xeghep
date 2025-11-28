@@ -10,6 +10,7 @@ import React, {
 import { useSelector } from "react-redux";
 import { io, Socket } from "socket.io-client";
 import { RootState } from "../redux/data/store";
+import AppConfig from "../services/config";
 
 // ⚠️ IP server của bạn
 
@@ -36,9 +37,9 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   ;
-  const SOCKET_URL = "http://15.235.167.241:4000"
+
   useEffect(() => {
-    socketRef.current = io(SOCKET_URL, {
+    socketRef.current = io(AppConfig.SOCKET_URL, {
       // transports: ["polling", "websocket"],
       transports: ["websocket", "polling"], // thử websocket trực tiếp, polling nếu cần
       reconnection: true,
