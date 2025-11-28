@@ -7,6 +7,8 @@ import { displayNotification } from "../utils/notificationService";
 export const useTripSellerNotifications = (sellerId?: string) => {
   const { socket, isConnected } = useSocket();
   const navigation = useNavigation();
+console.log('basn dduowjc chuyeesn : ', sellerId)
+console.log('socket useTripSellerNotifications: ', socket)
 
   useEffect(() => {
     if (!socket || !isConnected || !sellerId) {

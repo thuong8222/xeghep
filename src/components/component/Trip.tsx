@@ -19,22 +19,22 @@ export default function Trip(props) {
             backgroundColor={props.data?.is_sold === 1 ? ColorsGlobal.backgroundTripSold : ColorsGlobal.backgroundTrip}
             opacity={props.data?.is_sold=== 1 ? .5 : 1} row>
             <AppView gap={4} flex={1} padding={12}  >
-                <AppView row justifyContent={'space-between'}>
-                    <AppView row alignItems='center' gap={8}>
+                <AppView row justifyContent={'space-between'} alignItems='center' >
+                    <AppView row alignItems='center' gap={4}>
                         <AppText fontWeight={600}
                             color={
                                 props.data?.is_sold === 1
                                     ? ColorsGlobal.textLight
                                     : props.data?.direction === 1
-                                        ? ColorsGlobal.main
-                                        : ColorsGlobal.main2
+                                        ? ColorsGlobal.main2
+                                        : ColorsGlobal.main
                             }>{props.data?.driver_sell?.full_name}</AppText>
-                        <IconChevronLeftDouble rotate={props.data?.direction === 1 ? 0 : 180} color={
+                        <IconChevronLeftDouble rotate={props.data?.direction === 1 ?  180:0} color={
                             props.data?.is_sold === 1
                                 ? ColorsGlobal.textLight
                                 : props.data?.direction === 1
-                                    ? ColorsGlobal.main
-                                    : ColorsGlobal.main2
+                                ? ColorsGlobal.main2
+                                : ColorsGlobal.main
                         } />
                     </AppView>
 

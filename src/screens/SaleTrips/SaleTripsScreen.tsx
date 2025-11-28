@@ -46,7 +46,6 @@ export default function SaleTripsScreen({ route }: Props) {
     typeCar: null as { type: string; name: string } | null
   });
   const [noteOptions, setNoteOptions] = useState();
-  console.log('tripOptions SaleTripsScreen: ', tripOptions)
 
 
   // Hàm này sẽ được gọi mỗi khi TripOptionsSection thay đổi dữ liệu
@@ -72,21 +71,22 @@ export default function SaleTripsScreen({ route }: Props) {
     console.log("Ghi chú nhận được từ con:", val);
   };
   const handleCreateTrip = async () => {
-    console.log('tripOptions handleCreateTrip: ', tripOptions)
+
     if (!placeStart || !placeEnd) {
       Alert.alert('Điểm đi/ Điểm đến không được để trống!')
       return;
     }
-    console.log('tripOptions handleCreateTrip: ', tripOptions)
+
     if (tripOptions.guestType === 'normal' && !tripOptions.typeCar) {
       Alert.alert("Thiếu thông tin", "Vui lòng chọn loại xe!");
       return;
     }
+    console.log('selectedDirection: ', selectedDirection)
 
-    console.log('handleCreateTrip')
+
     const payload: CreateTripPayload = {
       area_id: id_area,
-      direction: selectedDirection || 1,
+      direction: selectedDirection,
       guests: tripOptions?.numGuests || 1,
       time_start: tripOptions?.timeStart || (Math.floor(Date.now() / 1000)),
       price_sell: Number(tripOptions.price) || 250,
@@ -96,8 +96,6 @@ export default function SaleTripsScreen({ route }: Props) {
       note: noteOptions || '',
       type_car: tripOptions?.typeCar?.type || 'car5',
       cover_car: tripOptions.typeCar ? 0 : 1,
-
-
     };
     console.log('payload handleCreateTrip: ', payload)
 
@@ -106,7 +104,7 @@ export default function SaleTripsScreen({ route }: Props) {
       await fetchTrips(id_area); // nếu cần refetch
       console.log("🎉 Kết quả API trả về:", res);
       setUpdateTrips(moment().unix());
-      setSelectedDirection(1);
+      setSelectedDirection();
       setPlaceStart("");
       setPlaceEnd("");
       setCommuneWard("");

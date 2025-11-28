@@ -197,7 +197,6 @@ export default function BuyTripScreen({ navigation, route }: Props) {
             pick_up: filters?.place_start,
             drop_off: filters?.place_end
         };
-
         if (filters.place_start) model.place_start = filters.place_start;
         if (filters.place_end) model.place_end = filters.place_end;
 

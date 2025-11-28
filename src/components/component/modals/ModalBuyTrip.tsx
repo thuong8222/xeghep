@@ -14,7 +14,7 @@ import AppInput from '../../common/AppInput'
 interface ModalBuyTripProps {
   visible?: boolean;
   onRequestClose?: () => void;
-  onApplyFilter?: (filters: any, customDate?: Date | null,placeStart ?:string, placeEnd?:string ) => void; // ✅ Thêm customDate parameter
+  onApplyFilter?: (filters: any, customDate?: Date | null, placeStart?: string, placeEnd?: string) => void; // ✅ Thêm customDate parameter
 }
 
 export default function ModalBuyTrip({ visible, onRequestClose, onApplyFilter }: ModalBuyTripProps) {
@@ -34,13 +34,11 @@ export default function ModalBuyTrip({ visible, onRequestClose, onApplyFilter }:
     };
 
     // ✅ Truyền customDate như tham số thứ 2
-                <AppInput value={placeStart} onChangeText={(text) => setPlaceStart(text)} type={'select'} placeholder='Điểm đón' />
-    onApplyFilter?.(payload, selectedTime === 'custom' ? customDate : null, placeStart,placeEnd );
+    <AppInput value={placeStart} onChangeText={(text) => setPlaceStart(text)} type={'select'} placeholder='Điểm đón' />
+    onApplyFilter?.(payload, selectedTime === 'custom' ? customDate : null, placeStart, placeEnd);
     onRequestClose?.();
   };
 
-  console.log('customDate: ', customDate)
-  
   return (
     <Modal
       transparent

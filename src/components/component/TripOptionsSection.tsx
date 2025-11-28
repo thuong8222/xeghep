@@ -33,7 +33,7 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
 
     const [selectedCar, setSelectedCar] = useState<{ type: string; name: string } | null>(null);
 
-    console.log('selectedCar; ', selectedCar)
+
     // Helper gọi onTripOptionsChange
     const notifyChange = (
         newNumGuests?: number,
