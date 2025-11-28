@@ -121,8 +121,6 @@ export default function HistoryBuySalePoint() {
 
   return (
     <Container ignoreBottomInset style={{ gap: 6}} loading={loading}>
-    
-
       {error && (
         <AppText color="red">{error}</AppText>
       )}

@@ -54,7 +54,6 @@ export const fetchAreaGroups = createAsyncThunk<
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get('api/areas/group');
-      console.log('fetchAreaGroups: ',response)
       if (response.data.status === 1) {
         return response.data.data;
       } else {

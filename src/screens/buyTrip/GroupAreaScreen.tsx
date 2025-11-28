@@ -104,7 +104,6 @@ export default function GroupAreaScreen({ navigation }: Props) {
 }
 const Area = (props) => {
   const detailArea = () => {
-    console.log('detail area pressed', props.data)
     props.gotoDetailAreaPress(props.data)
   }
   return (
