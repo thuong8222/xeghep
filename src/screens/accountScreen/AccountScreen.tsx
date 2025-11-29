@@ -25,11 +25,9 @@ interface Props {
 export default function AccountScreen({ navigation }: Props) {
 
   const { driver, loading, error, successMessage, getDriver, clear } = useDriverApi();
-const { setCurrentDriver } = useAppContext();
-console.log('first driver in account screen', driver);
+  const { setCurrentDriver } = useAppContext();
+  console.log('first driver in account screen', driver);
   const [isModalChangePw, setIsModalChangePw] = useState(false);
-
-
 
   // Lấy thông tin driver khi vào màn hình
   useEffect(() => {
@@ -51,7 +49,6 @@ console.log('first driver in account screen', driver);
   }, [error, successMessage]);
 
 
-
   const Logout = () => {
     const handleLogout = async () => {
       try {
@@ -60,22 +57,22 @@ console.log('first driver in account screen', driver);
         await AsyncStorage.removeItem("driver")
         // Xóa driver khỏi context
         setCurrentDriver('');
-  
+
         // Xóa user state ở Redux nếu cần
         // dispatch(clearUser());
-  
+
         // Điều hướng về màn hình login
         navigation.reset({
           index: 0,
           routes: [{ name: 'Auth', state: { routes: [{ name: 'LoginScreen' }] } }],
         });
-  
+
         console.log('✅ Đã đăng xuất');
       } catch (error) {
         console.error('❌ Lỗi khi đăng xuất:', error);
       }
     };
-  
+
     Alert.alert(
       'Xeghep',
       'Bạn có muốn đăng xuất?',
@@ -91,7 +88,7 @@ console.log('first driver in account screen', driver);
       ]
     );
   };
-  
+
   const gotoHistoryBuySalePoint = () => {
     console.log('gotoHistoryBuySalePoint')
     navigation.navigate('RootNavigator', {
@@ -100,7 +97,6 @@ console.log('first driver in account screen', driver);
         screen: 'AccountTabs',       // bước 2: vào account tab
         params: {
           screen: 'HistoryBuySalePoint'// bước 3: tới màn hình History
-
         }
       }
     });
@@ -134,6 +130,18 @@ console.log('first driver in account screen', driver);
       }
     });
   }
+  const gotoNotification = () => {
+    navigation.navigate('RootNavigator', {
+      screen: 'BottomTabs',
+      params: {
+        screen: 'AccountTabs',
+        params: {
+          screen: 'Notification'
+        }
+      }
+    });
+  };
+
   return (
     <ScrollView style={{ flex: 1, backgroundColor: ColorsGlobal.backgroundWhite }}>
       <AppView flex={1} backgroundColor={ColorsGlobal.backgroundWhite} padding={16} gap={12}>
@@ -155,7 +163,7 @@ console.log('first driver in account screen', driver);
           {/* } */}
           <AppView alignItems='center'>
             <AppText bold color={ColorsGlobal.main}>{driver?.full_name}</AppText>
-            {/* <AppText color={ColorsGlobal.main2}>{'Tài xế'}</AppText> */}
+            <AppText color={ColorsGlobal.main2}>{driver?.is_active === true ? 'Đang hoạt động' : 'Tạm khoá'}</AppText>
           </AppView>
 
         </AppView>
@@ -174,8 +182,10 @@ console.log('first driver in account screen', driver);
           <AppView gap={8}>
             <FunctionSection label='Đổi mật khẩu' onPress={() => setIsModalChangePw(true)} />
             <FunctionSection label='Lịch sử mua/bán điểm' onPress={gotoHistoryBuySalePoint} />
+            <FunctionSection label='Thông báo' onPress={gotoNotification} />
             {/* <FunctionSection label='Lịch sử mua/bán chuyến' onPress={gotoHistoryBuySalePoint} />
             <FunctionSection label='Danh sách điểm' onPress={gotoHistoryBuySalePoint} /> */}
+            <FunctionSection label='Xoá tài khoản' onPress={Logout} />
             <FunctionSection label='Đăng xuất' onPress={Logout} />
           </AppView>
 

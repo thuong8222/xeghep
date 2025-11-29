@@ -7,11 +7,14 @@ import AccountInfoScreen from '../../screens/accountScreen/AccountInfoScreen';
 import CarInfoScreen from '../../screens/accountScreen/CarInfoScreen';
 import { Driver } from '../../redux/slices/driverSlice';
 
+import NotificationScreen from '../../screens/accountScreen/NotificationScreen';
+
 export type AccountTabsParamList = {
   AccountScreen: undefined;
   HistoryBuySalePoint: undefined;
   AccountInfoScreen: {data:Driver};
   CarInfoScreen: {data:Driver};
+  Notification: undefined;
 }
 
 const Stack = createNativeStackNavigator<AccountTabsParamList>();
@@ -35,6 +38,11 @@ export default function AccountTabs() {
       <Stack.Screen name="CarInfoScreen" component={CarInfoScreen} options={{
         presentation: 'modal',
         headerTitle: 'Thông tin xe',
+        headerTitleAlign: 'center'
+      }} />
+        <Stack.Screen name="Notification" component={NotificationScreen} options={{
+        presentation: 'modal',
+        headerTitle: 'Thông báo',
         headerTitleAlign: 'center'
       }} />
 

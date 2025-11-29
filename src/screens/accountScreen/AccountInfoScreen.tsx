@@ -2,7 +2,7 @@ import { Alert, Image, Platform, StyleSheet, Text, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import AppView from '../../components/common/AppView'
 import AppInput from '../../components/common/AppInput'
-import { validateExperienceYears, validatePhoneNumber } from '../../utils/Helper';
+import { NumberFormat, validateExperienceYears, validatePhoneNumber } from '../../utils/Helper';
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal';
 import IconUser from '../../assets/icons/IconUser';
 import ButtonSubmit from '../../components/common/ButtonSubmit';
@@ -18,6 +18,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootParamList } from '../../../App';
 import ModalOnlySelectProvince from '../../components/component/modals/ModalOnlySelectProvince';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { clearMessages } from '../../redux/slices/ authSlice';
 type AccountScreenNavProp = NativeStackNavigationProp<RootParamList>;
 
 interface Props {
@@ -30,7 +31,15 @@ export default function AccountInfoScreen({ navigation }: Props) {
     const driverPre = route.params.data;
     const { driver, loading, error, successMessage, editDriver, clear } = useDriverApi();
 
-
+    console.log('driverPre', driverPre);
+    console.log('driver', driver);
+    const current_points = driverPre.current_points;
+    const total_trips_received = driverPre.total_trips_received;
+    const total_trips_sold = driverPre.total_trips_sold;
+    console.log('driver.current_points', driverPre.current_points);
+    console.log('driver.total_trips_received', driverPre.total_trips_received);
+    console.log('total_trips_sold', driverPre.total_trips_sold);
+    console.log('driver', driver);
     const [nameDisplay, setNameDisplay] = useState(driverPre?.full_name || '');
     const [numberPhone, setNumberPhone] = useState(driverPre?.phone || '');
     const [address, setAddress] = useState(driverPre?.address || '');
@@ -130,6 +139,19 @@ export default function AccountInfoScreen({ navigation }: Props) {
             <AppView gap={8} flex={1} paddingTop={24}>
                 <AppView row>
                     <AppInput value={nameDisplay} onChangeText={(text) => setNameDisplay(text)} placeholder='Nhập tên hiển thị' label={'Tên hiển thị'} />
+                </AppView>
+                <AppView row gap={6}>
+                    <AppView flex={1}>
+                        <AppInput value={String(NumberFormat(current_points))} onChangeText={(text) => setNameDisplay(text)} label={'Điểm hiện tại'} />
+                    </AppView>
+                    <AppView flex={1}>
+                        <AppInput value={String(NumberFormat(total_trips_received))} onChangeText={(text) => setNameDisplay(text)} label={'Chuyến nhận'} />
+                    </AppView>
+                    <AppView flex={1}>
+
+                        <AppInput value={String(NumberFormat(total_trips_sold))} onChangeText={(text) => setNameDisplay(text)} label={'Chuyến bán'} />
+                    </AppView>
+
                 </AppView>
                 <AppView row>
                     <AppInput label="Số điện thoại"
