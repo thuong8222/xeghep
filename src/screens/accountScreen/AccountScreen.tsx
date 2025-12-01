@@ -16,6 +16,9 @@ import IconUser from '../../assets/icons/IconUser'
 import { useDriverApi } from '../../redux/hooks/userDriverApi'
 import { useAppContext } from '../../context/AppContext'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { deleteAccount, logoutAccount } from '../../redux/slices/ authSlice'
+import { useDispatch } from 'react-redux'
+import { AppDispatch } from '../../redux/data/store'
 
 type AccountScreenNavProp = NativeStackNavigationProp<RootParamList>;
 
@@ -23,13 +26,12 @@ interface Props {
   navigation: AccountScreenNavProp;
 }
 export default function AccountScreen({ navigation }: Props) {
-
+  const dispatch = useDispatch<AppDispatch>();
   const { driver, loading, error, successMessage, getDriver, clear } = useDriverApi();
   const { setCurrentDriver } = useAppContext();
-  console.log('first driver in account screen', driver);
   const [isModalChangePw, setIsModalChangePw] = useState(false);
 
-  // Lấy thông tin driver khi vào màn hình
+ 
   useEffect(() => {
     if (!driver) {
       getDriver().catch(err => {
@@ -38,13 +40,10 @@ export default function AccountScreen({ navigation }: Props) {
     }
   }, [driver]);
 
-  // Hiện thông báo error hoặc success
+ 
   useEffect(() => {
     if (error) {
       Alert.alert('Lỗi', error, [{ text: 'OK', onPress: () => clear() }]);
-    }
-    if (successMessage) {
-      Alert.alert('Thành công', successMessage, [{ text: 'OK', onPress: () => clear() }]);
     }
   }, [error, successMessage]);
 
@@ -52,22 +51,21 @@ export default function AccountScreen({ navigation }: Props) {
   const Logout = () => {
     const handleLogout = async () => {
       try {
-        // Xóa token trong AsyncStorage
+     
+        const result = await dispatch(logoutAccount()).unwrap();
+        
         await AsyncStorage.removeItem('token');
         await AsyncStorage.removeItem("driver")
-        // Xóa driver khỏi context
+     
         setCurrentDriver('');
 
-        // Xóa user state ở Redux nếu cần
-        // dispatch(clearUser());
-
-        // Điều hướng về màn hình login
+      
         navigation.reset({
           index: 0,
           routes: [{ name: 'Auth', state: { routes: [{ name: 'LoginScreen' }] } }],
         });
 
-        console.log('✅ Đã đăng xuất');
+    
       } catch (error) {
         console.error('❌ Lỗi khi đăng xuất:', error);
       }
@@ -88,9 +86,43 @@ export default function AccountScreen({ navigation }: Props) {
       ]
     );
   };
+  const DeleteAccount = () => {
+    const handleDelete = async () => {
+      try {
+   
+        const result = await dispatch(deleteAccount()).unwrap();
+
+    
+
+       
+        await AsyncStorage.removeItem('token');
+        await AsyncStorage.removeItem('driver');
+
+        setCurrentDriver('');
+
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Auth', state: { routes: [{ name: 'LoginScreen' }] } }],
+        });
+
+       
+      } catch (error) {
+        console.error('Lỗi xoá tài khoản:', error);
+      }
+    };
+
+    Alert.alert(
+      'Xeghep',
+      'Bạn có chắc chắn muốn XÓA TÀI KHOẢN? Thao tác này không thể hoàn tác!',
+      [
+        { text: 'Hủy', style: 'cancel' },
+        { text: 'Xoá tài khoản', style: 'destructive', onPress: handleDelete }
+      ]
+    );
+  };
 
   const gotoHistoryBuySalePoint = () => {
-    console.log('gotoHistoryBuySalePoint')
+   
     navigation.navigate('RootNavigator', {
       screen: 'BottomTabs',      // bước 1: đi vào bottom tabs
       params: {
@@ -163,7 +195,7 @@ export default function AccountScreen({ navigation }: Props) {
           {/* } */}
           <AppView alignItems='center'>
             <AppText bold color={ColorsGlobal.main}>{driver?.full_name}</AppText>
-            <AppText color={ColorsGlobal.main2}>{driver?.is_active === true ? 'Đang hoạt động' : 'Tạm khoá'}</AppText>
+            <AppText fontSize={14} color={ColorsGlobal.main2}>{driver?.is_active === true ? 'Đang hoạt động' : 'Tạm khoá'}</AppText>
           </AppView>
 
         </AppView>
@@ -185,7 +217,7 @@ export default function AccountScreen({ navigation }: Props) {
             <FunctionSection label='Thông báo' onPress={gotoNotification} />
             {/* <FunctionSection label='Lịch sử mua/bán chuyến' onPress={gotoHistoryBuySalePoint} />
             <FunctionSection label='Danh sách điểm' onPress={gotoHistoryBuySalePoint} /> */}
-            <FunctionSection label='Xoá tài khoản' onPress={Logout} />
+            <FunctionSection label='Xoá tài khoản' onPress={DeleteAccount} />
             <FunctionSection label='Đăng xuất' onPress={Logout} />
           </AppView>
 

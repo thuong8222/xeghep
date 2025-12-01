@@ -8,7 +8,7 @@ import { CONSTANT, NumberFormat } from '../../utils/Helper';
 
 
 export default function PointHistory(props) {
-    console.log('PointHistory props.data: ', props.data)
+    // console.log('PointHistory props.data: ', props.data)
     const isBuy = props.data.related_type === 'point_buy' || props.data.related_type === 'trip_buy'
     const key_related = props.data.related_type;
     const name_related = CONSTANT.TRANSACTION_TYPE_BY_KEY[key_related];
@@ -34,7 +34,7 @@ export default function PointHistory(props) {
                 </AppText>
             </AppView>
             <AppView row justifyContent={'space-between'}>
-                <AppText fontSize={13} color={ColorsGlobal.textLight}>{moment(props.data.date).format('DD/MM/YYYY hh:mm')}</AppText>
+                <AppText fontSize={13} color={ColorsGlobal.textLight}>{moment(props.data.created_at).format('DD/MM/YYYY hh:mm')}</AppText>
                 <AppText fontSize={13} color={ColorsGlobal.main2}>{'Số dư: ' + NumberFormat(props.data.after_balance) + ' điểm'}</AppText>
             </AppView>
         </AppView>

@@ -22,6 +22,7 @@ import { useTripSellerNotifications } from '../hooks/useTripSellerNotifications'
 import { useTripBuyerNotifications } from '../hooks/useTripBuyerNotifications';
 import { useTripsListRealtime } from '../hooks/useTripsListRealtime';
 import { useReceivedTripsRealtime } from '../hooks/useReceivedTripsRealtime';
+import { useNotificationsRealtime } from '../hooks/useNotificationsRealtime';
 const Stack = createNativeStackNavigator<RootParamList>();
 export default function MainNavigator() {
   const { currentDriver } = useAppContext();
@@ -58,6 +59,8 @@ export default function MainNavigator() {
   useTripBuyerNotifications(currentDriver?.id || undefined);  // Nhận thông báo khi mua chuyến thành công
   useTripsListRealtime();                          // Auto update danh sách chuyến
   useReceivedTripsRealtime(currentDriver?.id || undefined);   // Auto update danh sách chuyến đã nhận
+   // ✅ Kích hoạt notification system
+   useNotificationsRealtime(currentDriver?.id);
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       {!isSplashDone ? (

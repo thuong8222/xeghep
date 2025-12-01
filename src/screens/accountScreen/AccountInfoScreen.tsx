@@ -31,15 +31,10 @@ export default function AccountInfoScreen({ navigation }: Props) {
     const driverPre = route.params.data;
     const { driver, loading, error, successMessage, editDriver, clear } = useDriverApi();
 
-    console.log('driverPre', driverPre);
-    console.log('driver', driver);
     const current_points = driverPre.current_points;
     const total_trips_received = driverPre.total_trips_received;
     const total_trips_sold = driverPre.total_trips_sold;
-    console.log('driver.current_points', driverPre.current_points);
-    console.log('driver.total_trips_received', driverPre.total_trips_received);
-    console.log('total_trips_sold', driverPre.total_trips_sold);
-    console.log('driver', driver);
+ 
     const [nameDisplay, setNameDisplay] = useState(driverPre?.full_name || '');
     const [numberPhone, setNumberPhone] = useState(driverPre?.phone || '');
     const [address, setAddress] = useState(driverPre?.address || '');

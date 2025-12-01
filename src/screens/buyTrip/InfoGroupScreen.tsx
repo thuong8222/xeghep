@@ -36,10 +36,10 @@ export default function InfoGroupScreen({ route, navigation }: Props) {
                     <AppText >{'Danh sách thành viên '}</AppText>
                     <IconArowDown rotate={-90} size={20} />
                 </AppButton>
-                <AppButton onPress={() => Alert.alert('Đang phát triển')} row justifyContent={'space-between'} padding={12}>
+                {/* <AppButton onPress={() => Alert.alert('Đang phát triển')} row justifyContent={'space-between'} padding={12}>
                     <AppText >{'Thông báo'}</AppText>
                     <IconArowDown rotate={-90} size={20} />
-                </AppButton>
+                </AppButton> */}
                 <AppButton onPress={gotoGroupRules} row justifyContent={'space-between'} padding={12}>
                     <AppText >{'Quy định nhóm'}</AppText>
                     <IconArowDown rotate={-90} size={20} />

@@ -31,6 +31,9 @@ interface PointState {
   loading: boolean;
   error: string | null;
   successMessage: string | null;
+  page: number;
+  lastPage: number;
+  types: string[];
 }
 interface BuyPointPayload {
   points_amount: number;
@@ -47,6 +50,9 @@ const initialState: PointState = {
   history: [],
   error: null,
   successMessage: null,
+  page: 1,
+  lastPage: 1,
+  types: [],
 };
 interface BankInfo {
   bank_name: string;
@@ -162,18 +168,29 @@ export const confirmPointAction = createAsyncThunk<
   }
 });
 
-// 4️⃣ Lấy lịch sử giao dịch điểm
+// 4️⃣ Lấy lịch sử giao dịch điểm với filter + phân trang
+// redux/slices/pointSlice.ts
+
+export interface FetchHistoryPointParams {
+  start_date?: number; // timestamp giây
+  end_date?: number; // timestamp giây
+  page?: number;
+  related_type?: string;
+}
 export const fetchPointHistory = createAsyncThunk<
-  any[], // dữ liệu trả về là mảng các giao dịch
-  void,
+  { data: any[]; lastPage: number }, // trả về data + lastPage
+  FetchHistoryPointParams,
   { rejectValue: string }
->('point/fetchPointHistory', async (_, { rejectWithValue }) => {
+>('point/fetchPointHistory', async (params, { rejectWithValue }) => {
   try {
-    const response = await getHistoryTrandsactionPoints();
-    console.log('fetchPointHistory: ', response.data.data);
-    console.log('fetchPointHistory: ', response.data);
+ 
+    const response = await getHistoryTrandsactionPoints(params); // API hỗ trợ query params
     if (response.data.status === true) {
-      return response.data.data; // trả về danh sách giao dịch
+      return {
+        data: response.data.data, // giả sử API trả về { items: [...], last_page: n }
+        lastPage: response.data.data.last_page || 1,
+        types: response.data.types || [],
+      };
     } else {
       return rejectWithValue(response.data.message || 'Lấy lịch sử thất bại');
     }
@@ -183,6 +200,7 @@ export const fetchPointHistory = createAsyncThunk<
     );
   }
 });
+
 export const createSalePoint = createAsyncThunk<
   string, // return type (response.data.data)
   CreateSalePayload, // payload type
@@ -212,16 +230,16 @@ const pointSlice = createSlice({
   name: 'point',
   initialState,
   reducers: {
-     // ✅ Thêm giao dịch mới
-     addTransaction: (state, action: PayloadAction<any>) => {
+    // ✅ Thêm giao dịch mới
+    addTransaction: (state, action: PayloadAction<any>) => {
       // Chỉ thêm nếu chưa tồn tại
       const exists = state.history.find(t => t.id === action.payload.id);
       if (!exists) {
         state.history.unshift(action.payload); // Thêm vào đầu
       }
     },
-     // ✅ Thêm điểm mới
-     addPoint: (state, action: PayloadAction<any>) => {
+    // ✅ Thêm điểm mới
+    addPoint: (state, action: PayloadAction<any>) => {
       // Chỉ thêm nếu chưa tồn tại
       const exists = state.points.find(p => p.id === action.payload.id);
       if (!exists) {
@@ -329,14 +347,17 @@ const pointSlice = createSlice({
         state.error = null;
         state.successMessage = null;
       })
-      .addCase(
-        fetchPointHistory.fulfilled,
-        (state, action: PayloadAction<any[]>) => {
-          state.loading = false;
-          state.history = action.payload;
-          state.successMessage = 'Lấy lịch sử giao dịch thành công';
-        },
-      )
+      .addCase(fetchPointHistory.fulfilled, (state, action) => {
+        state.loading = false;
+        state.page = action.meta.arg.page || 1;
+        state.lastPage = action.payload.lastPage;
+        if (state.page > 1) {
+          state.history = [...state.history, ...action.payload.data]; // load more
+        } else {
+          state.history = action.payload.data;
+        }
+        state.types = action.payload.types || [];
+      })
       .addCase(fetchPointHistory.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Lấy lịch sử giao dịch thất bại';
@@ -344,5 +365,11 @@ const pointSlice = createSlice({
   },
 });
 
-export const {addTransaction, addPoint, updatePoint, removePoint, clearPointMessages } = pointSlice.actions;
+export const {
+  addTransaction,
+  addPoint,
+  updatePoint,
+  removePoint,
+  clearPointMessages,
+} = pointSlice.actions;
 export default pointSlice.reducer;

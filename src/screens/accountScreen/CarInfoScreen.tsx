@@ -20,7 +20,6 @@ export default function CarInfoScreen() {
     const route = useRoute<RouteProp<AccountTabsParamList, 'CarInfoScreen'>>();
     const { driver, loading, error, successMessage, editDriver, clear } = useDriverApi();
     const driverPre = route.params.data;
-    console.log('driverPre info xe: ', driverPre)
     const [carInfo, setCarInfo] = useState({
         name: driverPre.name_car || '',
         year: driverPre.year_car || '',
@@ -64,8 +63,7 @@ export default function CarInfoScreen() {
                 status_car: carInfo.status || '',
                 type_car: carInfo.type || ''
             };
-            console.log('model: ', model)
-
+        
             await editDriver(model);
 
         } catch (err: any) {

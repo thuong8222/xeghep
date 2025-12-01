@@ -9,11 +9,11 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppConfig from '../../services/config';
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: AppConfig.BASE_URL,
   headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
 });
-const apiFormData = axios.create({
+export const apiFormData = axios.create({
   baseURL: AppConfig.BASE_URL,
   headers: {
     Accept: 'application/json',
@@ -27,6 +27,19 @@ apiFormData.interceptors.request.use(async configFormData => {
 api.interceptors.request.use(async config => {
   const token = await AsyncStorage.getItem('token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+export const api_hastoken = axios.create({
+  baseURL: AppConfig.BASE_URL,
+  headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+});
+
+// Thêm interceptor
+api_hastoken.interceptors.request.use(async (config) => {
+  const token = await AsyncStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 

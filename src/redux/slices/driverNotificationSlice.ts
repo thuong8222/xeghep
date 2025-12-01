@@ -5,6 +5,8 @@ export interface NotificationItem {
     id: string;
     title: string;
     content: string;
+    is_important: boolean;
+    image: string | null;
     created_at: string;
 }
 
@@ -12,6 +14,7 @@ interface NotificationPagination {
     data: NotificationItem[];
     current_page: number;
     last_page: number;
+    unreadCount: number;
 }
 
 interface NotificationState {
@@ -23,6 +26,7 @@ interface NotificationState {
     items: NotificationItem[];
     page: number;
     lastPage: number;
+    unreadCount: number;
 }
 
 const initialState: NotificationState = {
@@ -34,6 +38,7 @@ const initialState: NotificationState = {
     items: [],
     page: 1,
     lastPage: 1,
+    unreadCount: 0,
 };
 
 // =======================
@@ -62,7 +67,37 @@ const driverNotificationSlice = createSlice({
             state.items = [];
             state.page = 1;
             state.lastPage = 1;
-        }
+        },
+        setNotifications: (state, action: PayloadAction<NotificationItem[]>) => {
+            state.items = action.payload;
+          },
+          
+          addNotification: (state, action: PayloadAction<NotificationItem>) => {
+            // Add to beginning of array (newest first)
+            const exists = state.items.find(n => n.id === action.payload.id);
+            
+            if (!exists) {
+              state.items.unshift(action.payload);
+              state.unreadCount += 1;
+            } else {
+              // Update existing notification
+              const index = state.items.findIndex(n => n.id === action.payload.id);
+              if (index !== -1) {
+                state.items[index] = action.payload;
+              }
+            }
+          },
+          
+          removeNotification: (state, action: PayloadAction<string>) => {
+            state.items = state.items.filter(n => n.id !== action.payload);
+          },
+          
+          markAsRead: (state, action: PayloadAction<string>) => {
+            // You can extend this to track read status per notification
+            if (state.unreadCount > 0) {
+              state.unreadCount -= 1;
+            }
+          },
     },
     extraReducers: (builder) => {
         builder
@@ -98,6 +133,10 @@ const driverNotificationSlice = createSlice({
     },
 });
 
-export const { resetNotifications } = driverNotificationSlice.actions;
+export const {  resetNotifications, 
+    setNotifications,
+    addNotification,
+    removeNotification,
+    markAsRead,  } = driverNotificationSlice.actions;
 
 export default driverNotificationSlice.reducer;

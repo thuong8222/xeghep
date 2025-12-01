@@ -1,16 +1,18 @@
+
 // redux/slices/authSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import AppConfig from '../../services/config';
 import { useAppContext } from '../../context/AppContext';
+import { api_hastoken } from '../data/API';
 
 interface AuthState {
   token: string | null;
   loading: boolean;
   error: string | null;
   successMessage: string | null;
-  driver?: string | null; 
+  driver?: string | null;
 }
 
 const initialState: AuthState = {
@@ -64,14 +66,14 @@ export const loginUser = createAsyncThunk<
     const token = response.data.data.token;
     const successMessage = response.data.message || 'Đăng nhập thành công'; // ✅ lấy message
     const driver = response.data.data.driver;
-    await AsyncStorage.setItem('token',token );
+    await AsyncStorage.setItem('token', token);
 
     await AsyncStorage.setItem(
       'driver',
-      JSON.stringify(response.data.data.driver)
+      JSON.stringify(response.data.data.driver),
     );
-   
-    return { token, successMessage, driver};
+
+    return { token, successMessage, driver };
   } catch (err: any) {
     return rejectWithValue(
       err.response?.data?.message || err.message || 'Đăng nhập thất bại',
@@ -86,11 +88,40 @@ export const forgotPassword = createAsyncThunk<
   { rejectValue: string }
 >('auth/forgotPassword', async (payload, { rejectWithValue }) => {
   try {
-    const response = await api.post('/api/auth/forgot-password', payload);
+    const response = await api_hastoken.post('/api/auth/forgot-password', payload);
     return response.data.message || 'Yêu cầu thành công';
   } catch (err: any) {
     return rejectWithValue(
       err.response?.data?.message || err.message || 'Yêu cầu thất bại',
+    );
+  }
+});
+export const logoutAccount = createAsyncThunk<
+  string,
+  void,
+  { rejectValue: string }
+>('auth/logoutAccount', async (_, { rejectWithValue }) => {
+  try {
+    const response = await api_hastoken.post('/api/auth/logout');
+    return response.data.message || 'Đăng xuất thành công';
+  } catch (err: any) {
+    return rejectWithValue(
+      err.response?.data?.message || err.message || 'Yêu cầu thất bại',
+    );
+  }
+});
+
+export const deleteAccount = createAsyncThunk<
+  string,
+  void,
+  { rejectValue: string }
+>('auth/deleteAccount', async (_, { rejectWithValue }) => {
+  try {
+    const response = await api_hastoken.delete('/api/auth/remover');
+    return response.data.message || 'Xoá tài khoản thành công';
+  } catch (err: any) {
+    return rejectWithValue(
+      err.response?.data?.message || err.message || 'Xoá tài khoản thất bại',
     );
   }
 });
@@ -150,7 +181,42 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload || 'Đăng nhập thất bại';
       })
+      //logoutAccount
+      .addCase(logoutAccount.pending, state => {
+        state.loading = true;
+        state.error = null;
+      
+      })
+      .addCase(
+        logoutAccount.fulfilled,
+        (state, action: PayloadAction<string>) => {
+          state.loading = false;
+        
+        },
+      )
 
+      .addCase(logoutAccount.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Đăng nhập thất bại';
+      })
+      //deleteAccount
+      .addCase(deleteAccount.pending, state => {
+        state.loading = true;
+        state.error = null;
+      
+      })
+      .addCase(
+        deleteAccount.fulfilled,
+        (state, action: PayloadAction<string>) => {
+          state.loading = false;
+          
+        },
+      )
+
+      .addCase(deleteAccount.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Xoá tài khoản thất bại';
+      })
       // FORGOT PASSWORD
       .addCase(forgotPassword.pending, state => {
         state.loading = true;
