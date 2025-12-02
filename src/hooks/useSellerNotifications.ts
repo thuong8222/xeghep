@@ -29,7 +29,20 @@ const navigation = useNavigation();
           });} 
           }]
       );
-    await  displayNotification('Người mua mới!', data.message || 'Bạn có người mua mới muốn liên hệ');
+   // 🚀 Push notification – click để vào ChatScreen
+   await displayNotification(
+    "Người mua mới!",
+    data.message || "Bạn có người mua mới muốn liên hệ",
+    {
+      screen: "ChatScreen",
+      params: { data: data.data },
+    }
+  );
+
+console.log("📤 Đã gửi notification với navData:", {
+  screen: "ChatScreen",
+  params: { data: data.data },
+});
       // TODO: Cập nhật state, navigate, hoặc show toast
     };
 

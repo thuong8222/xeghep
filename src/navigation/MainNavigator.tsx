@@ -41,13 +41,11 @@ export default function MainNavigator() {
   useEffect(() => {
     if (!socket || !isConnected || !currentDriver?.id || !driver?.id) return;
 
-    console.log("📌 Registering user on app mount:", currentDriver.id);
+  
     socket.emit("register_user", currentDriver.id);
   }, [socket, isConnected, currentDriver?.id]);
 
-  console.log('driver?.id AsyncStorage  in root navigator', driver?.id)
-
-  console.log('currentDriver in root navigator', currentDriver.id)
+ 
 
   // ✅ Listen cả 2 loại thông báo (vì user có thể vừa là buyer vừa là seller)
   useSellerNotifications(currentDriver?.id || driver?.id);

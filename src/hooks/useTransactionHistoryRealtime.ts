@@ -9,9 +9,9 @@ export const useTransactionHistoryRealtime = (userId?: string) => {
   const { socket, isConnected } = useSocket();
   const dispatch = useDispatch<AppDispatch>();
 
-  console.log('🔍 Transaction hook - userId:', userId);
-  console.log('🔍 Transaction hook - socket:', !!socket);
-  console.log('🔍 Transaction hook - isConnected:', isConnected);
+  // console.log('🔍 Transaction hook - userId:', userId);
+  // console.log('🔍 Transaction hook - socket:', !!socket);
+  // console.log('🔍 Transaction hook - isConnected:', isConnected);
   useEffect(() => {
     if (!socket || !isConnected || !userId) {
       console.log('⚠️ Transaction history realtime not ready:', {
@@ -22,20 +22,20 @@ export const useTransactionHistoryRealtime = (userId?: string) => {
       return;
     }
 
-    console.log('🔔 Setting up transaction history listener for:', userId);
-    console.log('📡 Socket ID:', socket.id);
+    // console.log('🔔 Setting up transaction history listener for:', userId);
+    // console.log('📡 Socket ID:', socket.id);
 
     const handleTransactionUpdate = async (data: any) => {
-      console.log('📜 New transaction:', data);
+      // console.log('📜 New transaction:', data);
 
       const { transaction } = data.transaction;
 
       if (transaction) {
-        console.log('➕ Adding transaction:', transaction.id);
+        // console.log('➕ Adding transaction:', transaction.id);
         // ✅ Thêm giao dịch mới vào state.history
         dispatch(addTransaction(transaction));
-        console.log('✅ Added new transaction to history');
-        console.log('first transaction: ', transaction);
+        // console.log('✅ Added new transaction to history');
+        // console.log('first transaction: ', transaction);
         // Hiển thị notification
         try {
           const isReceive = transaction.type === 'buy_points';
@@ -50,9 +50,9 @@ export const useTransactionHistoryRealtime = (userId?: string) => {
     };
 
     socket.on('transaction_updated', handleTransactionUpdate);
-    console.log("✅ Registered 'transaction_updated' listener");
+ 
     return () => {
-      console.log('🔕 Removing transaction history listener');
+
       socket.off('transaction_updated', handleTransactionUpdate);
     };
   }, [socket, isConnected, userId, dispatch]);

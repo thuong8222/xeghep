@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { View, TextInput, Button, FlatList, Text, StyleSheet, Alert } from "react-native";
+import { View, FlatList, Text, StyleSheet, Alert, Image, TouchableOpacity, ActivityIndicator, Linking } from "react-native";
+import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 
 import { Message } from "../types/Message";
 import { RouteProp } from "@react-navigation/native";
@@ -9,21 +10,22 @@ import AppButton from "../components/common/AppButton";
 import AppText from "../components/common/AppText";
 import { ColorsGlobal } from "../components/base/Colors/ColorsGlobal";
 
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../redux/data/store";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../redux/data/store";
 import { confirmPointAction } from "../redux/slices/pointSlice";
 import { useSocket } from "../context/SocketContext";
 import Container from "../components/common/Container";
 import AppInput from "../components/common/AppInput";
 import IconSent from "../assets/icons/IconSent";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAppContext } from "../context/AppContext";
+import { RootStackParamList } from "../navigation/RootNavigator";
+import IconPhone from "../assets/icons/iconPhone";
+import ModalUploadCarImage from "../components/component/modals/ModalUploadCarImage";
 
-type RootStackParamList = {
-  Chat: { data: string };
-};
+// ⚠️ CẤU HÌNH IP SERVER
+const API_BASE_URL = 'http://15.235.167.241:5000'; // ⭐ Server IP của bạn
 
-type ChatRouteProp = RouteProp<RootStackParamList, "Chat">;
+type ChatRouteProp = RouteProp<RootStackParamList, 'ChatScreen'>;
 
 interface Props {
   route: ChatRouteProp;
@@ -31,51 +33,64 @@ interface Props {
 }
 
 const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
-  const { socket, isConnected } = useSocket();
+  const { socket } = useSocket();
   const dispatch = useDispatch<AppDispatch>();
   const { data } = route?.params;
-  console.log('data chat screen', data)
   const { currentDriver } = useAppContext();
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-  console.log('currentDriver in chat screen', currentDriver)
-
-  const currentUserId = currentDriver?.id // ví dụ: người mua là người đang login
-  const chatWith =
-    currentUserId === data?.buyer_id ? data?.seller_id : data?.buyer_id;
-  console.log(chatWith, 'chatWith id')
+  const currentUserId = currentDriver?.id;
+  const chatWith = currentUserId === data?.buyer_id ? data?.seller_id : data?.buyer_id;
+  
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
-
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDisplayModalUploadImage, setIsDisplayModalUploadImage] = useState(false);
+  
   const idPoint = data?.id;
-
   const isOnwer = currentUserId === data?.seller_id;
-  console.log('first currentUserId in chat screen', isOnwer)
   const nameChatWith = isOnwer ? data?.buyer.full_name : data?.seller.full_name;
+
+  const callToPhone = () => {
+    const phoneNumber = isOnwer ? data?.buyer?.phone : data?.seller?.phone;
+    if (!phoneNumber) {
+      Alert.alert("Lỗi", "Không có số điện thoại");
+      return;
+    }
+    const phoneUrl = `tel:${phoneNumber}`;
+    Linking.canOpenURL(phoneUrl)
+      .then(supported => {
+        if (!supported) {
+          Alert.alert("Lỗi", "Không thể mở ứng dụng gọi điện");
+        } else {
+          Linking.openURL(phoneUrl);
+        }
+      })
+      .catch(err => console.error("Call error:", err));
+  };
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: `${nameChatWith}`,
+      title: nameChatWith,
+      headerRight: () => (
+        <TouchableOpacity onPress={callToPhone} style={{ padding: 6, marginRight: 12 }}>
+          <IconPhone width={24} height={24} />
+        </TouchableOpacity>
+      ),
     });
-  }, [navigation, data?.buyer?.full_name]);
+  }, [navigation, nameChatWith, isOnwer, data?.buyer?.phone, data?.seller?.phone]);
 
   useEffect(() => {
-    if (!socket) {
-      console.log("⚠️ Socket chưa sẵn sàng");
-      return;
-    }
-
-    console.log("✅ Setting up socket listeners, socket id:", socket.id);
+    if (!socket) return;
 
     socket.on("connect", () => {
-      console.log("🔌 Socket connected, id:", socket.id);
+      console.log("🔌 Socket connected");
       socket.emit("register_user", currentUserId);
-      console.log("📌 Register user:", currentUserId);
     });
 
-    // ✅ QUAN TRỌNG: Nếu đã connected rồi thì emit luôn
     if (socket.connected) {
       socket.emit("register_user", currentUserId);
-      console.log("📌 Register user (already connected):", currentUserId);
     }
 
     return () => {
@@ -83,15 +98,9 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
     };
   }, [socket, currentUserId]);
 
-
-  // Load messages
   useEffect(() => {
-    if (!socket || !socket.connected) {
-      console.log("⚠️ Socket not ready for loading messages");
-      return;
-    }
+    if (!socket || !socket.connected) return;
 
-    console.log("🔄 Loading chat messages...");
     socket.emit("load_chat_messages", {
       user_id: currentUserId,
       chatWith: chatWith,
@@ -104,13 +113,19 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
 
     const handleReceiveMessage = (msg: Message) => {
       console.log("📨 Received message:", msg);
-      console.log("📨 msg.sender_id === currentUserId && msg.receiver_id === chatWith):", msg.sender_id == currentUserId && msg.receiver_id === chatWith);
-      console.log("📨 msg.sender_id === chatWith && msg.receiver_id === currentUserId:", msg.sender_id === chatWith && msg.receiver_id == currentUserId);
       if (
         (msg.sender_id === currentUserId && msg.receiver_id === chatWith) ||
         (msg.sender_id === chatWith && msg.receiver_id === currentUserId)
       ) {
-        setMessages((prev) => [...prev, msg]);
+        // ⭐ Tránh duplicate: Kiểm tra xem message đã tồn tại chưa
+        setMessages((prev) => {
+          const exists = prev.some(m => m.id === msg.id);
+          if (exists) {
+            console.log("⚠️ Message already exists, skipping:", msg.id);
+            return prev;
+          }
+          return [...prev, msg];
+        });
       }
     };
 
@@ -122,82 +137,140 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
       socket.off("receive_message", handleReceiveMessage);
     };
   }, [socket, currentUserId, chatWith]);
-  
-  // ✅ ĐÚNG: Chỉ đăng ký 1 lần trong useEffect
+
   useEffect(() => {
-    console.log('Xác nhận điểm từ server - useEffect triggered');
-    console.log('socket in useEffect', socket);
-    console.log('first currentUserId in chat screen', currentUserId);
     if (!socket || !socket.connected) return;
-  
+
     const handlePointConfirmed = (data: any) => {
-      console.log("📢 Xác nhận điểm từ server:", data);
-      
-      // Cập nhật trạng thái UI
       if (data.buyer_id === currentUserId) {
         Alert.alert(
           "✅ Giao dịch thành công",
           data.message || "Người bán đã xác nhận bán điểm",
-          [
-            { 
-              text: "OK", 
-              onPress: () => {
-                // Có thể reload hoặc navigate
-                // navigation.goBack();
-              }
-            }
-          ]
+          [{ text: "OK" }]
         );
       }
     };
-  
+
     socket.on("point_sale_confirmed", handlePointConfirmed);
-  
     return () => {
       socket.off("point_sale_confirmed", handlePointConfirmed);
     };
-  }, [socket, currentUserId]); 
+  }, [socket, currentUserId]);
 
-  // ✅ ĐÚNG: Không đăng ký event listener trong hàm này
-  const sendMessage = () => {
-    if (!message.trim()) return;
-
-    if (!socket) {
-      console.error("❌ Socket is null!");
+  // 📤 Gửi tin nhắn - HỖ TRỢ CẢ TEXT VÀ IMAGE CÙNG LÚC
+  const sendMessage = async () => {
+    if (!socket || !socket.connected) {
       Alert.alert("Lỗi", "Chưa kết nối tới server");
       return;
     }
 
-    if (!socket.connected) {
-      console.error("❌ Socket not connected!");
-      Alert.alert("Lỗi", "Mất kết nối tới server");
+    // ⭐ Kiểm tra: phải có ít nhất text hoặc image
+    if (!message.trim() && !selectedImage) {
       return;
     }
 
-    console.log("✅ Socket connected:", socket.id);
-    console.log("📤 Emitting send_message...");
+    setIsUploading(true);
 
-    const payload = {
-      sender_id: currentUserId,
-      receiver_id: chatWith,
-      text: message,
-    };
+    try {
+      let imageUrl = null;
 
-    console.log("📦 Payload:", payload);
+      // 1️⃣ Nếu có ảnh, upload trước
+      if (selectedImage) {
+        imageUrl = await uploadImage(selectedImage);
+      }
 
-    socket.emit("send_message", payload, (response: any) => {
-      // ✅ Callback để xác nhận server nhận được
-      console.log("✅ Server acknowledged:", response);
-    });
-    
-    // ✅ ĐÚNG: Xóa input sau khi gửi
-    setMessage("");
+      // 2️⃣ Gửi tin nhắn qua socket (có thể có cả text và image)
+      const payload = {
+        sender_id: currentUserId,
+        receiver_id: chatWith,
+        text: message.trim() || null, // ⭐ Text có thể null nếu chỉ gửi ảnh
+        image_url: imageUrl, // ⭐ Image có thể null nếu chỉ gửi text
+      };
+
+      console.log("📤 Sending message:", payload);
+
+      socket.emit("send_message", payload, (response: any) => {
+        console.log("✅ Server response:", response);
+        if (response?.error) {
+          Alert.alert("Lỗi", response.error);
+        }
+      });
+
+      // 3️⃣ Reset form
+      setMessage("");
+      setSelectedImage(null);
+
+    } catch (error) {
+      console.error('❌ Send message error:', error);
+      Alert.alert('Lỗi', 'Không thể gửi tin nhắn');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
+  // 🔧 Hàm upload ảnh riêng biệt
+  const uploadImage = async (imageUri: string): Promise<string> => {
+    try {
+      const formData = new FormData();
+      
+      // ⭐ Fix: Thêm đầy đủ thông tin file
+      formData.append('image', {
+        uri: imageUri,
+        type: 'image/jpeg',
+        name: `chat_${Date.now()}.jpg`,
+      } as any);
+
+      console.log("📤 Uploading image to:", `${API_BASE_URL}/api/upload/chat-image`);
+      console.log("📦 Image URI:", imageUri);
+
+      const uploadResponse = await fetch(`${API_BASE_URL}/api/upload/chat-image`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      console.log("📥 Upload response status:", uploadResponse.status);
+
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        console.error("❌ Upload failed:", errorText);
+        throw new Error(`Upload failed: ${uploadResponse.status}`);
+      }
+
+      const uploadResult = await uploadResponse.json();
+      console.log("✅ Upload result:", uploadResult);
+      
+      if (!uploadResult.success || !uploadResult.url) {
+        throw new Error(uploadResult.error || 'No URL returned');
+      }
+
+      console.log("✅ Image uploaded:", uploadResult.url);
+      return uploadResult.url;
+
+    } catch (error: any) {
+      console.error('❌ Upload image error:', error);
+      console.error('❌ Error message:', error.message);
+      
+      if (error.message.includes('Network request failed')) {
+        Alert.alert(
+          'Lỗi kết nối', 
+          'Không thể kết nối tới server. Kiểm tra:\n' +
+          '1. Server đang chạy\n' +
+          '2. Địa chỉ IP đúng\n' +
+          '3. Điện thoại và server cùng mạng'
+        );
+      }
+      
+      throw error;
+    }
+  };
+
+  // 🎨 Render tin nhắn
   const renderItem = ({ item }: { item: Message }) => {
     const isMine = item.sender_id === currentUserId;
-    // Sửa tên trường phù hợp với server
-    const time = item.created_at // ✅ Dùng created_at thay vì createdAt
+    const time = item.created_at
       ? new Date(item.created_at).toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -211,68 +284,70 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
           isMine ? styles.myMsgContainer : styles.otherMsgContainer,
         ]}
       >
-        {!isMine && <Text style={styles.sender}>{item.user}</Text>}
+        {!isMine && <Text style={styles.sender}>{item.user || 'Unknown'}</Text>}
         <View
           style={[
             styles.bubble,
             isMine ? styles.myBubble : styles.otherBubble,
           ]}
         >
-          <Text style={styles.text}>{item.text}</Text>
-          <Text style={styles.time}>{time}</Text>
+          {/* 🖼️ Hiển thị ảnh nếu có */}
+          {item.image_url && (
+           <TouchableOpacity onPress={() => setPreviewImage(item.image_url)}>
+              <Image
+                source={{ uri: item.image_url }}
+                style={styles.messageImage}
+                resizeMode="cover"
+              />
+            </TouchableOpacity>
+          )}
+
+          {/* 📝 Hiển thị text (caption) */}
+          {item.text && (
+            <Text style={[styles.text, { color: isMine ? 'white' : 'black' }]}>
+              {item.text}
+            </Text>
+          )}
+
+          <Text style={[styles.time, { color: isMine ? 'rgba(255,255,255,0.7)' : '#555' }]}>
+            {time}
+          </Text>
         </View>
       </View>
     );
   };
 
   const handleConfirm = async () => {
-    console.log('🔄 Starting confirmation for point ID:', idPoint);
-    console.log('📋 Point data:', data);
-    
-    // ✅ Kiểm tra điều kiện trước khi confirm
     if (!idPoint) {
       Alert.alert("Lỗi", "Không tìm thấy ID giao dịch");
       return;
     }
-  
+
     if (!isOnwer) {
       Alert.alert("Lỗi", "Bạn không phải người bán");
       return;
     }
-  
+
     if (data?.status === 'completed') {
       Alert.alert("Thông báo", "Giao dịch đã được xác nhận trước đó");
       return;
     }
-  
+
     try {
-      console.log('📤 Dispatching confirmPointAction...');
       const resultAction = await dispatch(confirmPointAction(idPoint));
-      
-      console.log('📥 Result action:', resultAction);
-  
+
       if (confirmPointAction.fulfilled.match(resultAction)) {
-        console.log('✅ Confirmation successful:', resultAction.payload);
-        
         Alert.alert(
-          "Thành công", 
+          "Thành công",
           "Bạn đã xác nhận bán điểm",
           [
             {
               text: "OK",
-              onPress: () => {
-                // Navigate về màn hình trước
-                navigation.goBack();
-              }
+              onPress: () => navigation.goBack()
             }
           ]
         );
       } else {
-        // ✅ Log chi tiết lỗi
-        console.error('❌ Confirmation failed');
-        console.error('❌ Payload:', resultAction.payload);
-        console.error('❌ Error:', resultAction.error);
-        
         const errorMessage = resultAction.payload as string || "Xác nhận thất bại";
         Alert.alert("Lỗi", errorMessage);
       }
@@ -281,7 +356,7 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
       Alert.alert("Lỗi", "Đã xảy ra lỗi không mong muốn");
     }
   };
-  
+
   const ListHeaderComponent = () => {
     return (
       <AppView radius={16} padding={16} gap={6} backgroundColor={ColorsGlobal.backgroundGray}>
@@ -306,38 +381,115 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
   }
 
   return (
-    <Container >
+    <>
+    {previewImage && (
+  <View
+    style={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: "rgba(0,0,0,0.9)",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 999,
+    }}
+  >
+    <TouchableOpacity
+      onPress={() => setPreviewImage(null)}
+      style={{ position: "absolute", top: 40, right: 20 }}
+    >
+      <Text style={{ fontSize: 30, color: "white" }}>✕</Text>
+    </TouchableOpacity>
+
+    <Image
+      source={{ uri: previewImage }}
+      style={{ width: "90%", height: "70%", resizeMode: "contain" }}
+    />
+  </View>
+)}
+
+
+    <Container>
       <FlatList
         data={messages}
-        keyExtractor={(_, i) => i.toString()}
+        keyExtractor={(item, i) => item.id || i.toString()}
         renderItem={renderItem}
         ListHeaderComponent={isOnwer ? ListHeaderComponent : undefined}
       />
-      <AppView row alignItems="center">
-        <AppView flex={1} height={40}>
+
+      {/* 🖼️ Preview ảnh đã chọn */}
+      {selectedImage && (
+        <AppView padding={10} backgroundColor={ColorsGlobal.backgroundLight}>
+          <View style={styles.imagePreviewContainer}>
+            <Image
+              source={{ uri: selectedImage }}
+              style={styles.imagePreview}
+            />
+            <TouchableOpacity
+              style={styles.removeImageButton}
+              onPress={() => setSelectedImage(null)}
+            >
+              <Text style={styles.removeImageText}>✕</Text>
+            </TouchableOpacity>
+          </View>
+        </AppView>
+      )}
+
+      {/* ⌨️ Input area */}
+      <AppView row alignItems="center" gap={5} >
+        {/* 📎 Button chọn ảnh */}
+        <AppButton onPress={() => setIsDisplayModalUploadImage(true)}>
+          <Text style={{ fontSize: 24 }}>📎</Text>
+        </AppButton>
+
+        <AppView flex={1}>
           <AppInput
             value={message}
             onChangeText={setMessage}
-            placeholder="Type a message..."
-            style={{ paddingTop: 0, borderWidth: 1 , backgroundColor: ColorsGlobal.backgroundLight, borderRadius: 20, height: 40 }}
+            placeholder="Nhập tin nhắn..."
+            multiline
+            style={{
+              paddingHorizontal: 12,
+              paddingVertical: 8,
+              backgroundColor: ColorsGlobal.backgroundLight,
+              borderRadius: 20,
+              minHeight: 40,
+              marginTop:-10
+            }}
           />
         </AppView>
 
-        <AppButton onPress={sendMessage}>
-          <IconSent />
+        {/* 📤 Button gửi */}
+        <AppButton onPress={sendMessage} disabled={isUploading}>
+          {isUploading ? (
+            <ActivityIndicator size="small" color={ColorsGlobal.main} />
+          ) : (
+            <IconSent color={ColorsGlobal.main} />
+          )}
         </AppButton>
       </AppView>
+
+      <ModalUploadCarImage
+        isDisplay={isDisplayModalUploadImage}
+        onClose={() => setIsDisplayModalUploadImage(false)}
+        onSelectImage={(uri) => {
+          setSelectedImage(uri);
+          setIsDisplayModalUploadImage(false);
+        }}
+      />
     </Container>
+    </>
   );
 };
 
 export default ChatScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10, backgroundColor: "#f2f2f2" },
-
   msgContainer: {
     marginVertical: 3,
+    paddingHorizontal: 10,
   },
   myMsgContainer: {
     alignItems: "flex-end",
@@ -345,7 +497,6 @@ const styles = StyleSheet.create({
   otherMsgContainer: {
     alignItems: "flex-start",
   },
-
   bubble: {
     padding: 10,
     borderRadius: 12,
@@ -359,37 +510,49 @@ const styles = StyleSheet.create({
     backgroundColor: "#e5e5ea",
     borderTopLeftRadius: 0,
   },
-
   text: {
-    color: "black",
+    fontSize: 15,
   },
   sender: {
     fontSize: 12,
     marginLeft: 4,
+    marginBottom: 2,
     color: "#555",
   },
   time: {
     fontSize: 10,
-    color: "#555",
     marginTop: 4,
     alignSelf: "flex-end",
   },
-
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderTopWidth: 1,
-    borderColor: "#ccc",
-    paddingTop: 6,
-    marginTop: 6,
+  messageImage: {
+    width: 200,
+    height: 200,
+    borderRadius: 8,
+    marginBottom: 5,
   },
-  input: {
-    height: 40,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    marginRight: 8,
-    backgroundColor: "#fff",
+  imagePreviewContainer: {
+    position: 'relative',
+    alignSelf: 'flex-start',
+  },
+  imagePreview: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: 'red',
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  removeImageText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

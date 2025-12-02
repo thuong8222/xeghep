@@ -13,6 +13,28 @@ import moment from 'moment';
 export default function DetailTripHistorySreen({ route }) {
     const data = route.params.data;
     const driverSell = data.driver_sell || {};
+    const formatTime = (value) => {
+        if (!value) return "--";
+      
+        // Nếu là số → có thể là seconds hoặc milliseconds
+        if (typeof value === "number") {
+          const ts = value.toString().length > 10 ? value / 1000 : value;
+          return moment.unix(ts).format("DD-MM-YYYY HH:mm");
+        }
+      
+        // Nếu là chuỗi nhưng là số
+        if (!isNaN(value)) {
+          const num = Number(value);
+          const ts = value.length > 10 ? num / 1000 : num;
+          return moment.unix(ts).format("DD-MM-YYYY HH:mm");
+        }
+      
+        // Trường hợp chuỗi dạng ISO
+        const m = moment(value);
+        if (m.isValid()) return m.format("DD-MM-YYYY HH:mm");
+      
+        return "--";
+      };
 
     return (
         <AppView style={styles.container}>
@@ -68,17 +90,18 @@ export default function DetailTripHistorySreen({ route }) {
                     <IconClock />
                     <AppText style={styles.label}>Giờ xuất phát:</AppText>
                     <AppText style={styles.value}>
-                        {moment(data.time_start).format('DD-MM-YYYY hh:mm')}
+                        {formatTime(data.time_start)}
                     </AppText>
                 </View>
 
                 <View style={styles.row}>
                     <IconClock />
                     <AppText style={styles.label}>Giờ nhận chuyến:</AppText>
-                    <AppText style={styles.value}>
-                        {moment(data.time_receive).format('DD-MM-YYYY hh:mm')}
+                    <AppText style={styles.value} color={ColorsGlobal.main2}>
+                        {formatTime(data.time_receive)}
                     </AppText>
                 </View>
+
             </View>
 
             {/* --- Giá – Point --- */}

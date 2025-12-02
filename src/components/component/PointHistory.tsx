@@ -10,6 +10,7 @@ import { CONSTANT, NumberFormat } from '../../utils/Helper';
 export default function PointHistory(props) {
     // console.log('PointHistory props.data: ', props.data)
     const isBuy = props.data.related_type === 'point_buy' || props.data.related_type === 'trip_buy'
+    const minus_points = props.data.related_type === 'point_sale' || props.data.related_type === 'trip_buy'
     const key_related = props.data.related_type;
     const name_related = CONSTANT.TRANSACTION_TYPE_BY_KEY[key_related];
     const key_reason = props.data.reason
@@ -22,13 +23,13 @@ export default function PointHistory(props) {
                     <AppText fontSize={14}
                         color={ColorsGlobal.main2}>{reason_name}</AppText>
 
-                    {props.data.related &&
+                    {(props.data?.partner) &&
                         <AppText fontSize={14}
-                            color={ColorsGlobal.main2}>{isBuy ? ` của ${props.data.related.full_name}` : ` cho ${props.data.related.full_name}`}</AppText>
-                    }
+                            color={ColorsGlobal.main2}>{isBuy ? ` của ${props.data?.partner?.full_name||props.data?.partner?.full_name}` : ` cho ${props.data?.partner?.full_name|| props.data.partner?.full_name}`}</AppText>
+                    } 
                 </AppView>
 
-                <AppText color={isBuy ? ColorsGlobal.main2 : ColorsGlobal.main} fontWeight={600}>
+                <AppText color={minus_points ? ColorsGlobal.main : ColorsGlobal.main2} fontWeight={600}>
                     {/* {isBuy ? `+${reason} điểm` : `-${reason} điểm`} */}
                     {NumberFormat(props?.data?.change) + ' điểm'}
                 </AppText>

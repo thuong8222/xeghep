@@ -1,22 +1,26 @@
-import React, { useState } from 'react';
-import { View, Image, Alert, Platform, PermissionsAndroid } from 'react-native';
+import React from 'react';
+import { View, Alert, Platform, PermissionsAndroid } from 'react-native';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 
 import AppModal from '../../common/AppModal';
 import AppButton from '../../common/AppButton';
 import AppText from '../../common/AppText';
-
 import { ColorsGlobal } from '../../base/Colors/ColorsGlobal';
 import IconArrowDown from '../../../assets/icons/IconArowDown';
-
 
 interface ModalUploadCarImageProps {
   isDisplay: boolean;
   onClose: () => void;
   onSelectImage: (uri: string) => void;
 }
-export default function ModalUploadCarImage({ isDisplay, onClose, onSelectImage }: ModalUploadCarImageProps) {
 
+export default function ModalUploadCarImage({ 
+  isDisplay, 
+  onClose, 
+  onSelectImage 
+}: ModalUploadCarImageProps) {
+
+  // 📷 Xin quyền camera trên Android
   const requestCameraPermission = async () => {
     if (Platform.OS === 'android') {
       try {
@@ -39,29 +43,42 @@ export default function ModalUploadCarImage({ isDisplay, onClose, onSelectImage 
       return true; // iOS tự xử lý qua Info.plist
     }
   };
+
+  // 🖼️ Chọn ảnh từ thư viện
   const pickImage = () => {
     launchImageLibrary(
       {
         mediaType: 'photo',
         quality: 0.8,
-        includeBase64: true,
+        maxWidth: 1024,
+        maxHeight: 1024,
       },
       (response) => {
-        console.log('response pickImage: ',response)
-        if (response.didCancel) return;
+        console.log('response pickImage: ', response);
+        
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+          return;
+        }
+        
         if (response.errorCode) {
+          console.log('ImagePicker Error: ', response.errorMessage);
           Alert.alert('Lỗi', response.errorMessage || 'Không thể chọn ảnh');
           return;
         }
+
         const uri = response.assets?.[0]?.uri;
         if (uri) {
-          onSelectImage(uri); // 👈 truyền ra ngoài
-          onClose();          // đóng modal
+          onSelectImage(uri); // 👈 Truyền URI ra ngoài
+          onClose();          // Đóng modal
+        } else {
+          Alert.alert('Lỗi', 'Không thể lấy ảnh');
         }
       }
     );
   };
 
+  // 📸 Chụp ảnh mới
   const takePhoto = async () => {
     const hasPermission = await requestCameraPermission();
 
@@ -74,19 +91,31 @@ export default function ModalUploadCarImage({ isDisplay, onClose, onSelectImage 
       {
         mediaType: 'photo',
         quality: 0.8,
-        includeBase64: true,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        cameraType: 'back',
+        saveToPhotos: false, // Không lưu vào thư viện tự động
       },
       (response) => {
-        console.log('response takePhoto: ',response)
-        if (response.didCancel) return;
+        console.log('response takePhoto: ', response);
+        
+        if (response.didCancel) {
+          console.log('User cancelled camera');
+          return;
+        }
+        
         if (response.errorCode) {
+          console.log('Camera Error: ', response.errorMessage);
           Alert.alert('Lỗi', response.errorMessage || 'Không thể chụp ảnh');
           return;
         }
+
         const uri = response.assets?.[0]?.uri;
         if (uri) {
-          onSelectImage(uri); // 👈 truyền ra ngoài
-          onClose();          // đóng modal
+          onSelectImage(uri); // 👈 Truyền URI ra ngoài
+          onClose();          // Đóng modal
+        } else {
+          Alert.alert('Lỗi', 'Không thể lấy ảnh');
         }
       }
     );
@@ -95,15 +124,27 @@ export default function ModalUploadCarImage({ isDisplay, onClose, onSelectImage 
   return (
     <AppModal isVisible={isDisplay} onClose={onClose} heightPercent={0.26}>
       <View style={{ flex: 1, justifyContent: 'center', paddingBottom: 30 }}>
-        <AppButton onPress={pickImage} padding={10} justifyContent={'space-between'} row>
-          <AppText>{'Chọn ảnh từ thư viện'}</AppText>
-          <IconArrowDown rotate={-90} />
-        </AppButton>
-        <AppButton onPress={takePhoto} padding={10} borderTopWidth={1} borderTopColor={ColorsGlobal.borderColor} justifyContent={'space-between'} row>
-          <AppText>{'Chụp ảnh mới'}</AppText>
+        <AppButton 
+          onPress={pickImage} 
+          padding={10} 
+          justifyContent={'space-between'} 
+          row
+        >
+          <AppText>{'🖼️ Chọn ảnh từ thư viện'}</AppText>
           <IconArrowDown rotate={-90} />
         </AppButton>
 
+        <AppButton 
+          onPress={takePhoto} 
+          padding={10} 
+          borderTopWidth={1} 
+          borderTopColor={ColorsGlobal.borderColor} 
+          justifyContent={'space-between'} 
+          row
+        >
+          <AppText>{'📷 Chụp ảnh mới'}</AppText>
+          <IconArrowDown rotate={-90} />
+        </AppButton>
       </View>
     </AppModal>
   );

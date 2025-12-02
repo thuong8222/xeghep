@@ -11,14 +11,14 @@ import {
 export const useTripsListRealtime = () => {
   const { socket, isConnected } = useSocket();
   const dispatch = useDispatch<AppDispatch>();
-console.log('useTripsListRealtime initialized');
+// console.log('useTripsListRealtime initialized');
   useEffect(() => {
     if (!socket || !isConnected) {
       console.log("⚠️ Trips list realtime not ready");
       return;
     }
 
-    console.log("🔔 Setting up trips list real-time listener");
+    // console.log("🔔 Setting up trips list real-time listener");
 
     const handleTripsUpdate = (data: any) => {
       console.log("🚗 Trips list updated:", data);

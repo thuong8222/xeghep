@@ -20,25 +20,7 @@ export type RootStackParamList = {
 };
 const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function RootNavigator() {
-//   const navigation = useNavigation()
 
-//   const [driver, setDriver] = useState<any>(null);
-
-//   useEffect(() => {
-//     const fetchDriver = async () => {
-//       const driverString = await AsyncStorage.getItem("driver");
-//       if (driverString) setDriver(JSON.parse(driverString));
-//     };
-//     fetchDriver();
-//   }, []);
-//   console.log('driver?.id AsyncStorage  in root navigator', driver?.id)
-//  const {currentDriver } = useAppContext();
-//  console.log('currentDriver in root navigator', currentDriver.id)
-
-//   // ✅ Hook notification tự handle driver?.id
-//   useSellerNotifications(currentDriver?.id || driver?.id);
-//     // ✅ Thêm hook notification cho buyer
-//     useBuyerNotifications(currentDriver?.id || driver?.id);
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName='BottomTabs'>

@@ -1,8 +1,10 @@
 export interface Message {
-  id: string;
-  sender_id: string;
-  receiver_id: string | null;
-  text: string | null;
-  image_url: string | null;
-  created_at: Date | string; // ✅ Đổi từ createdAt thành created_at
+  id?: string;
+  sender_id: number;
+  receiver_id: number;
+  text?: string;
+  image_url?: string; // ⭐ Đổi từ image thành image_url
+  type?: 'text' | 'image';
+  user?: string;
+  created_at?: string;
 }
