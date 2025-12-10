@@ -213,7 +213,7 @@ export default function AccountScreen({ navigation }: Props) {
           <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Tính năng'}</AppText>
           <AppView gap={8}>
             <FunctionSection label='Đổi mật khẩu' onPress={() => setIsModalChangePw(true)} />
-            <FunctionSection label='Lịch sử mua/bán điểm' onPress={gotoHistoryBuySalePoint} />
+            <FunctionSection label='Sao kê lịch sử điểm' onPress={gotoHistoryBuySalePoint} />
             <FunctionSection label='Thông báo' onPress={gotoNotification} />
             {/* <FunctionSection label='Lịch sử mua/bán chuyến' onPress={gotoHistoryBuySalePoint} />
             <FunctionSection label='Danh sách điểm' onPress={gotoHistoryBuySalePoint} /> */}

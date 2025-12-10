@@ -30,12 +30,13 @@ export default function GroupAreaScreen({ navigation }: Props) {
   // Lấy danh sách khi mount
   useEffect(() => {
     fetchGroups();
-    
+
   }, []);
 
   const fetchGroups = useCallback(async () => {
     try {
       await getAreas();
+
     } catch (err) {
       console.log('Lỗi fetch groups:', err);
     }
@@ -65,7 +66,7 @@ export default function GroupAreaScreen({ navigation }: Props) {
       headerTitle: () => (
         <AppView justifyContent={'center'} alignItems={'center'}>
           <AppText fontWeight={700}>{'Nhóm khu vực'}</AppText>
-          {/* <AppText fontSize={12} lineHeight={16} color={ColorsGlobal.textLight}>{'300 thành viên'}</AppText> */}
+         
         </AppView>
       ),
       // headerRight: HeaderRightButton,
@@ -75,7 +76,7 @@ export default function GroupAreaScreen({ navigation }: Props) {
 
   const gotoDetailArea = (props) => {
 
-    navigation.navigate('BuyTrip', { nameGroup: props.name + ' - ' + getNameByCode(props.province_code), countMember: props.members_count || 0, id_area: props.id })
+    navigation.navigate('BuyTrip', { nameGroup: props.name + ' - ' + getNameByCode(props.province_code), countMember: props.members_count || 0, id_area: props.id ,isJoin: props.is_member})
   }
   const renderItem_groupArea = ({ item, index }) => {
     return (<>
@@ -84,7 +85,7 @@ export default function GroupAreaScreen({ navigation }: Props) {
     )
   }
   return (
-  <Container loading={loading} >
+    <Container loading={loading} >
       <FlatList
         data={groups}
         renderItem={renderItem_groupArea}
@@ -106,8 +107,9 @@ const Area = (props) => {
   const detailArea = () => {
     props.gotoDetailAreaPress(props.data)
   }
+  const isJoinArea = props.data?.is_member
   return (
-    <AppButton onPress={detailArea} gap={8} paddingVertical={16} paddingLeft={12} flex={1} row >
+    <AppButton onPress={detailArea} gap={8} paddingVertical={16} paddingLeft={12} flex={1} row opacity={isJoinArea ? 1 : .5}>
       <AppView height={45} width={45} radius={9999} backgroundColor={ColorsGlobal.backgroundLight} alignItems='center' justifyContent='center' padding={4} >
         <AppText fontSize={scale(18)} lineHeight={scale(26)} fontWeight={700} textAlign='center'>{props.data.members_count > 99 ? '99+' : props.data.members_count}</AppText>
       </AppView>

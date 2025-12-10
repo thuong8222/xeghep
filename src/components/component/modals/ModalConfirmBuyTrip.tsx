@@ -6,6 +6,8 @@ import AppButton from '../../common/AppButton';
 import AppText from '../../common/AppText';
 import IconClose from '../../../assets/icons/IconClose';
 import ButtonSubmit from '../../common/ButtonSubmit';
+import { navigate } from '../../../navigation/navigationRef';
+import { useNavigation } from '@react-navigation/native';
 
 interface ModalConfirmBuyTripProps {
   visible?: boolean;
@@ -18,9 +20,10 @@ export default function ModalConfirmBuyTrip({
   onRequestClose,
   data
 }: ModalConfirmBuyTripProps) {
-
+const navigation = useNavigation()
   const handleOk = () => {
     onRequestClose?.();
+    navigation.navigate('ReceivingScheduleTabs',{screen:'DetailTripHistory', params:{data:data}})
   };
 
 

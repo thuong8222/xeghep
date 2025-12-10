@@ -15,7 +15,7 @@ const { width: screenWidth } = Dimensions.get("window");
 type Props = {
   types: string[];
   selectedType: string | null;
-  toggleFilter: (type: string) => void;
+  toggleFilter?: (type: string) => void;
 };
 
 export default function TypeFilterBar({
@@ -27,7 +27,7 @@ export default function TypeFilterBar({
   const itemRefs = useRef<Record<string, View | null>>({});
 
   const handlePress = (type: string) => {
-    toggleFilter(type);
+    toggleFilter?.(type);
 
     const item = itemRefs.current[type];
     const scrollViewNode = findNodeHandle(scrollRef.current);
@@ -74,6 +74,7 @@ export default function TypeFilterBar({
               isActive={isActive}
               onPress={() => handlePress(type)}
               fontStyle="normal"
+              
             />
           </View>
         );

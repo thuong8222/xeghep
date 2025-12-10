@@ -46,41 +46,45 @@ const isAndroid = Platform.OS === 'android';
 
 export { scale, _screen_width, _screen_height, isAndroid, navbarHeight };
 
-export function NumberFormat(num, joinChar = ',') {
+export function NumberFormat(num: any, joinChar = ',') {
   try {
-    let hasDot = false;
-    let numString = num + '';
-    let negative = false;
-    if (numString[0] === '-') negative = true;
-    numString = numString.replace(/[^0-9.]/g, '');
-    let numberPart = numString.split('.');
-    let beforeDot = numberPart[0];
-    let afterDot = '';
-    if (numberPart.length >= 2) {
-      numberPart.splice(0, 1);
-      afterDot += numberPart.join('');
-    }
+    let numString = String(num).trim();
 
-    var arr = [];
+    // Kiểm tra âm
+    const negative = numString.startsWith('-');
+
+    // Xóa ký tự không phải số hoặc dấu chấm
+    numString = numString.replace(/[^0-9.]/g, '');
+
+    // Tách phần nguyên và phần thập phân
+    const numberPart = numString.split('.');
+    let beforeDot = numberPart[0];
+    let afterDot = numberPart.length > 1 ? numberPart.slice(1).join('') : '';
+    const hasDot = afterDot.length > 0;
+
+    // Format phần nguyên (beforeDot)
+    const arr: string[] = [];
     while (beforeDot.length > 0) {
       if (beforeDot.length > 3) {
-        arr.push(beforeDot.slice(beforeDot.length - 3, beforeDot.length));
+        arr.push(beforeDot.slice(beforeDot.length - 3));
         beforeDot = beforeDot.slice(0, beforeDot.length - 3);
       } else {
         arr.push(beforeDot);
         beforeDot = '';
       }
     }
+
     return (
-      (negative === true ? '-' : '') +
+      (negative ? '-' : '') +
       arr.reverse().join(joinChar) +
-      (hasDot === true ? '.' : '') +
-      afterDot
+      (hasDot ? '.' + afterDot : '')
     );
+
   } catch (ex) {
     return '';
   }
 }
+
 export function GetObjectProperty(obj: any, prop: any, defaultValue = '') {
   try {
     if (obj === '' || obj === null || typeof obj === 'undefined')
@@ -534,3 +538,17 @@ export const DRIVER_STATUS_LABELS: Record<number, string> = {
   [DRIVER_STATUS.READY]: 'Sẵn sàng',
   [DRIVER_STATUS.MAINTENANCE]: 'Đang bảo trì',
 };
+ export const parseTime = (value) => {
+        // Nếu là dạng số và dài 10 → timestamp giây
+        if (typeof value === 'number' && value.toString().length === 10) {
+            return moment(value * 1000);
+        }
+
+        // Nếu là string dạng timestamp "1763950404"
+        if (typeof value === 'string' && /^\d{10}$/.test(value)) {
+            return moment(Number(value) * 1000);
+        }
+
+        // Còn lại → xem như datetime string bình thường
+        return moment(value);
+    };

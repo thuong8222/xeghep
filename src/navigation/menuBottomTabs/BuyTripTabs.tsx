@@ -20,6 +20,7 @@ export type BuyTripStackParamList = {
     nameGroup: string;
     countMember: number;
     id_area: string;
+    isJoin?:string;
   }
   SaleTrip: {
     id_area: string;

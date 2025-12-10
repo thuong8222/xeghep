@@ -40,20 +40,26 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const currentUserId = currentDriver?.id;
-  const chatWith = currentUserId === data?.buyer_id ? data?.seller_id : data?.buyer_id;
-  
+  const buyer_id = data?.buyer_id || data?.id_driver_receive || data?.driver_receive?.id;
+  const seller_id = data?.seller_id || data?.id_driver_sell || data?.driver_sell?.id_driver;
+  // const chatWith = currentUserId === data?.buyer_id ? data?.seller_id : data?.buyer_id;
+  const chatWith = currentUserId === buyer_id ? seller_id : buyer_id;
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDisplayModalUploadImage, setIsDisplayModalUploadImage] = useState(false);
-  
-  const idPoint = data?.id;
-  const isOnwer = currentUserId === data?.seller_id;
-  const nameChatWith = isOnwer ? data?.buyer.full_name : data?.seller.full_name;
 
+  const idPoint = data?.id;
+  const isOnwer = currentUserId === seller_id;
+  const name_buyer = data?.buyer?.full_name || data?.driver_receive?.full_name;
+  const name_seller = data?.seller?.full_name || data?.driver_sell?.full_name;
+  // const nameChatWith = isOnwer ? data?.buyer.full_name : data?.seller.full_name;
+  const nameChatWith = isOnwer ? name_buyer : name_seller;
+  const phone_buyer = data?.buyer?.phone || data?.driver_receive?.phone;
+  const phone_seller = data?.seller?.phone || data?.driver_sell?.phone;
   const callToPhone = () => {
-    const phoneNumber = isOnwer ? data?.buyer?.phone : data?.seller?.phone;
+    const phoneNumber = isOnwer ? phone_buyer : phone_seller;
     if (!phoneNumber) {
       Alert.alert("Lỗi", "Không có số điện thoại");
       return;
@@ -75,7 +81,7 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
       title: nameChatWith,
       headerRight: () => (
         <TouchableOpacity onPress={callToPhone} style={{ padding: 6, marginRight: 12 }}>
-          <IconPhone width={24} height={24} />
+          <IconPhone width={24} height={24} rotate={0} />
         </TouchableOpacity>
       ),
     });
@@ -212,7 +218,7 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
   const uploadImage = async (imageUri: string): Promise<string> => {
     try {
       const formData = new FormData();
-      
+
       // ⭐ Fix: Thêm đầy đủ thông tin file
       formData.append('image', {
         uri: imageUri,
@@ -241,7 +247,7 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
 
       const uploadResult = await uploadResponse.json();
       console.log("✅ Upload result:", uploadResult);
-      
+
       if (!uploadResult.success || !uploadResult.url) {
         throw new Error(uploadResult.error || 'No URL returned');
       }
@@ -252,17 +258,17 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
     } catch (error: any) {
       console.error('❌ Upload image error:', error);
       console.error('❌ Error message:', error.message);
-      
+
       if (error.message.includes('Network request failed')) {
         Alert.alert(
-          'Lỗi kết nối', 
+          'Lỗi kết nối',
           'Không thể kết nối tới server. Kiểm tra:\n' +
           '1. Server đang chạy\n' +
           '2. Địa chỉ IP đúng\n' +
           '3. Điện thoại và server cùng mạng'
         );
       }
-      
+
       throw error;
     }
   };
@@ -293,7 +299,7 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
         >
           {/* 🖼️ Hiển thị ảnh nếu có */}
           {item.image_url && (
-           <TouchableOpacity onPress={() => setPreviewImage(item.image_url)}>
+            <TouchableOpacity onPress={() => setPreviewImage(item.image_url)}>
               <Image
                 source={{ uri: item.image_url }}
                 style={styles.messageImage}
@@ -382,104 +388,104 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
 
   return (
     <>
-    {previewImage && (
-  <View
-    style={{
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: "rgba(0,0,0,0.9)",
-      justifyContent: "center",
-      alignItems: "center",
-      zIndex: 999,
-    }}
-  >
-    <TouchableOpacity
-      onPress={() => setPreviewImage(null)}
-      style={{ position: "absolute", top: 40, right: 20 }}
-    >
-      <Text style={{ fontSize: 30, color: "white" }}>✕</Text>
-    </TouchableOpacity>
+      {previewImage && (
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.9)",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 999,
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => setPreviewImage(null)}
+            style={{ position: "absolute", top: 40, right: 20 }}
+          >
+            <Text style={{ fontSize: 30, color: "white" }}>✕</Text>
+          </TouchableOpacity>
 
-    <Image
-      source={{ uri: previewImage }}
-      style={{ width: "90%", height: "70%", resizeMode: "contain" }}
-    />
-  </View>
-)}
-
-
-    <Container>
-      <FlatList
-        data={messages}
-        keyExtractor={(item, i) => item.id || i.toString()}
-        renderItem={renderItem}
-        ListHeaderComponent={isOnwer ? ListHeaderComponent : undefined}
-      />
-
-      {/* 🖼️ Preview ảnh đã chọn */}
-      {selectedImage && (
-        <AppView padding={10} backgroundColor={ColorsGlobal.backgroundLight}>
-          <View style={styles.imagePreviewContainer}>
-            <Image
-              source={{ uri: selectedImage }}
-              style={styles.imagePreview}
-            />
-            <TouchableOpacity
-              style={styles.removeImageButton}
-              onPress={() => setSelectedImage(null)}
-            >
-              <Text style={styles.removeImageText}>✕</Text>
-            </TouchableOpacity>
-          </View>
-        </AppView>
+          <Image
+            source={{ uri: previewImage }}
+            style={{ width: "90%", height: "70%", resizeMode: "contain" }}
+          />
+        </View>
       )}
 
-      {/* ⌨️ Input area */}
-      <AppView row alignItems="center" gap={5} >
-        {/* 📎 Button chọn ảnh */}
-        <AppButton onPress={() => setIsDisplayModalUploadImage(true)}>
-          <Text style={{ fontSize: 24 }}>📎</Text>
-        </AppButton>
 
-        <AppView flex={1}>
-          <AppInput
-            value={message}
-            onChangeText={setMessage}
-            placeholder="Nhập tin nhắn..."
-            multiline
-            style={{
-              paddingHorizontal: 12,
-              paddingVertical: 8,
-              backgroundColor: ColorsGlobal.backgroundLight,
-              borderRadius: 20,
-              minHeight: 40,
-              marginTop:-10
-            }}
-          />
+      <Container>
+        <FlatList
+          data={messages}
+          keyExtractor={(item, i) => item.id || i.toString()}
+          renderItem={renderItem}
+          ListHeaderComponent={isOnwer ? ListHeaderComponent : undefined}
+        />
+
+        {/* 🖼️ Preview ảnh đã chọn */}
+        {selectedImage && (
+          <AppView padding={10} backgroundColor={ColorsGlobal.backgroundLight}>
+            <View style={styles.imagePreviewContainer}>
+              <Image
+                source={{ uri: selectedImage }}
+                style={styles.imagePreview}
+              />
+              <TouchableOpacity
+                style={styles.removeImageButton}
+                onPress={() => setSelectedImage(null)}
+              >
+                <Text style={styles.removeImageText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+          </AppView>
+        )}
+
+        {/* ⌨️ Input area */}
+        <AppView row alignItems="center" gap={5} >
+          {/* 📎 Button chọn ảnh */}
+          <AppButton onPress={() => setIsDisplayModalUploadImage(true)}>
+            <Text style={{ fontSize: 24 }}>📎</Text>
+          </AppButton>
+
+          <AppView flex={1}>
+            <AppInput
+              value={message}
+              onChangeText={setMessage}
+              placeholder="Nhập tin nhắn..."
+              multiline
+              style={{
+                paddingHorizontal: 12,
+                paddingVertical: 8,
+                backgroundColor: ColorsGlobal.backgroundLight,
+                borderRadius: 20,
+                minHeight: 40,
+                marginTop: -10
+              }}
+            />
+          </AppView>
+
+          {/* 📤 Button gửi */}
+          <AppButton onPress={sendMessage} disabled={isUploading}>
+            {isUploading ? (
+              <ActivityIndicator size="small" color={ColorsGlobal.main} />
+            ) : (
+              <IconSent color={ColorsGlobal.main} />
+            )}
+          </AppButton>
         </AppView>
 
-        {/* 📤 Button gửi */}
-        <AppButton onPress={sendMessage} disabled={isUploading}>
-          {isUploading ? (
-            <ActivityIndicator size="small" color={ColorsGlobal.main} />
-          ) : (
-            <IconSent color={ColorsGlobal.main} />
-          )}
-        </AppButton>
-      </AppView>
-
-      <ModalUploadCarImage
-        isDisplay={isDisplayModalUploadImage}
-        onClose={() => setIsDisplayModalUploadImage(false)}
-        onSelectImage={(uri) => {
-          setSelectedImage(uri);
-          setIsDisplayModalUploadImage(false);
-        }}
-      />
-    </Container>
+        <ModalUploadCarImage
+          isDisplay={isDisplayModalUploadImage}
+          onClose={() => setIsDisplayModalUploadImage(false)}
+          onSelectImage={(uri) => {
+            setSelectedImage(uri);
+            setIsDisplayModalUploadImage(false);
+          }}
+        />
+      </Container>
     </>
   );
 };

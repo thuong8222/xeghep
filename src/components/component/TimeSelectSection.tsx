@@ -10,55 +10,55 @@ import IconMinus from '../../assets/icons/IconMinus';
 import IconPlus from '../../assets/icons/IconPlus';
 import AppModal from '../common/AppModal';
 import { scale } from '../../utils/Helper';
+import moment from 'moment';
+import ButtonChange from './ButtonChange';
 
 interface TimeSelectSectionProps {
     onTimeChange?: (timestampSeconds: number | null
-        
-        ) => void;
-  }
-  export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionProps) {
+
+    ) => void;
+}
+export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionProps) {
     const [isInstant, setIsInstant] = useState(true);
-    const [time, setTime] = useState(0);
+    const [time, setTime] = useState(15);
     const [showDropdown, setShowDropdown] = useState(false);
     const [showPicker, setShowPicker] = useState(false);
     const [selectedTime, setSelectedTime] = useState<Date | null>(null);
 
-    // const addTime = () => setTime(prev => Math.min(prev + 15, 60)); // ⏫ Giới hạn tối đa 60 phút
-    // const subTime = () => setTime(prev => Math.max(prev - 15, 0)); 
     const addTime = () => {
         setTime(prev => {
-          const newMinutes = Math.min(prev + 15, 60);
-      
-          // Tạo timestamp dựa trên now + newMinutes
-          const now = new Date();
-          const futureTime = new Date(now.getTime() + newMinutes * 60 * 1000);
-          const timestampSeconds = Math.floor(futureTime.getTime() / 1000);
-      
-          onTimeChange?.(timestampSeconds); // truyền ra parent
-          return newMinutes; // luôn trả về number
+            const newMinutes = Math.min(prev + 5, 60);
+
+            // Tạo timestamp dựa trên now + newMinutes
+            const now = new Date();
+            const futureTime = new Date(now.getTime() + newMinutes * 60 * 1000);
+            const timestampSeconds = Math.floor(futureTime.getTime() / 1000);
+
+            onTimeChange?.(timestampSeconds); // truyền ra parent
+            return newMinutes; // luôn trả về number
         });
-      };
-      
-      const subTime = () => {
+    };
+
+    const subTime = () => {
         setTime(prev => {
-          const newMinutes = Math.max(prev - 15, 0);
-      
-          const now = new Date();
-          const futureTime = new Date(now.getTime() + newMinutes * 60 * 1000);
-          const timestampSeconds = Math.floor(futureTime.getTime() / 1000);
-      
-          onTimeChange?.(timestampSeconds); // truyền ra parent
-          return newMinutes; // luôn trả về number
+            const newMinutes = Math.max(prev - 5, 0);
+
+            const now = new Date();
+            const futureTime = new Date(now.getTime() + newMinutes * 60 * 1000);
+            const timestampSeconds = Math.floor(futureTime.getTime() / 1000);
+
+            onTimeChange?.(timestampSeconds); // truyền ra parent
+            return newMinutes; // luôn trả về number
         });
-      };
-      
-    
+    };
+
+
     const handleSelectOption = (option: string) => {
         setShowDropdown(false);
         if (option === 'Đi ngay') {
             setIsInstant(true);
             setShowPicker(false);
-            setTime(0); 
+            setTime(0);
             const now = new Date();
             const futureTime = new Date(now.getTime());
             onTimeChange?.(futureTime); ///truyen ra ngoai
@@ -74,7 +74,7 @@ interface TimeSelectSectionProps {
             setSelectedTime(date);
             const timestampSeconds = Math.floor(date.getTime() / 1000);
             onTimeChange?.(timestampSeconds, false); //////truyen ra ngoai
-          }
+        }
     };
 
     return (
@@ -94,7 +94,8 @@ interface TimeSelectSectionProps {
                             {isInstant
                                 ? 'Đi ngay'
                                 : selectedTime
-                                    ? `${selectedTime.getHours().toString().padStart(2, '0')}:${selectedTime
+                                    ? moment(selectedTime).format('DD/MM/YYYY HH:mm') ||
+                                    `${selectedTime.getHours().toString().padStart(2, '0')}:${selectedTime
                                         .getMinutes()
                                         .toString()
                                         .padStart(2, '0')}`
@@ -135,13 +136,17 @@ interface TimeSelectSectionProps {
                 {/* Hiển thị +/- khi không chọn giờ cụ thể */}
                 {isInstant && (
                     <AppView row gap={8} alignItems="center">
-                        <AppButton onPress={subTime}>
-                            <IconMinus size={20} color={ColorsGlobal.colorIconNoActive} />
-                        </AppButton>
+                        <ButtonChange
+                            onPress={subTime}
+                            icon={<IconMinus size={20} color={ColorsGlobal.colorIconNoActive} />}
+                        />
+
                         <AppText fontWeight={700}>{`${time}p`}</AppText>
-                        <AppButton onPress={addTime}>
-                            <IconPlus size={scale(20)} color={ColorsGlobal.textDark} />
-                        </AppButton>
+                        <ButtonChange
+                            onPress={addTime}
+                            icon={<IconPlus size={18} color={ColorsGlobal.colorIconNoActive} />}
+                        />
+                        
                     </AppView>
                 )}
             </AppView>
@@ -158,8 +163,8 @@ interface TimeSelectSectionProps {
             <AppModal isVisible={showPicker && Platform.OS === 'ios'} onClose={() => setShowPicker(false)} heightPercent={0.4}  >
                 <DateTimePicker
                     value={selectedTime || new Date()}
-                    mode="time"
-                    is24Hour={true}
+                    mode='datetime'
+                    // is24Hour={true}
                     display="spinner"
                     onChange={onChangeTime}
                     style={{ width: '100%' }}

@@ -12,10 +12,12 @@ import IconTranferPoint from '../assets/icons/IconTranferPoint';
 import IconUser from '../assets/icons/IconUser';
 import { ColorsGlobal } from '../components/base/Colors/ColorsGlobal';
 import { NavigatorScreenParams } from '@react-navigation/native';
+import PriorityPurchaseTabs from './PriorityPurchaseTabs';
 
 export type BottomTabParamList = {
   BuyTripTabs: NavigatorScreenParams<BuyTripStackParamList>; // ✅ nested stack
   ReceivingScheduleTabs: undefined;
+  PriorityPurchaseTabs: undefined;
   SaleTripsTabs: undefined;
   PointTabs: NavigatorScreenParams<PointTabsParamList>; // nếu Point cũng là stack
   AccountTabs: NavigatorScreenParams<AccountTabsParamList>; // nếu Account cũng là stack
@@ -41,6 +43,10 @@ export default function MenuBottomTabs() {
       <Tabs.Screen name="ReceivingScheduleTabs" component={ReceivingScheduleTabs} options={{
         tabBarLabel: 'Lịch nhận',
 
+        tabBarIcon: ({ color, size, focused }) => <IconReceiveHistory color={color} />
+      }} />
+      <Tabs.Screen name="PriorityPurchaseTabs" component={PriorityPurchaseTabs} options={{
+        tabBarLabel: 'Mua ưu tiên',
         tabBarIcon: ({ color, size, focused }) => <IconReceiveHistory color={color} />
       }} />
 

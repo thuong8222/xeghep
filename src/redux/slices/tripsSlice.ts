@@ -43,7 +43,8 @@ export interface DriverArea {
 interface TripsState {
   trips: Trip[];
   driver_areas: DriverArea[];
-  receivedTrips: Trip[];     
+  receivedTrips: Trip[];
+  soldTrips: Trip[];
   input_area_id?: string;
   trips_count: number;
   loading: boolean;
@@ -57,7 +58,8 @@ interface TripsState {
 const initialState: TripsState = {
   trips: [],
   driver_areas: [],
-  receivedTrips: [],    
+  receivedTrips: [],
+  soldTrips: [],
   input_area_id: undefined,
   trips_count: 0,
   loading: false,
@@ -118,10 +120,18 @@ export const fetchTrips = createAsyncThunk<
         end_date: payload.end_date,
         direction: payload.direction,
         pick_up: payload.pick_up,
-        drop_off: payload.drop_off
+        drop_off: payload.drop_off,
       },
     });
-
+    console.log('modal truyen vao: ',{
+      area_id: payload.area_id,
+      start_date: payload.start_date,
+      end_date: payload.end_date,
+      direction: payload.direction,
+      pick_up: payload.pick_up,
+      drop_off: payload.drop_off,
+    })
+    console.log('fetchTrips res ', response);
     return {
       trips: response.data.data,
       // driver_areas: response.data.driver_areas,
@@ -139,7 +149,7 @@ export const fetchTrips = createAsyncThunk<
 });
 export interface FetchReceivedTripsParams {
   start_date?: number; // timestamp giây
-  end_date?: number;   // timestamp giây
+  end_date?: number; // timestamp giây
 }
 // --- Thêm asyncThunk để fetch chuyến đã nhận ---
 export const fetchReceivedTrips = createAsyncThunk<
@@ -148,11 +158,28 @@ export const fetchReceivedTrips = createAsyncThunk<
   { rejectValue: string }
 >('trips/fetchReceivedTrips', async (params, { rejectWithValue }) => {
   try {
-    console.log('params slice: ',params)
+    console.log('params slice: ', params);
     const response = await api.get('api/trips/received', { params });
     return response.data.data;
   } catch (err: any) {
-    return rejectWithValue(err.response?.data?.message || 'Lấy chuyến thất bại');
+    return rejectWithValue(
+      err.response?.data?.message || 'Lấy chuyến thất bại',
+    );
+  }
+});
+export const fetchSoldTrips = createAsyncThunk<
+  Trip[],
+  FetchReceivedTripsParams,
+  { rejectValue: string }
+>('trips/fetchSoldTrips', async (params, { rejectWithValue }) => {
+  try {
+    console.log('params slice: ', params);
+    const response = await api.get('api/trips/sold', { params });
+    return response.data.data;
+  } catch (err: any) {
+    return rejectWithValue(
+      err.response?.data?.message || 'Lấy chuyến thất bại',
+    );
   }
 });
 
@@ -181,12 +208,12 @@ export const buyTrip = createAsyncThunk<
   { rejectValue: string }
 >('trips/buyTrip', async ({ tripId }, { rejectWithValue }) => {
   try {
-    console.log('mua chueyesn : ',tripId)
+    console.log('mua chueyesn : ', tripId);
     const response = await api.post(`/api/trips/${tripId}/buy`);
     console.log('trips/buyTrip: ', response);
     return response.data;
   } catch (err: any) {
-    console.log('mua chueyesn err: ',err)
+    console.log('mua chueyesn err: ', err);
     return rejectWithValue(
       err.response?.data?.message || 'Mua chuyến thất bại',
     );
@@ -201,7 +228,9 @@ const tripsSlice = createSlice({
     // ✅ THÊM: Real-time actions cho trips
     addTrip: (state, action: PayloadAction<Trip>) => {
       // Thêm chuyến mới vào danh sách (khi có người tạo chuyến mới)
-      const exists = state.trips.find(t => t.id_trip === action.payload.id_trip);
+      const exists = state.trips.find(
+        t => t.id_trip === action.payload.id_trip,
+      );
       if (!exists) {
         state.trips.unshift(action.payload); // Thêm vào đầu danh sách
       }
@@ -209,7 +238,9 @@ const tripsSlice = createSlice({
 
     updateTrip: (state, action: PayloadAction<Trip>) => {
       // Cập nhật thông tin chuyến
-      const index = state.trips.findIndex(t => t.id_trip === action.payload.id_trip);
+      const index = state.trips.findIndex(
+        t => t.id_trip === action.payload.id_trip,
+      );
       if (index !== -1) {
         state.trips[index] = action.payload;
       }
@@ -223,14 +254,18 @@ const tripsSlice = createSlice({
     // ✅ THÊM: Action cho danh sách chuyến đã nhận
     addReceivedTrip: (state, action: PayloadAction<Trip>) => {
       // Thêm chuyến vào danh sách "Chuyến đã nhận"
-      const exists = state.receivedTrips.find(t => t.id_trip === action.payload.id_trip);
+      const exists = state.receivedTrips.find(
+        t => t.id_trip === action.payload.id_trip,
+      );
       if (!exists) {
         state.receivedTrips.unshift(action.payload);
       }
     },
 
     updateReceivedTrip: (state, action: PayloadAction<Trip>) => {
-      const index = state.receivedTrips.findIndex(t => t.id_trip === action.payload.id_trip);
+      const index = state.receivedTrips.findIndex(
+        t => t.id_trip === action.payload.id_trip,
+      );
       if (index !== -1) {
         state.receivedTrips[index] = action.payload;
       }
@@ -270,7 +305,7 @@ const tripsSlice = createSlice({
       })
       .addCase(createTrip.fulfilled, (state, action: PayloadAction<Trip>) => {
         state.loading = false;
-     //   state.trips.unshift(action.payload); // thêm trip mới vào đầu list
+        //   state.trips.unshift(action.payload); // thêm trip mới vào đầu list
         state.successMessage = 'Tạo chuyến thành công';
       })
       .addCase(createTrip.rejected, (state, action) => {
@@ -293,27 +328,50 @@ const tripsSlice = createSlice({
         state.buyTripError = action.payload || 'Mua chuyến thất bại';
         state.buyTripSuccess = false;
       })
-      
+
       // Case mới: fetchReceivedTrips
       .addCase(fetchReceivedTrips.pending, state => {
-        state.loading = true;  // hoặc bạn có thể dùng state riêng như state.receivedLoading
+        state.loading = true; // hoặc bạn có thể dùng state riêng như state.receivedLoading
         state.error = null;
       })
-      .addCase(fetchReceivedTrips.fulfilled, (state, action: PayloadAction<Trip[]>) => {
-        state.loading = false;
-        state.receivedTrips = action.payload;
-        // nếu muốn bạn có thể dùng successMessage riêng
-      })
+      .addCase(
+        fetchReceivedTrips.fulfilled,
+        (state, action: PayloadAction<Trip[]>) => {
+          state.loading = false;
+          state.receivedTrips = action.payload;
+          // nếu muốn bạn có thể dùng successMessage riêng
+        },
+      )
       .addCase(fetchReceivedTrips.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Lấy chuyến đã nhận thất bại';
+      })
+
+      .addCase(fetchSoldTrips.pending, state => {
+        state.loading = true; // hoặc bạn có thể dùng state riêng như state.receivedLoading
+        state.error = null;
+      })
+      .addCase(
+        fetchSoldTrips.fulfilled,
+        (state, action: PayloadAction<Trip[]>) => {
+          state.loading = false;
+          state.soldTrips = action.payload;
+          // nếu muốn bạn có thể dùng successMessage riêng
+        },
+      )
+      .addCase(fetchSoldTrips.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Lấy chuyến đã nhận thất bại';
       });
   },
 });
 
-export const {addTrip,
+export const {
+  addTrip,
   updateTrip,
   removeTrip,
   addReceivedTrip,
-  updateReceivedTrip, clearTripsMessages } = tripsSlice.actions;
+  updateReceivedTrip,
+  clearTripsMessages,
+} = tripsSlice.actions;
 export default tripsSlice.reducer;

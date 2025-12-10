@@ -23,8 +23,9 @@ import moment from 'moment'
 import { useAppContext } from '../../context/AppContext'
 interface Props {
   route: any;
+  navigation: any;
 }
-export default function SaleTripsScreen({ route }: Props) {
+export default function SaleTripsScreen({ route, navigation }: Props) {
   const { id_area } = route.params;
   const insets = useSafeAreaInsets();
 
@@ -32,40 +33,56 @@ export default function SaleTripsScreen({ route }: Props) {
   const { setUpdateTrips } = useAppContext()
   const [selectedDirection, setSelectedDirection] = useState(1);
   const [isCommuneWard, setIsCommuneWard] = useState(false);
+  const [isCommuneWardTo, setIsCommuneWardTo] = useState(false);
   const [moreInputEnd, setMoreInputEnd] = useState(false);
+  const [moreInput, setMoreInput] = useState(false);
+
   const [placeStart, setPlaceStart] = useState('');
   const [placeEnd, setPlaceEnd] = useState('');
   const [communeWard, setCommuneWard] = useState('');
+  const [communeWardTo, setCommuneWardTo] = useState('');
 
-  const [tripOptions, setTripOptions] = useState({
-    numGuests: 1,
-    price: 250,
-    points: '1',
-    guestType: 'normal',
-    timeStart: null as number | null,
-    typeCar: null as { type: string; name: string } | null
-  });
+ // ✅ Initial state với giá trị mặc định
+ const [tripOptions, setTripOptions] = useState({
+  numGuests: 1,
+  price: '250',
+  points: '1',
+  guestType: 'normal',
+  timeStart: null as number | null,
+  typeCar: null as { type: string; name: string } | null
+});
   const [noteOptions, setNoteOptions] = useState();
 
 
-  // Hàm này sẽ được gọi mỗi khi TripOptionsSection thay đổi dữ liệu
-  const handleTripOptionsChange = (
-    numGuests: number | null,
-    price?: string,
-    points?: string,
-    guestType?: string,
-    timeStart?: number,
-    typeCar?: { type: string; name: string } | null
-  ) => {
-    setTripOptions({
-      numGuests: numGuests ?? tripOptions.numGuests,
-      price: price ?? tripOptions.price,
-      points: points ?? tripOptions.points,
-      guestType: guestType ?? tripOptions.guestType,
-      timeStart: timeStart ?? tripOptions.timeStart,
-      typeCar: typeCar ?? tripOptions.typeCar
-    });
-  };
+    // ✅ FIX: Hàm này phải UPDATE state với giá trị MỚI, không phải giá trị cũ
+    const handleTripOptionsChange = (
+      numGuests: number | null,
+      price?: string,
+      points?: string | number,
+      guestType?: string,
+      timeStart?: number | null,
+      typeCar?: { type: string; name: string } | null
+    ) => {
+      console.log('📊 Trip options changed:', {
+        numGuests,
+        price,
+        points,
+        guestType,
+        timeStart,
+        typeCar
+      });
+  
+      // ✅ Update với giá trị MỚI từ params
+      setTripOptions(prev => ({
+        numGuests: numGuests ?? prev.numGuests,
+        price: price ?? prev.price,
+        points: points?.toString() ?? prev.points,
+        guestType: guestType ?? prev.guestType,
+        timeStart: timeStart ?? prev.timeStart,
+        typeCar: typeCar !== undefined ? typeCar : prev.typeCar  // ✅ Cho phép null
+      }));
+    };
+  
   const handleNoteChange = (val?: string) => {
     setNoteOptions(val ?? "");
     console.log("Ghi chú nhận được từ con:", val);
@@ -76,14 +93,16 @@ export default function SaleTripsScreen({ route }: Props) {
       Alert.alert('Điểm đi/ Điểm đến không được để trống!')
       return;
     }
-
-    if (tripOptions.guestType === 'normal' && !tripOptions.typeCar) {
-      Alert.alert("Thiếu thông tin", "Vui lòng chọn loại xe!");
-      return;
-    }
+   // ✅ Parse points an toàn
+  //  const parsedPoints = parseFloat(tripOptions.points);
+  //  if (isNaN(parsedPoints) || parsedPoints < 1 || parsedPoints > 10) {
+  //    Alert.alert('Lỗi', 'Điểm bán phải từ 1 đến 10!');
+  //    return;
+  //  }
+  
     console.log('selectedDirection: ', selectedDirection)
 
-
+    console.log('tripOptions: ', tripOptions)
     const payload: CreateTripPayload = {
       area_id: id_area,
       direction: selectedDirection,
@@ -92,7 +111,7 @@ export default function SaleTripsScreen({ route }: Props) {
       price_sell: Number(tripOptions.price) || 250,
       place_start: placeStart,
       place_end: placeEnd + ', ' + communeWard,
-      point: tripOptions?.points,
+      point: Number(tripOptions?.points),
       note: noteOptions || '',
       type_car: tripOptions?.typeCar?.type || 'car5',
       cover_car: tripOptions.typeCar ? 0 : 1,
@@ -108,7 +127,9 @@ export default function SaleTripsScreen({ route }: Props) {
       setPlaceStart("");
       setPlaceEnd("");
       setCommuneWard("");
+      setCommuneWardTo('')
       setMoreInputEnd(false);
+      setMoreInput(false);
 
       setTripOptions({
         numGuests: 1,
@@ -121,7 +142,10 @@ export default function SaleTripsScreen({ route }: Props) {
 
       setNoteOptions("");
       Alert.alert('Thành công', 'Tạo chuyến thành công!');
+      navigation.goBack()
     } catch (err) {
+      Alert.alert('Lỗi tạo chuyến', JSON.stringify(err, null, 2));
+
       console.log('Lỗi tạo chuyến:', JSON.stringify(err, null, 2));
     }
   };
@@ -129,11 +153,15 @@ export default function SaleTripsScreen({ route }: Props) {
   const selectCommuneWard = () => {
     setIsCommuneWard(true); // mở modal chọn xã/phường
   };
-
+  const selectCommuneWardTo = () => {
+    setIsCommuneWardTo(true); // mở modal chọn xã/phường
+  };
   const toggleMoreDetailEnd = () => {
     setMoreInputEnd(!moreInputEnd)
   }
-
+  const toggleMoreInput = () => {
+    setMoreInput(!moreInput)
+  }
 
 
 
@@ -161,8 +189,22 @@ export default function SaleTripsScreen({ route }: Props) {
                   value={placeStart}
                   onChangeText={setPlaceStart}
                   placeholder="Nhập điểm đón"
+                  type='select'
+                  toggleSelect={toggleMoreInput}
                 />
               </AppView>
+              {moreInput &&
+                <AppView row gap={16} >
+                  <AppInput
+                    value={communeWardTo}
+                    onChangeText={setCommuneWardTo}
+                    placeholder="Chọn xã/phường"
+                    type='select'
+                    editable={false}
+                    toggleSelect={selectCommuneWardTo}
+                  />
+                </AppView>
+              }
             </AppView>
             <AppView gap={6}>
               <AppView row gap={8} alignItems='flex-end' justifyContent={'space-between'}>
@@ -205,6 +247,19 @@ export default function SaleTripsScreen({ route }: Props) {
           console.log('✅ Kết quả chọn:', value);
           // Ví dụ: value = { province: {...}, district: {...} }
           setCommuneWard(`${value.province.name} - ${value.district.name}`);
+
+        }}
+      />
+      <SelectProvinceDistrictModal
+        isVisible={isCommuneWardTo}
+        onClose={() => {
+          setIsCommuneWardTo(false);
+        }}
+        onSelected={(value) => {
+          console.log('✅ Kết quả chọn:', value);
+          // Ví dụ: value = { province: {...}, district: {...} }
+
+          setCommuneWardTo(`${value.province.name} - ${value.district.name}`);
         }}
       />
 
@@ -213,4 +268,3 @@ export default function SaleTripsScreen({ route }: Props) {
   )
 }
 
-const styles = StyleSheet.create({})

@@ -43,7 +43,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
     const [selectedArea, setSelectedArea] = useState<string | undefined>(undefined);
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
-    const { nameGroup, countMember, id_area } = route.params;
+    const { nameGroup, countMember, id_area , isJoin} = route.params;
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isModalConfirmBuyTrip, setIsModalConfirmBuyTrip] = useState(false);
     const [filters, setFilters] = useState<{ direction: string; time: string } | null>(null);
@@ -51,7 +51,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
     const gotoInfoGroup = () => {
 
         setIdArea(id_area)
-        navigation.navigate('InfoGroup', { nameGroup: nameGroup, countMember: countMember })
+        navigation.navigate('InfoGroup', { nameGroup: nameGroup, countMember: countMember, isJoin: isJoin })
     }
     const HeaderRightButton = () => (
         <AppView row gap={6}>
@@ -179,33 +179,57 @@ export default function BuyTripScreen({ navigation, route }: Props) {
 
         )
     };
-    const handleApplyFilter = (filters: any) => {
+   
 
+    const handleApplyFilter = async (filters: any, dateFilter?: string | null) => {
+        console.log("handleApplyFilter", filters, dateFilter);
+    
         if (!id_area) return;
-        // Lấy customDate từ filters
-        const customDate = filters.customDate;
-        // Chuyển selectedTime thành start_date/end_date
-        const { start_date, end_date } = getDateRange(filters.time, customDate);
-
-        const direction = filters.direction;
-
+    
         const model: any = {
-            area_id: id_area,
-            start_date,
-            end_date,
-            direction,
-            pick_up: filters?.place_start,
-            drop_off: filters?.place_end
+            area_id: id_area
         };
+    
+        // ------------ TIME FILTER ------------
+        if (dateFilter) {
+            const dateObj = new Date(dateFilter); // ❗ Convert ISO → Date
+    
+            if (!isNaN(dateObj.getTime())) {
+                const startOfDay = new Date(
+                    dateObj.getFullYear(),
+                    dateObj.getMonth(),
+                    dateObj.getDate(),
+                    0, 0, 0
+                );
+    
+                const endOfDay = new Date(
+                    dateObj.getFullYear(),
+                    dateObj.getMonth(),
+                    dateObj.getDate(),
+                    23, 59, 59
+                );
+    
+                model.start_date = startOfDay.toISOString();
+                model.end_date = endOfDay.toISOString();
+            }
+        }
+    
+        // ------------ DIRECTION ------------
+        if (filters.direction !== undefined) {
+            model.direction = filters.direction;
+        }
+    
+        // ------------ PICKUP / DROPOFF ------------
         if (filters.place_start) model.place_start = filters.place_start;
         if (filters.place_end) model.place_end = filters.place_end;
-
-
-        getTrips(model);
+    
+        console.log("Model gửi API:", model);
+    
+       await getTrips(model);
         setIsModalVisible(false);
     };
-
-
+    
+    
     return (
         <AppView flex={1} backgroundColor='#fff' padding={scale(16)} position='relative'>
             <SwipeListView
@@ -233,7 +257,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
             <ModalBuyTrip
                 visible={isModalVisible}
                 onRequestClose={() => setIsModalVisible(false)}
-                onApplyFilter={handleApplyFilter} // Không cần arrow function nữa
+                onApplyFilter={handleApplyFilter}
             />
             <ModalConfirmBuyTrip visible={isModalConfirmBuyTrip}
                 onRequestClose={() => setIsModalConfirmBuyTrip(false)} data={boughtTrip} />

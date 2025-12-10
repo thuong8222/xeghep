@@ -1,5 +1,5 @@
 import { Alert, Linking, StyleSheet, Text, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import AppView from '../common/AppView';
 import { ColorsGlobal } from '../base/Colors/ColorsGlobal';
 import AppText from '../common/AppText';
@@ -8,15 +8,18 @@ import moment from 'moment';
 import ArrowRight from '../../assets/icons/ArrowRight';
 import AppButton from '../common/AppButton';
 import IconNote from '../../assets/icons/IconNote';
-import { scale } from '../../utils/Helper';
+import { NumberFormat, scale } from '../../utils/Helper';
 import { useNavigation } from '@react-navigation/native';
+import { useAppContext } from '../../context/AppContext';
 
 export default function TripHistory(props) {
-    const navigation = useNavigation()
+    const navigation = useNavigation();
+    const { currentDriver } = useAppContext()
     const isSold = props.data.is_sold;
     const gotoDetailTripHistory = () => {
         navigation.navigate('DetailTripHistory', { data: props.data })
     }
+    const isOwner = props?.data?.id_driver_sell === currentDriver?.id
     return (
         <AppButton onPress={gotoDetailTripHistory} gap={4} radius={12} borderWidth={1} padding={0}
             borderColor={ColorsGlobal.borderColorDark}
@@ -65,8 +68,8 @@ export default function TripHistory(props) {
                 </AppView>
                 <AppView row justifyContent={'space-between'}>
                     <AppText fontWeight={600}>{props.data.guests + ' khách'}</AppText>
-                    <AppText color={ColorsGlobal.main} fontWeight={700}>{props.data.price_sell + "K"}</AppText>
-                    <AppText fontWeight={700}>{'+' + props.data.point + 'đ'}</AppText>
+                    <AppText color={ColorsGlobal.main} fontWeight={700}>{NumberFormat(props.data.price_sell) + "K"}</AppText>
+                    <AppText fontWeight={700}>{isOwner ? `+${props.data.point} đ` : `-${props.data.point} đ`}</AppText>
 
                 </AppView>
                 {props.data.note &&
@@ -77,13 +80,13 @@ export default function TripHistory(props) {
                 }
 
             </AppView>
-            {/* {isSold === 1 && (
-                <AppView borderLeftColor={'#949494'} borderLeftWidth={1} justifyContent='center' alignItems='center' padding={8}>
-                    <AppText fontSize={10} >{'Nhận'}</AppText>
-                    <AppText fontSize={10} >{props.data.id_driver_receive}</AppText>
+            {(isSold === 1 && isOwner) && (
+                <AppView borderLeftColor={'#949494'} borderLeftWidth={1} justifyContent='center' alignItems='center' padding={8} gap={4}>
+                    <AppText fontSize={10} >{'Tài xế nhận'}</AppText>
+                    <AppText fontSize={10} >{props.data?.driver_receive?.full_name}</AppText>
                 </AppView>)
 
-            } */}
+            }
         </AppButton>
     )
 }

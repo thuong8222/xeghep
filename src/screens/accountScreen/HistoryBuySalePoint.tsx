@@ -230,7 +230,7 @@ if (!history) return null;
         </AppText>
       )}
   <AppView >
-        <TypeFilterBar
+       <TypeFilterBar
           types={types}
           selectedType={selectedType}
           toggleFilter={(type) => setSelectedType(prev => (prev === type ? null : type))}

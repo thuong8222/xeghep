@@ -16,13 +16,14 @@ interface Props {
 }
 
 export default function InfoGroupScreen({ route, navigation }: Props) {
-    const { nameGroup, countMember } = route.params;
+    const { nameGroup, countMember, isJoin } = route.params;
+
     const [isModalRequestJoinGroup, setIsModalRequestJoinGroup] = useState(false);
     const RequestJoinGroup = () => {
         setIsModalRequestJoinGroup(true)
     }
-   
-    const gotoGroupRules =()=>{
+
+    const gotoGroupRules = () => {
         navigation.navigate('GroupRules')
     }
     return (
@@ -44,9 +45,10 @@ export default function InfoGroupScreen({ route, navigation }: Props) {
                     <AppText >{'Quy định nhóm'}</AppText>
                     <IconArowDown rotate={-90} size={20} />
                 </AppButton>
-                {/* <AppButton onPress={RequestJoinGroup} row justifyContent={'space-between'} padding={12}>
+                {/* {!isJoin && <AppButton onPress={RequestJoinGroup} row justifyContent={'space-between'} padding={12}>
                     <AppText >{'Xin vào nhóm'}</AppText>
-                </AppButton> */}
+                </AppButton>
+                } */}
             </AppView>
             <ModalRequestJoinGroup visible={isModalRequestJoinGroup} onRequestClose={() => setIsModalRequestJoinGroup(false)} />
         </AppView>

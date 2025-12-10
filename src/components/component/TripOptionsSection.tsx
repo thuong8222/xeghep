@@ -7,18 +7,24 @@ import IconArrowDown from '../../assets/icons/IconArowDown';
 import IconMinus from '../../assets/icons/IconMinus';
 import { ColorsGlobal } from '../base/Colors/ColorsGlobal';
 import IconPlus from '../../assets/icons/IconPlus';
-import AppModal from '../../components/common/AppModal';
+
 import GuestModal from './modals/GuestModal';
 import AppInput from '../common/AppInput';
-import DateTimePicker from 'react-native-modal-datetime-picker';
+
 import TimeSelectSection from './TimeSelectSection';
 import { CONSTANT, NumberFormat, scale, validatePrice } from '../../utils/Helper';
-import moment from 'moment';
+
 import ModalTypeCar from './modals/ModalTypeCar';
+import ButtonChange from './ButtonChange';
 
 interface TripOptionsSectionProps {
-    onTripOptionsChange?: (numGuests: number | null, price?: string, points?: string, guestType?: string, timeStart?: number) => void;
-    typeCar?: { type: string; name: string } | null
+    onTripOptionsChange?: (
+        numGuests: number | null, 
+        price?: string, 
+        points?: string |number, 
+        guestType?: string, 
+        timeStart?: number) => void;
+        typeCar?: { type: string; name: string } | null
 }
 export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsSectionProps) {
 
@@ -33,16 +39,17 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
 
     const [selectedCar, setSelectedCar] = useState<{ type: string; name: string } | null>(null);
 
-
-    // Helper gọi onTripOptionsChange
+    // ✅ Helper gọi onTripOptionsChange - luôn truyền đầy đủ params
     const notifyChange = (
         newNumGuests?: number,
         newPrice?: number,
-        newPoints?: number,
+        newPoints?: number|string,
         newGuestType?: typeof guestType,
         newTimeStart?: number | null,
-        newTypeCar?: { type: string; name: string } | null
+        // newTypeCar?: { type: string; name: string } | null
     ) => {
+        console.log('points notifyChange: ',points)
+        console.log('newPoints notifyChange: ',newPoints)
         if (onTripOptionsChange) {
             onTripOptionsChange(
                 newNumGuests ?? numGuests,
@@ -50,20 +57,49 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
                 (newPoints ?? points).toString(),
                 newGuestType ?? guestType,
                 newTimeStart ?? timeStart,
-                newTypeCar ?? selectedCar     // ✔ luôn gửi selectedCar
             );
         }
     };
-    const addPrice = () => setPrice(prev => prev + 10);
-    const subPrice = () => setPrice(prev => Math.max(prev - 10, 0));
-    const addPoint = () => setPoints(prev => Math.min(prev + 0.5, 10));
-    const subPoint = () => setPoints(prev => Math.max(prev - 0.5, 1));
 
-    const addGuest = () => setNumGuests(prev => Math.min(prev + 1, 6));
-    const subGuest = () => setNumGuests(prev => Math.max(prev - 1, 1));
+    // ✅ Handlers
+    const addPrice = () => {
+        const newPrice = price + 10;
+        setPrice(newPrice);
+        notifyChange(undefined, newPrice);
+    };
+
+    const subPrice = () => {
+        const newPrice = Math.max(price - 10, 0);
+        setPrice(newPrice);
+        notifyChange(undefined, newPrice);
+    };
+
+    const addPoint = () => {
+        const newPoints = Math.min(points + 0.5, 10);
+        setPoints(newPoints);
+        notifyChange(undefined, undefined, newPoints);
+    };
+
+    const subPoint = () => {
+        const newPoints = Math.max(points - 0.5, 1);
+        setPoints(newPoints);
+        notifyChange(undefined, undefined, newPoints);
+    };
+
+    const addGuest = () => {
+        const newGuests = Math.min(numGuests + 1, 6);
+        setNumGuests(newGuests);
+        notifyChange(newGuests);
+    };
+
+    const subGuest = () => {
+        const newGuests = Math.max(numGuests - 1, 1);
+        setNumGuests(newGuests);
+        notifyChange(newGuests);
+    };
     const guestTypeNameMap: Record<string, string> = {
         normal: `${numGuests} khách`,
-        car4: 'Bao xe 4 chỗ',
+        car5: 'Bao xe 5 chỗ',
         car7: 'Bao xe 7 chỗ',
         car16: 'Bao xe 16 chỗ',
         car35: 'Bao xe 35 chỗ',
@@ -89,13 +125,15 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
                 {/* Số khách */}
                 <AppView row justifyContent="space-between" alignItems='center' paddingVertical={9}>
                     <AppText>{'Số khách :'}</AppText>
-                    <AppView row gap={8}>
+                    <AppView row gap={8} alignItems='center'>
 
                         {/* Nút trừ (chỉ hiện khi KHÔNG phải bao xe) */}
                         {guestType === 'normal' && (
-                            <AppButton onPress={subGuest}>
-                                <IconMinus size={20} color={ColorsGlobal.colorIconNoActive} />
-                            </AppButton>
+                            <ButtonChange
+                                onPress={subGuest}
+                                icon={<IconMinus size={20} color={ColorsGlobal.colorIconNoActive} />}
+                            />
+                           
                         )}
 
                         {/* Nút chọn khách / bao xe */}
@@ -118,14 +156,16 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
 
                         {/* Nút cộng (chỉ hiện khi KHÔNG phải bao xe) */}
                         {guestType === 'normal' && (
-                            <AppButton onPress={addGuest}>
-                                <IconPlus size={scale(20)} color={ColorsGlobal.textDark} />
-                            </AppButton>
+                            <ButtonChange
+                                onPress={addGuest}
+                                icon={<IconPlus size={18} color={ColorsGlobal.colorIconNoActive} />}
+                            />
+
                         )}
                     </AppView>
                 </AppView>
 
-                {guestType === 'normal' &&
+                {/* {guestType === 'normal' &&
                     <AppView row justifyContent="space-between" alignItems='center' paddingVertical={6} >
                         <AppText>{'Loại xe:'}</AppText>
                         <AppButton row gap={4} onPress={() => setShowTypeCar(true)}>
@@ -138,16 +178,16 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
                             <IconArrowDown color={ColorsGlobal.colorIconNoActive} />
                         </AppButton>
                     </AppView>
-                }
+                } */}
                 {/* Giá tiền */}
                 <AppView row justifyContent="space-between" alignItems='center' paddingVertical={2} >
                     <AppText>{'Giá tiền :'}</AppText>
                     <AppView row gap={8} alignItems="center">
-                        <AppButton onPress={subPrice}>
-                            <IconMinus size={20} color={ColorsGlobal.colorIconNoActive} />
-                        </AppButton>
+                        <ButtonChange
+                            onPress={subPrice}
+                            icon={<IconMinus size={20} color={ColorsGlobal.colorIconNoActive} />}
+                        />
 
-                        {/* Ô nhập giá tiền */}
                         <AppView
                             style={{
                                 borderBottomWidth: 1,
@@ -181,10 +221,11 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
                             </AppView>
                             <AppText fontWeight={600}>K</AppText>
                         </AppView>
+                        <ButtonChange
+                            onPress={addPrice}
+                            icon={<IconPlus size={18} color={ColorsGlobal.colorIconNoActive} />}
+                        />
 
-                        <AppButton onPress={addPrice}>
-                            <IconPlus size={scale(20)} color={ColorsGlobal.textDark} />
-                        </AppButton>
                     </AppView>
                 </AppView>
 
@@ -193,10 +234,11 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
                 <AppView row justifyContent="space-between" alignItems='center' paddingVertical={2}>
                     <AppText>{'Điểm bán :'}</AppText>
                     <AppView row gap={8} alignItems="center">
-                        <AppButton onPress={subPoint}>
-                            <IconMinus size={20} color={ColorsGlobal.colorIconNoActive} />
-                        </AppButton>
-                        {/* <AppText fontWeight={700}>{`${points} điểm`}</AppText> */}
+                        <ButtonChange
+                            onPress={subPoint}
+                            icon={<IconMinus size={20} color={ColorsGlobal.colorIconNoActive} />}
+                        />
+                       
                         <AppView gap={8}
                             style={{
                                 borderBottomWidth: 1,
@@ -236,9 +278,11 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
                             </AppView>
                             <AppText fontWeight={600}>{'điểm'}</AppText>
                         </AppView>
-                        <AppButton onPress={addPoint} disabled={points == 10}>
-                            <IconPlus size={scale(20)} color={ColorsGlobal.textDark} />
-                        </AppButton>
+                        <ButtonChange
+                            onPress={addPoint}
+                            icon={<IconPlus size={18} color={ColorsGlobal.colorIconNoActive} />}
+                        />
+
                     </AppView>
                 </AppView>
             </AppView>

@@ -1,7 +1,7 @@
 import { StyleSheet, View, FlatList, RefreshControl } from 'react-native';
 import React, { useEffect, useState, useCallback } from 'react';
 import AppView from '../../components/common/AppView';
-import { scale } from 'react-native-size-matters';
+
 import TripHistory from '../../components/component/TripHistory';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import AppButton from '../../components/common/AppButton';
@@ -9,23 +9,37 @@ import AppInput from '../../components/common/AppInput';
 import AppText from '../../components/common/AppText';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/data/store';
-import { fetchReceivedTrips, FetchReceivedTripsParams } from '../../redux/slices/tripsSlice';
+import { fetchReceivedTrips, FetchReceivedTripsParams, fetchSoldTrips } from '../../redux/slices/tripsSlice';
 import { useAppContext } from '../../context/AppContext';
 import moment from 'moment';
+import TypeFilterBar from '../../components/component/TypeFilterBar';
+import { scale } from '../../utils/Helper';
 
 export default function ReceivingScheduleScreen() {
   // 🔹 All hooks must be at the top level and in consistent order
   const dispatch = useDispatch<AppDispatch>();
   const { updateTrips } = useAppContext();
-  const { receivedTrips, loading, error } = useSelector((state: RootState) => state.trips);
-  
+  const { receivedTrips, soldTrips, loading, error } = useSelector((state: RootState) => state.trips);
+
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [selectedDateType, setSelectedDateType] = useState<'from' | 'to' | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-
+  const [selectedType, setSelectedType] = useState<string | null>('chuyến nhận');
+  const types = ['chuyến nhận', 'chuyến bán']
+  console.log('soldTrips: ', soldTrips.length);
+  // console.log('selectedType: ', selectedType)
+  const toggleFilter = (type: string) => {
+    setSelectedType(prev => {
+      if (prev === type) {
+        // nếu bấm lại chính nó → chuyển sang loại còn lại
+        return types.find(t => t !== type) || type;
+      }
+      return type;
+    });
+  };
   // 🔹 Format date
   const formatDate = useCallback((date: Date) => {
     return moment(date).format('DD/MM/YYYY');
@@ -49,17 +63,22 @@ export default function ReceivingScheduleScreen() {
     const start_date = dateToTimestamp(fromDate);
     const end_date = dateToTimestamp(toDate);
     const params: FetchReceivedTripsParams = {};
-    
+
     if (start_date) params.start_date = start_date;
     if (end_date) params.end_date = end_date;
 
-    console.log('Dispatch fetchReceivedTrips with params:', params);
-    return dispatch(fetchReceivedTrips(params));
+    if (selectedType === 'chuyến nhận') {
+      return dispatch(fetchReceivedTrips(params));
+    } else {
+      return dispatch(fetchSoldTrips(params));
+    }
+
   }, [dispatch, fromDate, toDate, dateToTimestamp]);
 
   // 🔹 Initial load and reload when filters change
   useEffect(() => {
-    loadTrips();
+    if (selectedType)
+      loadTrips();
   }, [loadTrips, updateTrips]);
 
   // 🔹 Pull to refresh handler - clear filters and reload
@@ -68,7 +87,7 @@ export default function ReceivingScheduleScreen() {
     setFromDate('');
     setToDate('');
     setErrorMessage('');
-    
+
     // Dispatch without any date filters
     await dispatch(fetchReceivedTrips({}));
     setRefreshing(false);
@@ -151,14 +170,14 @@ export default function ReceivingScheduleScreen() {
   }, [loading, refreshing]);
 
   return (
-    <AppView flex={1} backgroundColor="#fff" padding={scale(16)} position="relative">
+    <AppView flex={1} backgroundColor="#fff" padding={16} position="relative" gap={8}>
       {error && (
         <AppView paddingBottom={8}>
           <AppText color="red">{error}</AppText>
         </AppView>
       )}
 
-      <AppView row justifyContent={'space-between'} gap={12} paddingBottom={16}>
+      <AppView row justifyContent={'space-between'} gap={12} >
         <AppButton flex={1} onPress={openSelectFromDate}>
           <AppInput
             keyboardType="numeric"
@@ -189,27 +208,36 @@ export default function ReceivingScheduleScreen() {
       </AppView>
 
       {errorMessage ? (
-        <AppText 
-          fontStyle="italic" 
-          fontSize={14} 
+        <AppText
+          fontStyle="italic"
+          fontSize={14}
           style={{ color: 'red', marginBottom: 8 }}
         >
           {'! ' + errorMessage}
         </AppText>
       ) : null}
+      <AppView>
+        <TypeFilterBar
+          types={types}
+          selectedType={selectedType}
+          toggleFilter={toggleFilter}
+        />
+      </AppView>
 
-      <FlatList
-        data={receivedTrips}
-        keyExtractor={(item) => item.id.toString()}
-        showsVerticalScrollIndicator={false}
-        renderItem={renderItem_trip}
-        ItemSeparatorComponent={() => <AppView height={scale(16)} />}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        ListEmptyComponent={renderEmptyComponent}
-      />
+      <AppView flex={1}>
+        <FlatList
+          data={selectedType === 'chuyến nhận' ? receivedTrips : soldTrips}
+          keyExtractor={(item) => item?.id.toString()}
+          showsVerticalScrollIndicator={false}
+          renderItem={renderItem_trip}
+          ItemSeparatorComponent={() => <AppView height={scale(16)} />}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          ListEmptyComponent={renderEmptyComponent}
 
+        />
+      </AppView>
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"

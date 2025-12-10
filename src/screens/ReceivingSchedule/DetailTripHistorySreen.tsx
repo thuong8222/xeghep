@@ -9,32 +9,36 @@ import IconLocation from '../../assets/icons/iconLocation';
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal';
 import IconPhone from '../../assets/icons/iconPhone';
 import moment from 'moment';
+import IconComment from '../../assets/icons/iconComment';
 
-export default function DetailTripHistorySreen({ route }) {
+export default function DetailTripHistorySreen({ route, navigation }) {
     const data = route.params.data;
     const driverSell = data.driver_sell || {};
     const formatTime = (value) => {
         if (!value) return "--";
-      
+
         // Nếu là số → có thể là seconds hoặc milliseconds
         if (typeof value === "number") {
-          const ts = value.toString().length > 10 ? value / 1000 : value;
-          return moment.unix(ts).format("DD-MM-YYYY HH:mm");
+            const ts = value.toString().length > 10 ? value / 1000 : value;
+            return moment.unix(ts).format("DD-MM-YYYY HH:mm");
         }
-      
+
         // Nếu là chuỗi nhưng là số
         if (!isNaN(value)) {
-          const num = Number(value);
-          const ts = value.length > 10 ? num / 1000 : num;
-          return moment.unix(ts).format("DD-MM-YYYY HH:mm");
+            const num = Number(value);
+            const ts = value.length > 10 ? num / 1000 : num;
+            return moment.unix(ts).format("DD-MM-YYYY HH:mm");
         }
-      
+
         // Trường hợp chuỗi dạng ISO
         const m = moment(value);
         if (m.isValid()) return m.format("DD-MM-YYYY HH:mm");
-      
+
         return "--";
-      };
+    };
+    const gotoChat = () => {
+        navigation.navigate('ChatScreen', { data: data })
+    }
 
     return (
         <AppView style={styles.container}>
@@ -49,6 +53,18 @@ export default function DetailTripHistorySreen({ route }) {
                         {driverSell.full_name} ({driverSell.phone})
                     </AppText>
 
+
+
+                </View>
+                <AppView row justifyContent={'space-between'} alignItems={'center'}>
+                    <AppButton
+                        row gap={6}
+                        onPress={gotoChat}
+
+                    >
+                        <IconComment color={ColorsGlobal.main} />
+                        <AppText color={ColorsGlobal.main}>{'Chat với lái xe bán'}</AppText>
+                    </AppButton>
                     <AppButton
 
                         onPress={() => {
@@ -61,7 +77,7 @@ export default function DetailTripHistorySreen({ route }) {
                         <AppText color={ColorsGlobal.main2}>{'Gọi'}</AppText>
 
                     </AppButton>
-                </View>
+                </AppView>
             </View>
 
             {/* --- Thông tin hành trình --- */}
@@ -110,12 +126,12 @@ export default function DetailTripHistorySreen({ route }) {
 
                 <View style={styles.row}>
                     <AppText style={styles.label}>Điểm chuyến:</AppText>
-                    <AppText style={styles.value}>{data.point}</AppText>
+                    <AppText style={styles.value}>{'-' + data.point + ' điểm'}</AppText>
                 </View>
 
                 <View style={styles.row}>
-                    <AppText style={styles.label}>Giá bán:</AppText>
-                    <AppText style={styles.price}>{data.price_sell}k</AppText>
+                    <AppText style={styles.label}>Thu khách:</AppText>
+                    <AppText style={styles.price}>{data.price_sell}K</AppText>
                 </View>
             </View>
 

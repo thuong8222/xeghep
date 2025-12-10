@@ -9,6 +9,7 @@ export const ColorsGlobal = {
     textNote: '#666666',
     borderColor: '#EBEAEA',
     borderColorDark: '#BDBDC2',
+    backgroundTripToday: '#E8F2E9',  // Vàng
 
     backgroundTrip: "#FBFBFB",
     backgroundBuyTrip: "#F9B68A",
