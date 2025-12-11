@@ -10,6 +10,10 @@ import ArrowRight from '../../assets/icons/ArrowRight';
 import IconNote from '../../assets/icons/IconNote';
 import { NumberFormat, parseTime, scale } from '../../utils/Helper';
 
+import { Alert } from 'react-native';
+import { useCountdown } from '../../hooks/useCountdown';
+import CountdownStyled from './CountdownStyled';
+
 export default function Trip(props) {
     // console.log('trips:  props: ', props)
     const guests = props.data?.guests;
@@ -20,6 +24,11 @@ export default function Trip(props) {
     const formatted = isToday
         ? time.format("HH:mm")
         : time.format("DD/MM/YYYY HH:mm");
+    const now = moment().unix();           // thời điểm hiện tại (seconds)
+    const remainSeconds = time_start_sec - now;
+    // const countdown = remainSeconds > 0 ? remainSeconds : 0;
+    const countdown = useCountdown(time_start_sec);
+
     return (
         <AppView gap={4} radius={12} borderWidth={1} padding={0}
             borderColor={isToday ? ColorsGlobal.main2 : ColorsGlobal.borderColorDark}
@@ -52,9 +61,10 @@ export default function Trip(props) {
                         } />
                     </AppView>
 
-                    <AppView row gap={8}>
+                    <AppView row gap={8} alignItems='center'>
                         <AppText fontWeight={600}>{formatted}</AppText>
-                        <AppText color={ColorsGlobal.main2}>{`+15'`}</AppText>
+                        <CountdownStyled seconds={countdown} />
+                        {/* <AppText color={ColorsGlobal.main2}>{`+15'`}</AppText> */}
                     </AppView>
                 </AppView>
                 <AppView row gap={8} >
