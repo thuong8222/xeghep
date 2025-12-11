@@ -8,7 +8,7 @@ import moment from 'moment';
 import ArrowRight from '../../assets/icons/ArrowRight';
 
 import IconNote from '../../assets/icons/IconNote';
-import { NumberFormat, parseTime, scale } from '../../utils/Helper';
+import { CONSTANT, NumberFormat, parseTime, scale } from '../../utils/Helper';
 
 import { Alert } from 'react-native';
 import { useCountdown } from '../../hooks/useCountdown';
@@ -24,10 +24,10 @@ export default function Trip(props) {
     const formatted = isToday
         ? time.format("HH:mm")
         : time.format("DD/MM/YYYY HH:mm");
-    const now = moment().unix();           // thời điểm hiện tại (seconds)
-    const remainSeconds = time_start_sec - now;
-    // const countdown = remainSeconds > 0 ? remainSeconds : 0;
     const countdown = useCountdown(time_start_sec);
+    const type_car = props?.data?.type_car;
+
+    const name_type_car = CONSTANT.TYPE_CAR_LIST.find(item => item.key === type_car)?.name;
 
     return (
         <AppView gap={4} radius={12} borderWidth={1} padding={0}
@@ -64,7 +64,6 @@ export default function Trip(props) {
                     <AppView row gap={8} alignItems='center'>
                         <AppText fontWeight={600}>{formatted}</AppText>
                         <CountdownStyled seconds={countdown} />
-                        {/* <AppText color={ColorsGlobal.main2}>{`+15'`}</AppText> */}
                     </AppView>
                 </AppView>
                 <AppView row gap={8} >
@@ -80,7 +79,7 @@ export default function Trip(props) {
                 </AppView>
                 <AppView row justifyContent={'space-between'}>
                     <AppText fontWeight={600}>
-                        {props?.data?.cover_car === 1 ? `Bao xe ${guests} chỗ` : `${guests} khách`}
+                        {props?.data?.cover_car === 1 ? `Bao ${name_type_car}` : `${guests} khách`}
                     </AppText>
                     <AppText color={ColorsGlobal.main} fontWeight={700}>{NumberFormat(props.data.price_sell) + "K"}</AppText>
                     <AppText fontWeight={700}>{'-' + props.data?.point + ' đ'}</AppText>

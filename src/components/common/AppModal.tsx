@@ -9,6 +9,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 interface AppModalProps {
   isVisible: boolean;
   onClose: () => void;
+  enableAutomaticScroll?:boolean;
   heightPercent?: number; // cho phép custom chiều cao
   children?: React.ReactNode; // ✅ phần nội dung tuỳ ý
 }
@@ -18,6 +19,7 @@ export default function AppModal({
   onClose,
   heightPercent = 0.8,
   children,
+  enableAutomaticScroll=true
 }: AppModalProps) {
   const insets = useSafeAreaInsets();
   return (
@@ -44,7 +46,7 @@ export default function AppModal({
         <KeyboardAwareScrollView
           style={{ flex: 1, }}
           viewIsInsideTabBar={true}
-          enableAutomaticScroll={true}
+          enableAutomaticScroll={enableAutomaticScroll}
           contentContainerStyle={{ flexGrow: 1 }}
           enableOnAndroid={true}
           extraScrollHeight={0}

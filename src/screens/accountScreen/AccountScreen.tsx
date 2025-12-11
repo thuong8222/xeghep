@@ -31,7 +31,7 @@ export default function AccountScreen({ navigation }: Props) {
   const { setCurrentDriver } = useAppContext();
   const [isModalChangePw, setIsModalChangePw] = useState(false);
 
- 
+
   useEffect(() => {
     if (!driver) {
       getDriver().catch(err => {
@@ -40,7 +40,7 @@ export default function AccountScreen({ navigation }: Props) {
     }
   }, [driver]);
 
- 
+
   useEffect(() => {
     if (error) {
       Alert.alert('Lỗi', error, [{ text: 'OK', onPress: () => clear() }]);
@@ -51,21 +51,19 @@ export default function AccountScreen({ navigation }: Props) {
   const Logout = () => {
     const handleLogout = async () => {
       try {
-     
+
         const result = await dispatch(logoutAccount()).unwrap();
-        
+
         await AsyncStorage.removeItem('token');
         await AsyncStorage.removeItem("driver")
-     
-        setCurrentDriver('');
 
-      
+        setCurrentDriver('');
         navigation.reset({
           index: 0,
           routes: [{ name: 'Auth', state: { routes: [{ name: 'LoginScreen' }] } }],
         });
 
-    
+
       } catch (error) {
         console.error('❌ Lỗi khi đăng xuất:', error);
       }
@@ -89,12 +87,12 @@ export default function AccountScreen({ navigation }: Props) {
   const DeleteAccount = () => {
     const handleDelete = async () => {
       try {
-   
+
         const result = await dispatch(deleteAccount()).unwrap();
 
-    
 
-       
+
+
         await AsyncStorage.removeItem('token');
         await AsyncStorage.removeItem('driver');
 
@@ -105,7 +103,7 @@ export default function AccountScreen({ navigation }: Props) {
           routes: [{ name: 'Auth', state: { routes: [{ name: 'LoginScreen' }] } }],
         });
 
-       
+
       } catch (error) {
         console.error('Lỗi xoá tài khoản:', error);
       }
@@ -122,7 +120,7 @@ export default function AccountScreen({ navigation }: Props) {
   };
 
   const gotoHistoryBuySalePoint = () => {
-   
+
     navigation.navigate('RootNavigator', {
       screen: 'BottomTabs',      // bước 1: đi vào bottom tabs
       params: {
@@ -173,7 +171,7 @@ export default function AccountScreen({ navigation }: Props) {
       }
     });
   };
-
+  console.log('driver: ', driver)
   return (
     <ScrollView style={{ flex: 1, backgroundColor: ColorsGlobal.backgroundWhite }}>
       <AppView flex={1} backgroundColor={ColorsGlobal.backgroundWhite} padding={16} gap={12}>
@@ -193,22 +191,39 @@ export default function AccountScreen({ navigation }: Props) {
             <IconUser size={100} />
           </AppView>
           {/* } */}
-          <AppView alignItems='center'>
-            <AppText bold color={ColorsGlobal.main}>{driver?.full_name}</AppText>
-            <AppText fontSize={14} color={ColorsGlobal.main2}>{driver?.is_active === true ? 'Đang hoạt động' : 'Tạm khoá'}</AppText>
+          <AppView alignItems='center' gap={10}>
+            <AppView>
+              <AppText bold color={ColorsGlobal.main}>{driver?.full_name}</AppText>
+              <AppText textAlign='center' fontSize={14} color={ColorsGlobal.main2}>{driver?.is_online === 1 ? 'Đang hoạt động' : 'Offline'}</AppText>
+            </AppView>
+
+            <AppView row justifyContent={'space-around'} width={'100%'}>
+              <AppView alignItems='center' backgroundColor={ColorsGlobal.backgroundGray} padding={10} radius={10} gap={10}>
+                <AppText fontSize={14}>{`Điểm`}</AppText>
+                <AppText bold color={ColorsGlobal.main2}>{driver?.current_points}</AppText>
+              </AppView>
+              <AppView alignItems='center' backgroundColor={ColorsGlobal.backgroundGray} padding={10} radius={10} gap={10}>
+                <AppText fontSize={14}>{`Chuyến nhận`}</AppText>
+                <AppText bold color={ColorsGlobal.main2}>{driver?.total_trips_received}</AppText>
+              </AppView>
+              <AppView alignItems='center' backgroundColor={ColorsGlobal.backgroundGray} padding={10} radius={10} gap={10}>
+                <AppText fontSize={14}>{`Chuyến bán`}</AppText>
+                <AppText bold color={ColorsGlobal.main2}>{driver?.total_trips_sold}</AppText>
+              </AppView>
+            </AppView>
           </AppView>
 
         </AppView>
         <AppView gap={6} height={'auto'} >
           <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Tài khoản'}</AppText>
           <FunctionSection label='Thông tin cá nhân' onPress={gotoInfoAccount} data={driver} />
+          <FunctionSection label='Thông tin xe' onPress={gotoInfoCar} />
         </AppView>
-        <AppView gap={6} height={'auto'} >
+        {/* <AppView gap={6} height={'auto'} >
           <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Thông tin xe'}</AppText>
           <FunctionSection label='Thông tin xe' onPress={gotoInfoCar} />
+        </AppView> */}
 
-
-        </AppView>
         <AppView gap={6} >
           <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Tính năng'}</AppText>
           <AppView gap={8}>

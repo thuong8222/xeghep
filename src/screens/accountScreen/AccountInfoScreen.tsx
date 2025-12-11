@@ -1,14 +1,12 @@
 import { Alert, Image, Platform, StyleSheet, Text, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import AppView from '../../components/common/AppView'
-import AppInput from '../../components/common/AppInput'
-import { NumberFormat, validateExperienceYears, validatePhoneNumber } from '../../utils/Helper';
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal';
 import IconUser from '../../assets/icons/IconUser';
 import ButtonSubmit from '../../components/common/ButtonSubmit';
 import AppButton from '../../components/common/AppButton';
-import ModalUploadCarImage from '../../components/component/modals/ModalUploadCarImage';
 import AppText from '../../components/common/AppText';
+import ModalUploadCarImage from '../../components/component/modals/ModalUploadCarImage';
 import IconCamera from '../../assets/icons/IconCamera';
 
 import { RouteProp, useRoute } from '@react-navigation/native';
@@ -16,9 +14,9 @@ import { AccountTabsParamList } from '../../navigation/menuBottomTabs/AccountTab
 import { useDriverApi } from '../../redux/hooks/userDriverApi';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootParamList } from '../../../App';
-import ModalOnlySelectProvince from '../../components/component/modals/ModalOnlySelectProvince';
+import { NumberFormat } from '../../utils/Helper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { clearMessages } from '../../redux/slices/ authSlice';
+
 type AccountScreenNavProp = NativeStackNavigationProp<RootParamList>;
 
 interface Props {
@@ -26,25 +24,15 @@ interface Props {
 }
 
 export default function AccountInfoScreen({ navigation }: Props) {
-    // --- gọi hook useRoute bên trong component ---
     const route = useRoute<RouteProp<AccountTabsParamList, 'AccountInfoScreen'>>();
     const driverPre = route.params.data;
-    const { driver, loading, error, successMessage, editDriver, clear } = useDriverApi();
 
-    const current_points = driverPre.current_points;
-    const total_trips_received = driverPre.total_trips_received;
-    const total_trips_sold = driverPre.total_trips_sold;
- 
-    const [nameDisplay, setNameDisplay] = useState(driverPre?.full_name || '');
-    const [numberPhone, setNumberPhone] = useState(driverPre?.phone || '');
-    const [address, setAddress] = useState(driverPre?.address || '');
-    const [phoneNumberError, setPhoneNumberError] = useState('');
-    const [experienceYearsError, setExperienceYearsError] = useState('');
+    const { driver, loading, error, successMessage, editDriver, clear } = useDriverApi();
 
     const [isDisplayModalUploadImage, setIsDisplayModalUploadImage] = useState(false);
     const [imageUri, setImageUri] = useState(driverPre?.image_avatar || '');
-    const [experienceYears, setExperienceYears] = useState('');
-    const [isOpenModal, setIsOpenModal] = useState(false);
+    const [experienceYears, setExperienceYears] = useState(driverPre?.experience_years || "");
+
     useEffect(() => {
         if (successMessage) {
             Alert.alert('Thành công', successMessage, [
@@ -64,142 +52,91 @@ export default function AccountInfoScreen({ navigation }: Props) {
     }, [successMessage, error]);
 
 
-
     const SaveChangeInfo = async () => {
         try {
             const model = {
-                full_name: nameDisplay,
                 image_avatar: imageUri,
-                address: address,
                 experience_years: experienceYears,
             };
 
-
             await editDriver(model);
-
         } catch (err: any) {
             Alert.alert('Thất bại', err?.message || 'Có lỗi xảy ra');
         }
     };
-    const handleUploadPress = () => {
-        setIsDisplayModalUploadImage(true);
-    }
-    const openSelectProvince = () => {
 
-        setIsOpenModal(true);
-    }
-    const handleProvinceSelected = (data: { province: any }) => {
-        setAddress(data.province.name); // cập nhật state với tên tỉnh
-        setIsOpenModal(false); // đóng modal
-    };
-    const insets = useSafeAreaInsets()
+    const insets = useSafeAreaInsets();
+
     return (
-        <AppView flex={1} backgroundColor={ColorsGlobal.backgroundWhite} padding={16} paddingBottom={Platform.OS === 'ios' ? insets.bottom : 0} >
-            <AppButton justifyContent='center' alignItems='center' paddingBottom={40} >
-                <AppView justifyContent="center" alignItems="center" marginTop={8}>
-                    <View style={{ position: 'relative' }}>
-                        {/* {imageUri ?
-                            <Image
-                                source={{ uri: imageUri }}
-                                style={{
-                                    width: 150,
-                                    height: 150,
-                                    borderRadius: 999,
-                                }}
-                                resizeMode="cover"
-                            /> : */}
+        <AppView flex={1} backgroundColor={ColorsGlobal.backgroundWhite} padding={16} paddingBottom={Platform.OS === 'ios' ? insets.bottom : 0} gap={16}>
+
+            {/* Avatar */}
+            <AppButton justifyContent='center' alignItems='center' paddingBottom={40}>
+                <View style={{ position: 'relative' }}>
+                    {imageUri ? (
+                        <Image
+                            source={{ uri: imageUri }}
+                            style={{ width: 150, height: 150, borderRadius: 999 }}
+                            resizeMode="cover"
+                        />
+                    ) : (
                         <AppView backgroundColor={ColorsGlobal.backgroundGray} radius={999} padding={20}>
                             <IconUser size={100} />
                         </AppView>
-                        {/* } */}
-                        {/* <AppButton
-                            onPress={handleUploadPress}
-                            style={{
-                                position: 'absolute',
-                                top: -8,
-                                right: -6,
-                                backgroundColor: 'rgba(0,0,0,0.5)',
-                                width: 28,
-                                height: 28,
-                                borderRadius: 14,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <IconCamera size={20} />
-                        </AppButton> */}
-                    </View>
-                </AppView>
+                    )}
+
+                    <AppButton
+                        onPress={() => setIsDisplayModalUploadImage(true)}
+                        style={{
+                            position: 'absolute',
+                            bottom: 0,
+                            right: 0,
+                            backgroundColor: '#00000066',
+                            width: 36,
+                            height: 36,
+                            borderRadius: 18,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <IconCamera size={20} color="white" />
+                    </AppButton>
+                </View>
             </AppButton>
-            <AppView gap={8} flex={1} paddingTop={24}>
-                <AppView row>
-                    <AppInput value={nameDisplay} onChangeText={(text) => setNameDisplay(text)} placeholder='Nhập tên hiển thị' label={'Tên hiển thị'} />
+
+            {/* Info */}
+            <AppView gap={16} borderWidth={1} borderColor={ColorsGlobal.borderColorDark} radius={10} padding={16}>
+
+                <Item label="Tên hiển thị" value={driverPre.full_name} row />
+                <Item label="Số điện thoại" value={driverPre.phone} row />
+                <Item label="Địa chỉ" value={driverPre.address || 'Chưa cập nhật'}  row />
+                <Item label="Năm kinh nghiệm" value={experienceYears + " năm"} row />
+
+                <AppView row gap={10}>
+                    <Item label="Điểm hiện tại" value={String(NumberFormat(driverPre.current_points))} flex={1} />
+                    <Item label="Chuyến nhận" value={String(NumberFormat(driverPre.total_trips_received))} flex={1} />
+                    <Item label="Chuyến bán" value={String(NumberFormat(driverPre.total_trips_sold))} flex={1} />
                 </AppView>
-                <AppView row gap={6}>
-                    <AppView flex={1}>
-                        <AppInput value={String(NumberFormat(current_points))} onChangeText={(text) => setNameDisplay(text)} label={'Điểm hiện tại'} />
-                    </AppView>
-                    <AppView flex={1}>
-                        <AppInput value={String(NumberFormat(total_trips_received))} onChangeText={(text) => setNameDisplay(text)} label={'Chuyến nhận'} />
-                    </AppView>
-                    <AppView flex={1}>
 
-                        <AppInput value={String(NumberFormat(total_trips_sold))} onChangeText={(text) => setNameDisplay(text)} label={'Chuyến bán'} />
-                    </AppView>
-
-                </AppView>
-                <AppView row>
-                    <AppInput label="Số điện thoại"
-                        value={numberPhone}
-                        keyboardType={'decimal-pad'}
-                        onChangeText={(text) => {
-                            setNumberPhone(text)
-                            setPhoneNumberError(validatePhoneNumber(text))
-                        }}
-                        error={phoneNumberError}
-                        placeholder="Nhập số điện thoại"
-                        editable={false}
-                    />
-
-                </AppView>
-                <AppView row>
-                    <AppInput label="Địa chỉ"
-                        value={address}
-
-                        onChangeText={(text) => {
-                            setAddress(text)
-
-                        }}
-                        error={phoneNumberError}
-                        placeholder="Chọn địa chỉ"
-                        type='select'
-
-
-
-                        toggleSelect={openSelectProvince}
-                    />
-
-                </AppView>
-                <AppView row>
-                    <AppInput value={experienceYears} onChangeText={(text) => {
-                        setExperienceYears(text)
-                        setExperienceYearsError(validateExperienceYears(text))
-                    }} placeholder='Nhập số năm kinh nghiệm' keyboardType={'decimal-pad'} label={'Năm kinh nghiệm'}
-                        error={experienceYearsError}
-                    />
-
-                </AppView>
             </AppView>
-            <AppView>
+
+            {/* <AppView marginTop={30}>
                 <ButtonSubmit title='Lưu thay đổi' onPress={SaveChangeInfo} />
-            </AppView>
-            <ModalUploadCarImage isDisplay={isDisplayModalUploadImage} onClose={() => setIsDisplayModalUploadImage(false)}
-                onSelectImage={(uri) => setImageUri(uri)} />
-            <ModalOnlySelectProvince
-                isVisible={isOpenModal}
-                onClose={() => setIsOpenModal(false)}
-                onSelected={handleProvinceSelected}
+            </AppView> */}
+
+            <ModalUploadCarImage
+                isDisplay={isDisplayModalUploadImage}
+                onClose={() => setIsDisplayModalUploadImage(false)}
+                onSelectImage={(uri) => setImageUri(uri)}
             />
         </AppView>
     )
 }
+
+const Item = ({ label, value, flex ,row }: any) => (
+    <AppView flex={flex} padding={row ?0: 12} backgroundColor={row?'transparent': '#F5F5F7'} radius={10} row={row} gap={10}  justifyContent={row?'space-between':'center'}>
+        <AppText textAlign='center' fontWeight='600' marginBottom={4} color="#555">{label}</AppText>
+        <AppText textAlign='center'  fontSize={row?16:20} bold={!row} color="#000">{value}</AppText>
+    </AppView>
+);
+

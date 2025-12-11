@@ -22,8 +22,9 @@ import { useAppContext } from '../../context/AppContext'
 import ModalConfirmBuyTrip from '../../components/component/modals/ModalConfirmBuyTrip'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/data/store'
-import { buyTrip, FetchTripsPayload } from '../../redux/slices/tripsSlice'
+import { buyTrip, FetchTripsPayload, cancelTrip } from '../../redux/slices/tripsSlice'
 import moment from 'moment'
+import AppModal from '../../components/common/AppModal'
 
 
 type BuyTripProps = NativeStackNavigationProp<BuyTripStackParamList>;
@@ -43,11 +44,14 @@ export default function BuyTripScreen({ navigation, route }: Props) {
     const [selectedArea, setSelectedArea] = useState<string | undefined>(undefined);
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
-    const { nameGroup, countMember, id_area , isJoin} = route.params;
+    const { nameGroup, countMember, id_area, isJoin } = route.params;
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isModalConfirmBuyTrip, setIsModalConfirmBuyTrip] = useState(false);
     const [filters, setFilters] = useState<{ direction: string; time: string } | null>(null);
     const [boughtTrip, setBoughtTrip] = useState();
+    const [tripToCancel, setTripToCancel] = useState(null);
+    const [showConfirmCancel, setShowConfirmCancel] = useState(false);
+
     const gotoInfoGroup = () => {
 
         setIdArea(id_area)
@@ -103,28 +107,13 @@ export default function BuyTripScreen({ navigation, route }: Props) {
     const fetchTrips = useCallback(async () => {
         if (!id_area) return;
         try {
-            const model: FetchTripsPayload = {
-                area_id: id_area,
-
-            }
-
-
+            const model: FetchTripsPayload = { area_id: id_area }
             await getTrips(model);
-
-
         } catch (err) {
             console.log('Lỗi fetch trips:', err);
         }
     }, [id_area, startDate, endDate, filters, getTrips, updateTrips]);
 
-    // const onRefresh = useCallback(async () => {
-    //     setRefreshing(true);
-    //     try {
-    //         await fetchTrips();
-    //     } finally {
-    //         setRefreshing(false);
-    //     }
-    // }, [fetchTrips]);
     const onRefresh = async () => {
         setRefreshing(true);
         try {
@@ -161,75 +150,89 @@ export default function BuyTripScreen({ navigation, route }: Props) {
                 console.log('Mua chuyến thất bại:', err);
             });
     };
+    const handleConfirmCancel = () => {
+        if (!tripToCancel) return;
+        PressCancelTrip(tripToCancel?.data?.item?.id, tripToCancel);
+        setShowConfirmCancel(false);
+    };
+
+    const PressCancelTrip = (rowMap: any, data: any) => {
+        dispatch(cancelTrip(data?.data?.item?.id))
+            .unwrap()
+            .then(() => {
+                setUpdateTrips(moment().unix());
+                closeRow(rowMap, data?.item?.id);
+                Alert.alert("Thông báo", "Huỷ bán chuyến thành công!");
+            })
+            .catch(err => {
+                Alert.alert('Thông báo', err);
+            });
+    };
 
     const SaleTrips = () => {
         navigation.navigate('SaleTrip', { id_area: id_area })
     }
 
     const renderHiddenItem = (data, rowMap) => {
-
         if (data.item.is_sold === 1) return null;
+        const isOnwer = data?.item?.id_driver_sell || data?.item?.driver_sell?.id_driver
         return (
 
             <View style={styles.rowBack}>
-                <AppButton style={[styles.backBtn, styles.backBtnRight, { backgroundColor: ColorsGlobal.backgroundBuyTrip }]} onPress={() => PressBuyTrip(rowMap, data.item.area_id, data)}>
-                    <Text style={styles.backBtnText}>{'Mua chuyến'}</Text>
-                </AppButton>
+
+                {isOnwer ?
+                    <AppButton style={[styles.backBtn, styles.backBtnRight, { backgroundColor: ColorsGlobal.backgroundBuyTrip }]} onPress={() => {
+                        setTripToCancel({ rowMap, data });
+                        setShowConfirmCancel(true);
+                    }}>
+                        <AppText fontWeight={600} textAlign='center' >{'Huỷ bán chuyến'}</AppText>
+                    </AppButton>
+                    :
+                    <AppButton style={[styles.backBtn, styles.backBtnRight, { backgroundColor: ColorsGlobal.backgroundBuyTrip }]} onPress={() => PressBuyTrip(rowMap, data.item.area_id, data)}>
+                        <Text style={styles.backBtnText}>{'Mua chuyến'}</Text>
+                    </AppButton>
+                }
             </View>
 
         )
     };
-   
+
 
     const handleApplyFilter = async (filters: any, dateFilter?: string | null) => {
         console.log("handleApplyFilter", filters, dateFilter);
-    
+
         if (!id_area) return;
-    
+
         const model: any = {
             area_id: id_area
         };
-    
-        // ------------ TIME FILTER ------------
+
+        // ------------- TIME FILTER (đã sửa) --------------
+        // if (dateFilter && dateFilter.start && dateFilter.end) {
+        //     model.start_date = dateFilter.start;   // ⭐ GIỮ NGUYÊN ISO từ child
+        //     model.end_date = dateFilter.end;
+        // }
         if (dateFilter) {
-            const dateObj = new Date(dateFilter); // ❗ Convert ISO → Date
-    
-            if (!isNaN(dateObj.getTime())) {
-                const startOfDay = new Date(
-                    dateObj.getFullYear(),
-                    dateObj.getMonth(),
-                    dateObj.getDate(),
-                    0, 0, 0
-                );
-    
-                const endOfDay = new Date(
-                    dateObj.getFullYear(),
-                    dateObj.getMonth(),
-                    dateObj.getDate(),
-                    23, 59, 59
-                );
-    
-                model.start_date = startOfDay.toISOString();
-                model.end_date = endOfDay.toISOString();
-            }
+            model.start_date = dateFilter.start_date;
+            model.end_date = dateFilter.end_date;
         }
-    
+
         // ------------ DIRECTION ------------
         if (filters.direction !== undefined) {
             model.direction = filters.direction;
         }
-    
+
         // ------------ PICKUP / DROPOFF ------------
         if (filters.place_start) model.place_start = filters.place_start;
         if (filters.place_end) model.place_end = filters.place_end;
-    
+
         console.log("Model gửi API:", model);
-    
-       await getTrips(model);
+
+        await getTrips(model);
         setIsModalVisible(false);
     };
-    
-    
+
+
     return (
         <AppView flex={1} backgroundColor='#fff' padding={scale(16)} position='relative'>
             <SwipeListView
@@ -261,6 +264,30 @@ export default function BuyTripScreen({ navigation, route }: Props) {
             />
             <ModalConfirmBuyTrip visible={isModalConfirmBuyTrip}
                 onRequestClose={() => setIsModalConfirmBuyTrip(false)} data={boughtTrip} />
+            <AppModal isVisible={showConfirmCancel} onClose={() => setShowConfirmCancel(false)}>
+                <AppView padding={20} gap={16}>
+                    <AppText bold fontSize={16}>Bạn có chắc muốn huỷ bán chuyến?</AppText>
+                    <AppText>Hành động này không thể hoàn tác.</AppText>
+
+                    <AppButton
+                        backgroundColor={ColorsGlobal.main}
+                        paddingVertical={10}
+                        radius={8}
+                        onPress={handleConfirmCancel}
+                    >
+                        <AppText color="#fff" textAlign="center">Đồng ý huỷ chuyến</AppText>
+                    </AppButton>
+
+                    <AppButton
+                        backgroundColor={ColorsGlobal.backgroundGray}
+                        paddingVertical={10}
+                        radius={8}
+                        onPress={() => setShowConfirmCancel(false)}
+                    >
+                        <AppText textAlign="center">Không, quay lại</AppText>
+                    </AppButton>
+                </AppView>
+            </AppModal>
 
         </AppView>
     )

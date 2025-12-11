@@ -12,7 +12,7 @@ import IconTranferPoint from '../assets/icons/IconTranferPoint';
 import IconUser from '../assets/icons/IconUser';
 import { ColorsGlobal } from '../components/base/Colors/ColorsGlobal';
 import { NavigatorScreenParams } from '@react-navigation/native';
-import PriorityPurchaseTabs from './PriorityPurchaseTabs';
+import PriorityPurchaseTabs from './menuBottomTabs/PriorityPurchaseTabs';
 
 export type BottomTabParamList = {
   BuyTripTabs: NavigatorScreenParams<BuyTripStackParamList>; // ✅ nested stack

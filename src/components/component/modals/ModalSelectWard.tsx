@@ -7,6 +7,8 @@ import AppView from '../../common/AppView';
 import AppInput from '../../common/AppInput';
 import { ColorsGlobal } from '../../base/Colors/ColorsGlobal';
 import { removeVietnameseTones } from '../../../utils/Helper';
+import IconTickCircle from '../../../assets/icons/IconTickCircle';
+import IconNoneTickCircle from '../../../assets/icons/IconNoneTickCircle';
 interface Props {
   isVisible: boolean;
   onClose: () => void;
@@ -19,7 +21,7 @@ export default function SelectProvinceDistrictModal({ isVisible, onClose, onSele
   const [districts, setDistricts] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState(null);
   const [searchText, setSearchText] = useState('');
-
+  const [selectedDistricts, setSelectedDistricts] = useState<any[]>([]);
 
   useEffect(() => {
     fetch('https://production.cas.so/address-kit/2025-07-01/provinces', {
@@ -51,16 +53,37 @@ export default function SelectProvinceDistrictModal({ isVisible, onClose, onSele
       console.error('❌ Lỗi tải huyện:', err);
     }
   };
+  // ⭕ Multi Select
+  const toggleSelectDistrict = (district) => {
+    setSelectedDistricts(prev => {
+      const exists = prev.find(item => item.code === district.code);
+      if (exists) {
+        return prev.filter(x => x.code !== district.code);
+      }
+      return [...prev, district];
+    });
+  };
 
-  const handleSelectDistrict = (district) => {
+  // ⭕ Confirm: gửi toàn bộ xã/phường ra ngoài
+  const handleConfirm = () => {
+    if (!selectedProvince || selectedDistricts.length === 0) return;
+
     onSelected({
       province: selectedProvince,
-      district,
+      districts: selectedDistricts,
     });
+
     onClose();
-    setStep('province');
-    setSearchText('');
   };
+  // const handleSelectDistrict = (district) => {
+  //   onSelected({
+  //     province: selectedProvince,
+  //     district,
+  //   });
+  //   onClose();
+  //   setStep('province');
+  //   setSearchText('');
+  // };
 
   // ✅ Lọc danh sách theo searchText
   const filteredProvinces = provinces.filter((item) =>
@@ -77,12 +100,27 @@ export default function SelectProvinceDistrictModal({ isVisible, onClose, onSele
       <AppText>{item.name}</AppText>
     </AppButton>
   );
+  const renderDistrict = ({ item }) => {
+    const isSelected = selectedDistricts.some(d => d.code === item.code);
 
-  const renderDistrict = ({ item }) => (
-    <AppButton onPress={() => handleSelectDistrict(item)} padding={12}>
-      <AppText>{item.name}</AppText>
-    </AppButton>
-  );
+    return (
+      <AppButton
+        onPress={() => toggleSelectDistrict(item)}
+        padding={12}
+        row
+        justifyContent="space-between"
+      >
+        <AppText>{item.name}</AppText>
+        {isSelected ? <IconTickCircle /> : <IconNoneTickCircle />}
+      </AppButton>
+    );
+  };
+
+  // const renderDistrict = ({ item }) => (
+  //   <AppButton onPress={() => handleSelectDistrict(item)} padding={12}>
+  //     <AppText>{item.name}</AppText>
+  //   </AppButton>
+  // );
 
   return (
     <AppModal isVisible={isVisible} onClose={onClose} heightPercent={0.8}>
@@ -115,13 +153,24 @@ export default function SelectProvinceDistrictModal({ isVisible, onClose, onSele
             <AppButton onPress={() => { setStep('province'); setSearchText(''); }}>
               <AppText>{"⬅ Quay lại"}</AppText>
             </AppButton>
-            {/* ✅ Ô nhập tìm kiếm xã/phường */}
+
             <AppInput
               type='search'
               value={searchText}
               onChangeText={setSearchText}
               placeholder="Tìm kiếm xã/phường..."
             />
+
+            <AppButton
+              backgroundColor={ColorsGlobal.main}
+              padding={12}
+              radius={10}
+              onPress={handleConfirm}
+            >
+              <AppText color="#fff" textAlign="center">
+                Xác nhận ({selectedDistricts.length})
+              </AppText>
+            </AppButton>
             <FlatList
               data={filteredDistricts}
               scrollEnabled={false}
@@ -131,6 +180,7 @@ export default function SelectProvinceDistrictModal({ isVisible, onClose, onSele
                 <AppView height={1} backgroundColor={ColorsGlobal.borderColor} />
               )}
             />
+
           </>
         )}
       </AppView>

@@ -3,7 +3,7 @@ import * as React from 'react';
 import Svg, {Path} from 'react-native-svg';
 const IconLocation = props => (
        <Svg
-                        style={{backgroundColor: '#fff'}}
+                        // style={{backgroundColor: '#fff'}}
                        
                         width="16"
                         height="16"

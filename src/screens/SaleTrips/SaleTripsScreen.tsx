@@ -93,13 +93,7 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
       Alert.alert('Điểm đi/ Điểm đến không được để trống!')
       return;
     }
-   // ✅ Parse points an toàn
-  //  const parsedPoints = parseFloat(tripOptions.points);
-  //  if (isNaN(parsedPoints) || parsedPoints < 1 || parsedPoints > 10) {
-  //    Alert.alert('Lỗi', 'Điểm bán phải từ 1 đến 10!');
-  //    return;
-  //  }
-  
+   
     console.log('selectedDirection: ', selectedDirection)
 
     console.log('tripOptions: ', tripOptions)
@@ -113,8 +107,8 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
       place_end: placeEnd + ', ' + communeWard,
       point: Number(tripOptions?.points),
       note: noteOptions || '',
-      type_car: tripOptions?.typeCar?.type || 'car5',
-      cover_car: tripOptions.typeCar ? 0 : 1,
+      type_car: tripOptions?.guestType ,
+      cover_car: tripOptions.guestType==='normal' ? 0 : 1,
     };
     console.log('payload handleCreateTrip: ', payload)
 

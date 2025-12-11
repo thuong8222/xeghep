@@ -154,7 +154,7 @@ export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionPro
             {/* Bộ chọn giờ */}
             {showPicker && Platform.OS === 'android' && <DateTimePicker
                 value={selectedTime || new Date()}
-                mode="time"
+                mode="datetime"
                 is24Hour={true}
                 display="spinner"
                 onChange={onChangeTime}

@@ -10,7 +10,7 @@ import IconArowDown from '../../../assets/icons/IconArowDown'
 import DateTimeFilter from '../DateTimeFilter'
 import ButtonSubmit from '../../common/ButtonSubmit'
 import AppInput from '../../common/AppInput'
-
+import moment from 'moment-timezone';
 interface ModalBuyTripProps {
   visible?: boolean;
   onRequestClose?: () => void;
@@ -31,21 +31,39 @@ export default function ModalBuyTrip({ visible, onRequestClose, onApplyFilter }:
   const [placeEnd, setPlaceEnd] = useState('');
   // ⭐ Convert lựa chọn → Date thật
   const dateValue = useMemo(() => {
-    const today = new Date();
+    const vietnamNow = moment().tz('Asia/Ho_Chi_Minh');
 
     switch (selectedTime) {
       case 'now':
-        return new Date();
+        const nowPlus15 = vietnamNow.clone().add(15, 'minutes');
+        const endOfToday = vietnamNow.clone().endOf('day');
+        return {
+          start: nowPlus15.toDate(),
+          end: endOfToday.toDate()
+        };
 
       case 'today':
-        console.log('handleApplyFilter homnay')
-        return new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        return {
+          start: vietnamNow.clone().startOf('day').toDate(),
+          end: vietnamNow.clone().endOf('day').toDate()
+        };
 
       case 'tomorrow':
-        return new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+        const tomorrow = vietnamNow.clone().add(1, 'day');
+        return {
+          start: tomorrow.clone().startOf('day').toDate(),
+          end: tomorrow.clone().endOf('day').toDate()
+        };
 
       case 'custom':
-        return customDate ?? null;
+        if (customDate) {
+          const customMoment = moment(customDate).tz('Asia/Ho_Chi_Minh');
+          return {
+            start: customMoment.clone().startOf('day').toDate(),
+            end: customMoment.clone().endOf('day').toDate()
+          };
+        }
+        return null;
 
       default:
         return null;
@@ -70,8 +88,26 @@ export default function ModalBuyTrip({ visible, onRequestClose, onApplyFilter }:
     };
     console.log('handleApplyFilter selectedTime: ', selectedTime)
 
-    console.log('handleApplyFilter  dateValue: ', dateValue?.toISOString());
-    onApplyFilter?.(payload, dateValue?.toISOString(), placeStart, placeEnd);
+    // console.log('handleApplyFilter  dateValue: ', dateValue?.toISOString());
+    // onApplyFilter?.(payload, dateValue?.toISOString(), placeStart, placeEnd);
+    let dateFilter = null;
+
+if (dateValue && "start" in dateValue) {
+  dateFilter = {
+    start_date: Math.floor(dateValue.start.getTime() / 1000),
+    end_date: Math.floor(dateValue.end.getTime() / 1000)
+  };
+}
+    
+    onApplyFilter?.(
+      payload,
+      dateFilter,
+      placeStart,
+      placeEnd
+    );
+  
+
+
     resetFilter()
     onRequestClose?.();
   };

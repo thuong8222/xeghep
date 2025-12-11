@@ -29,7 +29,7 @@ export default function ReceivingScheduleScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedType, setSelectedType] = useState<string | null>('chuyến nhận');
   const types = ['chuyến nhận', 'chuyến bán']
-  console.log('soldTrips: ', soldTrips.length);
+
   // console.log('selectedType: ', selectedType)
   const toggleFilter = (type: string) => {
     setSelectedType(prev => {
@@ -66,20 +66,21 @@ export default function ReceivingScheduleScreen() {
 
     if (start_date) params.start_date = start_date;
     if (end_date) params.end_date = end_date;
-
+    // dispatch(fetchReceivedTrips(params));
+    // dispatch(fetchSoldTrips(params));
     if (selectedType === 'chuyến nhận') {
       return dispatch(fetchReceivedTrips(params));
     } else {
       return dispatch(fetchSoldTrips(params));
     }
 
-  }, [dispatch, fromDate, toDate, dateToTimestamp]);
+  }, [dispatch, fromDate, toDate, dateToTimestamp, selectedType]);
 
   // 🔹 Initial load and reload when filters change
   useEffect(() => {
     if (selectedType)
       loadTrips();
-  }, [loadTrips, updateTrips]);
+  }, [loadTrips, updateTrips, selectedType]);
 
   // 🔹 Pull to refresh handler - clear filters and reload
   const onRefresh = useCallback(async () => {

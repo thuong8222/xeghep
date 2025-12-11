@@ -198,6 +198,20 @@ export const createTrip = createAsyncThunk<
     );
   }
 });
+export const cancelTrip = createAsyncThunk<
+  string, // return tripId để xoá trong state
+  string, // tripId
+  { rejectValue: string }
+>('trips/cancelTrip', async (tripId, { rejectWithValue }) => {
+  try {
+    console.log("HỦY CHUYẾN: ", tripId);
+    const response = await api.delete(`/api/trips/${tripId}`);
+console.log('response:  huyr chuyen: ', response)
+    return tripId; // trả lại id để xóa ở state
+  } catch (err: any) {
+    return rejectWithValue(err.response?.data?.message || 'Hủy chuyến thất bại');
+  }
+});
 export interface BuyTripPayload {
   tripId: string;
 }
@@ -362,13 +376,37 @@ const tripsSlice = createSlice({
       .addCase(fetchSoldTrips.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Lấy chuyến đã nhận thất bại';
+      })
+      .addCase(cancelTrip.pending, state => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(cancelTrip.fulfilled, (state, action: PayloadAction<string>) => {
+        state.loading = false;
+      
+        // XÓA TRONG trips LIST
+        state.trips = state.trips.filter(t => t.id_trip !== action.payload);
+      
+        // XÓA TRONG receivedTrips LIST (nếu có)
+        state.receivedTrips = state.receivedTrips.filter(t => t.id_trip !== action.payload);
+      
+        // XÓA TRONG soldTrips LIST (nếu có)
+        state.soldTrips = state.soldTrips.filter(t => t.id_trip !== action.payload);
+      
+        state.successMessage = 'Hủy chuyến thành công';
+      })
+      .addCase(cancelTrip.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Hủy chuyến thất bại';
       });
+      
   },
 });
 
 export const {
   addTrip,
   updateTrip,
+
   removeTrip,
   addReceivedTrip,
   updateReceivedTrip,

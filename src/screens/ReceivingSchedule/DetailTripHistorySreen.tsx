@@ -10,10 +10,16 @@ import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal';
 import IconPhone from '../../assets/icons/iconPhone';
 import moment from 'moment';
 import IconComment from '../../assets/icons/iconComment';
+import { useAppContext } from '../../context/AppContext';
 
 export default function DetailTripHistorySreen({ route, navigation }) {
     const data = route.params.data;
+    console.log('data DetailTripHistorySreen: ', data)
+    const { currentDriver } = useAppContext();
+    const isSeller = currentDriver?.id === data?.id_driver_sell;
+    console.log('isSeller: ', isSeller)
     const driverSell = data.driver_sell || {};
+    const driverReceive = data?.driver_receive
     const formatTime = (value) => {
         if (!value) return "--";
 
@@ -45,25 +51,29 @@ export default function DetailTripHistorySreen({ route, navigation }) {
 
             {/* --- Header tài xế bán chuyến --- */}
             <View style={styles.section}>
-                <AppText style={styles.sectionTitle}>Tài xế bán chuyến</AppText>
+                <AppText style={styles.sectionTitle}>{isSeller ? 'Tài xế nhận chuyến' : 'Tài xế bán chuyến: '}</AppText>
+                {isSeller ?
+                    <View style={styles.row}>
+                        <IconUser size={22} />
+                        <AppText style={styles.value}>
+                            {driverReceive.full_name} ({driverReceive.phone})
+                        </AppText>
+                    </View> :
+                    <View style={styles.row}>
+                        <IconUser size={22} />
+                        <AppText style={styles.value}>
+                            {driverSell.full_name} ({driverSell.phone})
+                        </AppText>
+                    </View>
+                }
 
-                <View style={styles.row}>
-                    <IconUser size={22} />
-                    <AppText style={styles.value}>
-                        {driverSell.full_name} ({driverSell.phone})
-                    </AppText>
-
-
-
-                </View>
                 <AppView row justifyContent={'space-between'} alignItems={'center'}>
                     <AppButton
                         row gap={6}
                         onPress={gotoChat}
-
                     >
                         <IconComment color={ColorsGlobal.main} />
-                        <AppText color={ColorsGlobal.main}>{'Chat với lái xe bán'}</AppText>
+                        <AppText color={ColorsGlobal.main}>{isSeller ? 'Chat với lái xe nhận' : 'Chat với lái xe bán'}</AppText>
                     </AppButton>
                     <AppButton
 
