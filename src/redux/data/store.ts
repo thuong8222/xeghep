@@ -10,6 +10,8 @@ import memberGroupReducer from '../slices/membersGroup';
 import pointReducer from '../slices/pointSlice';
 import regulationReducer from '../slices/regulationSlice';
 import driverNotificationReducer from '../slices/driverNotificationSlice';
+import requestAutoBuyReducer from '../slices/requestAutoBuyTrip';
+
 
 export const store = configureStore({
   reducer: {
@@ -22,6 +24,7 @@ export const store = configureStore({
     point: pointReducer,
     regulations: regulationReducer,
     driverNotifications: driverNotificationReducer,
+    requestAutoBuyTrip: requestAutoBuyReducer
   },
 });
 
