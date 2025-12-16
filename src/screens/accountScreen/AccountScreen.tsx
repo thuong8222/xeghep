@@ -21,6 +21,7 @@ import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/data/store'
 import { NumberFormat } from '../../utils/Helper'
 import { useSocket } from '../../context/SocketContext'
+import AppButton from '../../components/common/AppButton'
 
 type AccountScreenNavProp = NativeStackNavigationProp<RootParamList>;
 
@@ -202,10 +203,10 @@ export default function AccountScreen({ navigation }: Props) {
             </AppView>
 
             <AppView row justifyContent={'space-around'} width={'100%'}>
-              <AppView alignItems='center' backgroundColor={ColorsGlobal.backgroundGray} padding={10} radius={10} gap={10}>
+              <AppButton onPress={gotoHistoryBuySalePoint} alignItems='center' backgroundColor={ColorsGlobal.backgroundGray} padding={10} radius={10} gap={10}>
                 <AppText fontSize={14}>{`Điểm`}</AppText>
                 <AppText bold color={ColorsGlobal.main2}>{NumberFormat(driver?.current_points)}</AppText>
-              </AppView>
+              </AppButton>
               <AppView alignItems='center' backgroundColor={ColorsGlobal.backgroundGray} padding={10} radius={10} gap={10}>
                 <AppText fontSize={14}>{`Chuyến nhận`}</AppText>
                 <AppText bold color={ColorsGlobal.main2}>{NumberFormat(driver?.total_trips_received)}</AppText>
@@ -233,10 +234,9 @@ export default function AccountScreen({ navigation }: Props) {
           <AppView gap={8}>
             <FunctionSection label='Đổi mật khẩu' onPress={() => setIsModalChangePw(true)} />
             <FunctionSection label='Sao kê lịch sử điểm' onPress={gotoHistoryBuySalePoint} />
-            <FunctionSection label='Thông báo' onPress={gotoNotification} />
-            {/* <FunctionSection label='Lịch sử mua/bán chuyến' onPress={gotoHistoryBuySalePoint} />
-            <FunctionSection label='Danh sách điểm' onPress={gotoHistoryBuySalePoint} /> */}
-            <FunctionSection label='Xoá tài khoản' onPress={DeleteAccount} />
+            <FunctionSection label='Thông báo hệ thống' onPress={gotoNotification} />
+
+            {/* <FunctionSection label='Xoá tài khoản' onPress={DeleteAccount} /> */}
             <FunctionSection label='Đăng xuất' onPress={Logout} />
           </AppView>
 

@@ -180,7 +180,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
         if (data.item.is_sold === 1) return null;
         const seller_ = data?.item?.id_driver_sell || data?.item?.driver_sell?.id_driver
         const isOnwer = seller_ === currentDriver?.id
-        console.log('isOnwer: ',isOnwer)
+    
         return (
 
             <View style={styles.rowBack}>

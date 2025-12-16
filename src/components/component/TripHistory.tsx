@@ -21,6 +21,16 @@ export default function TripHistory(props) {
         navigation.navigate('DetailTripHistory', { data: props.data })
     }
     const isOwner = props?.data?.id_driver_sell === currentDriver?.id
+    let status_ = '';
+
+    if (isSold === 1) {
+        status_ = 'Đã bán';
+    } else if (isSold === 2 && props?.data?.status === 0) {
+        status_ = 'Đã huỷ';
+    } else {
+        status_ = 'Không bán được';
+    }
+
     return (
         <AppButton onPress={gotoDetailTripHistory} gap={4} radius={12} borderWidth={1} padding={0}
             borderColor={ColorsGlobal.borderColorDark}
@@ -48,12 +58,15 @@ export default function TripHistory(props) {
                     </AppView>
 
                     <AppView row gap={8}>
-                        <AppText fontWeight={600}>
-                            {typeof props.data.time_receive === 'number' || /^\d+$/.test(props.data.time_receive)
-                                ? moment.unix(Number(props.data.time_receive)).format('DD-MM-YYYY HH:mm')
-                                : moment(props.data.time_receive).format('DD-MM-YYYY HH:mm')}
-                        </AppText>
-
+                        {props.data.time_receive ?
+                            <AppText fontWeight={600}>
+                                {typeof props.data.time_receive === 'number' || /^\d+$/.test(props.data.time_receive)
+                                    ? moment.unix(Number(props.data.time_receive)).format('DD-MM-YYYY HH:mm')
+                                    : moment(props.data.time_receive).format('DD-MM-YYYY HH:mm')}
+                            </AppText>
+                            :
+                            <AppText color={isSold === 1 ? 'green' : 'red'}>{status_}</AppText>
+                        }
                     </AppView>
                 </AppView>
                 <AppView row gap={8} >
@@ -82,10 +95,19 @@ export default function TripHistory(props) {
 
             </AppView>
             {(isSold === 1 && isOwner) && (
-                <AppView borderLeftColor={'#949494'} borderLeftWidth={1} justifyContent='center' alignItems='center' padding={8} gap={4}>
-                    <AppText fontSize={10} >{'Tài xế nhận'}</AppText>
-                    <AppText fontSize={10} >{props.data?.driver_receive?.full_name}</AppText>
-                </AppView>)
+                <AppView borderLeftColor={'#949494'} borderLeftWidth={1}  >
+
+                    <AppView padding={10}>
+                        <AppText fontSize={13} textAlign='center' color={isSold === 1 && 'green'}>{isSold === 1 && status_}</AppText>
+                    </AppView>
+                    {isSold === 1 &&
+                        <AppView justifyContent='center' alignItems='center' padding={8} gap={4}>
+                            <AppText fontSize={10} >{'Tài xế nhận'}</AppText>
+                            <AppText fontSize={10} >{props.data?.driver_receive?.full_name}</AppText>
+                        </AppView>
+                    }
+                </AppView>
+            )
 
             }
         </AppButton>

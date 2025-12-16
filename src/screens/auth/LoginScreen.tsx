@@ -125,11 +125,11 @@ const {setCurrentDriver } = useAppContext();
       }
     } catch (e) {
       console.warn(e);
-      Alert.alert('Lỗi khi xác thực biometric', e.message || String(e));
+      Alert.alert('Lỗi khi xác thực biometric', e?.message || String(e));
     }
   };
   const insets = useSafeAreaInsets()
-  const { isConnected } = useSocket();
+  // const { isConnected } = useSocket();
   return (
 
     <ScrollView style={{ flexGrow: 1, backgroundColor: ColorsGlobal.backgroundWhite }} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', }} showsVerticalScrollIndicator={false}>
@@ -137,7 +137,7 @@ const {setCurrentDriver } = useAppContext();
         <AppView flex={1} justifyContent="center" >
 
           <AppView justifyContent="center" alignItems="center" marginBottom={20} gap={16}>
-          <AppText>Socket status: {isConnected ? "✅ Connected" : "❌ Disconnected"}</AppText>
+          {/* <AppText>Socket status: {isConnected ? "✅ Connected" : "❌ Disconnected"}</AppText> */}
             <Image source={logo} style={styles.logo} resizeMode="contain" />
             <AppView gap={6}>
               <AppText

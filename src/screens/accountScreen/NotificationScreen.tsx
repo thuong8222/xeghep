@@ -8,6 +8,7 @@ import { clearMessages } from "../../redux/slices/ authSlice";
 import AppView from "../../components/common/AppView";
 import AppText from "../../components/common/AppText";
 import moment from "moment";
+import AppButton from "../../components/common/AppButton";
 
 export default function NotificationScreen() {
   const {
@@ -35,16 +36,16 @@ console.log(items);
   };
 
   const renderItem = ({ item }) => (
-    <AppView style={{ padding: 15, backgroundColor:ColorsGlobal.backgroundLight, marginBottom: 10, borderRadius: 8 }}>
+    <AppButton style={{ padding: 15, backgroundColor:ColorsGlobal.backgroundLight, marginBottom: 10, borderRadius: 8 }}>
       <AppView>
       <AppText bold>{item.title}</AppText>
       <AppText style={{ marginTop: 4 }}>{item.content}</AppText>
       </AppView>
       <AppText fontSize={12} textAlign="right" color={ColorsGlobal.textLight}>{moment(item.created_at).format('DD/MM/YYYY hh:mm')}</AppText>
      
-    </AppView>
+    </AppButton>
   );
-
+console.log('items: ',items)
   return (
     <Container loading={loading}>
       <FlatList
