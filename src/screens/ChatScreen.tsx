@@ -275,6 +275,7 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
 
   // 🎨 Render tin nhắn
   const renderItem = ({ item }: { item: Message }) => {
+    // console.log('item chat: ', item)
     const isMine = item.sender_id === currentUserId;
     const time = item.created_at
       ? new Date(item.created_at).toLocaleTimeString([], {
@@ -290,16 +291,17 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
           isMine ? styles.myMsgContainer : styles.otherMsgContainer,
         ]}
       >
-        {!isMine && <Text style={styles.sender}>{item.user || 'Unknown'}</Text>}
+        {!isMine && <Text style={styles.sender}>{nameChatWith || 'Unknown'}</Text>}
         <View
           style={[
             styles.bubble,
             isMine ? styles.myBubble : styles.otherBubble,
           ]}
         >
+        
           {/* 🖼️ Hiển thị ảnh nếu có */}
           {item.image_url && (
-            <TouchableOpacity onPress={() => setPreviewImage(item.image_url)}>
+            <TouchableOpacity onPress={() => setPreviewImage(item?.image_url)}>
               <Image
                 source={{ uri: item.image_url }}
                 style={styles.messageImage}
@@ -417,12 +419,14 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
       )}
 
 
-      <Container>
+      <Container padding={0}>
+    {isOnwer &&  <ListHeaderComponent />} 
         <FlatList
           data={messages}
           keyExtractor={(item, i) => item.id || i.toString()}
           renderItem={renderItem}
-          ListHeaderComponent={isOnwer ? ListHeaderComponent : undefined}
+          contentContainerStyle={{padding:8}}
+          // ListHeaderComponent={isOnwer ? ListHeaderComponent : undefined}
         />
 
         {/* 🖼️ Preview ảnh đã chọn */}
@@ -521,7 +525,7 @@ const styles = StyleSheet.create({
   },
   sender: {
     fontSize: 12,
-    marginLeft: 4,
+    marginLeft: 0,
     marginBottom: 2,
     color: "#555",
   },

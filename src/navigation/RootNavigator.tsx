@@ -5,7 +5,7 @@ import MenuBottomTabs, { BottomTabParamList } from './MenuBottomTabs';
 
 import ChatScreen from '../screens/ChatScreen';
 import { NavigatorScreenParams, useNavigation } from '@react-navigation/native';
-import { Button } from '@react-navigation/elements';
+import { Button, HeaderBackButton } from '@react-navigation/elements';
 import { useSelector } from 'react-redux';
 import { RootState } from '@reduxjs/toolkit/query';
 import { useSellerNotifications } from '../hooks/useSellerNotifications';
@@ -21,15 +21,17 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function RootNavigator() {
 
-
+  const navigation = useNavigation()
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName='BottomTabs'>
       <Stack.Screen name="BottomTabs" component={MenuBottomTabs} />
-
       <Stack.Screen name="ChatScreen" component={ChatScreen} options={{
         headerShown: true,
         title: 'Chat',
-      
+        headerLeft: () => (
+          <HeaderBackButton onPress={() => navigation.goBack()} />
+        ),
+
       }} />
     </Stack.Navigator>
   )

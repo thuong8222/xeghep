@@ -42,47 +42,47 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
   const [communeWard, setCommuneWard] = useState('');
   const [communeWardTo, setCommuneWardTo] = useState('');
 
- // ✅ Initial state với giá trị mặc định
- const [tripOptions, setTripOptions] = useState({
-  numGuests: 1,
-  price: '250',
-  points: '1',
-  guestType: 'normal',
-  timeStart: null as number | null,
-  typeCar: null as { type: string; name: string } | null
-});
+  // ✅ Initial state với giá trị mặc định
+  const [tripOptions, setTripOptions] = useState({
+    numGuests: 1,
+    price: '250',
+    points: '1',
+    guestType: 'normal',
+    timeStart: null as number | null,
+    typeCar: null as { type: string; name: string } | null
+  });
   const [noteOptions, setNoteOptions] = useState();
 
 
-    // ✅ FIX: Hàm này phải UPDATE state với giá trị MỚI, không phải giá trị cũ
-    const handleTripOptionsChange = (
-      numGuests: number | null,
-      price?: string,
-      points?: string | number,
-      guestType?: string,
-      timeStart?: number | null,
-      typeCar?: { type: string; name: string } | null
-    ) => {
-      console.log('📊 Trip options changed:', {
-        numGuests,
-        price,
-        points,
-        guestType,
-        timeStart,
-        typeCar
-      });
-  
-      // ✅ Update với giá trị MỚI từ params
-      setTripOptions(prev => ({
-        numGuests: numGuests ?? prev.numGuests,
-        price: price ?? prev.price,
-        points: points?.toString() ?? prev.points,
-        guestType: guestType ?? prev.guestType,
-        timeStart: timeStart ?? prev.timeStart,
-        typeCar: typeCar !== undefined ? typeCar : prev.typeCar  // ✅ Cho phép null
-      }));
-    };
-  
+  // ✅ FIX: Hàm này phải UPDATE state với giá trị MỚI, không phải giá trị cũ
+  const handleTripOptionsChange = (
+    numGuests: number | null,
+    price?: string,
+    points?: string | number,
+    guestType?: string,
+    timeStart?: number | null,
+    typeCar?: { type: string; name: string } | null
+  ) => {
+    console.log('📊 Trip options changed:', {
+      numGuests,
+      price,
+      points,
+      guestType,
+      timeStart,
+      typeCar
+    });
+
+    // ✅ Update với giá trị MỚI từ params
+    setTripOptions(prev => ({
+      numGuests: numGuests ?? prev.numGuests,
+      price: price ?? prev.price,
+      points: points?.toString() ?? prev.points,
+      guestType: guestType ?? prev.guestType,
+      timeStart: timeStart ?? prev.timeStart,
+      typeCar: typeCar !== undefined ? typeCar : prev.typeCar  // ✅ Cho phép null
+    }));
+  };
+
   const handleNoteChange = (val?: string) => {
     setNoteOptions(val ?? "");
     console.log("Ghi chú nhận được từ con:", val);
@@ -93,7 +93,7 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
       Alert.alert('Điểm đi/ Điểm đến không được để trống!')
       return;
     }
-   
+
     console.log('selectedDirection: ', selectedDirection)
 
     console.log('tripOptions: ', tripOptions)
@@ -107,8 +107,8 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
       place_end: placeEnd + ', ' + communeWard,
       point: Number(tripOptions?.points),
       note: noteOptions || '',
-      type_car: tripOptions?.guestType ,
-      cover_car: tripOptions.guestType==='normal' ? 0 : 1,
+      type_car: tripOptions?.guestType,
+      cover_car: tripOptions.guestType === 'normal' ? 0 : 1,
     };
     console.log('payload handleCreateTrip: ', payload)
 

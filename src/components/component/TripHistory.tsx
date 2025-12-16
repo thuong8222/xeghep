@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useAppContext } from '../../context/AppContext';
 
 export default function TripHistory(props) {
+    console.log('props history trip: ', props)
     const navigation = useNavigation();
     const { currentDriver } = useAppContext()
     const isSold = props.data.is_sold;

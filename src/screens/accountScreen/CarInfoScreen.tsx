@@ -1,192 +1,82 @@
-import { Alert, Image, Platform, StyleSheet, View } from 'react-native';
-import React, { useState } from 'react';
+import { Image, Platform, StyleSheet, View } from 'react-native';
+import React from 'react';
 import AppView from '../../components/common/AppView';
-import AppInput from '../../components/common/AppInput';
-import AppButton from '../../components/common/AppButton';
-import { DRIVER_STATUS, DRIVER_STATUS_LABELS, validatePlateVN, validateYear } from '../../utils/Helper';
-import ModalUploadCarImage from '../../components/component/modals/ModalUploadCarImage';
+import AppText from '../../components/common/AppText';
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal';
 import IconCar from '../../assets/icons/iconCar';
-import IconCamera from '../../assets/icons/IconCamera';
-import ButtonSubmit from '../../components/common/ButtonSubmit';
-import { useDriverApi } from '../../redux/hooks/userDriverApi';
+import { DRIVER_STATUS_LABELS } from '../../utils/Helper';
 import { AccountTabsParamList } from '../../navigation/menuBottomTabs/AccountTabs';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ModalSelectStatus from '../../components/component/modals/ModalSelectStatusCar';
+
+/* ======================
+   Component hiển thị 1 dòng
+====================== */
+const InfoRow = ({ label, value }: { label: string; value?: string }) => (
+    <AppView gap={4} row justifyContent={'space-between'}>
+        <AppText fontSize={14} color={ColorsGlobal.textLight} fontWeight={'600'}>
+            {label}
+        </AppText>
+        <AppText fontSize={16}>
+            {value || '--'}
+        </AppText>
+    </AppView>
+);
 
 export default function CarInfoScreen() {
-    // --- gọi hook useRoute bên trong component ---
     const route = useRoute<RouteProp<AccountTabsParamList, 'CarInfoScreen'>>();
-    const { driver, loading, error, successMessage, editDriver, clear } = useDriverApi();
     const driverPre = route.params.data;
-    const [carInfo, setCarInfo] = useState({
-        name: driverPre.name_car || '',
-        year: driverPre.year_car || '',
-        status: driverPre.status_car || 1,
-        licensePlate: driverPre.license_number || '',
+    const insets = useSafeAreaInsets();
 
-        model: driverPre.model_car || '',
-        color: driverPre.color_car || '',
-
-        type: driverPre?.type_car || '',
-        imageUri: driverPre.image_car || '',
-    });
-
-    const [errors, setErrors] = useState({
-        year: '',
-        licensePlate: '',
-    });
-
-    const [isDisplayModalUploadImage, setIsDisplayModalUploadImage] = useState(false);
-    const [status, setStatus] = useState(driverPre?.status_car ?? DRIVER_STATUS.MAINTENANCE);
-    const [isStatusModalVisible, setIsStatusModalVisible] = useState(false);
-    const closeModalSelectStatus = () => {
-        setIsStatusModalVisible(false)
-    }
-    const handleChange = (key: keyof typeof carInfo, value: string) => {
-        setCarInfo(prev => ({ ...prev, [key]: value }));
-        if (key === 'year') setErrors(prev => ({ ...prev, year: validateYear(value) }));
-        if (key === 'licensePlate') setErrors(prev => ({ ...prev, licensePlate: validatePlateVN(value) }));
-    };
-
-    const SaveChangeInfo = async () => {
-        try {
-
-            const model = {
-                image_car: carInfo.imageUri || '',
-                license_number: carInfo.licensePlate || '',
-                name_car: carInfo.name || '',
-                model_car: carInfo.model || '',
-                year_car: carInfo.year || '',
-                color_car: carInfo.color || '',
-                status_car: carInfo.status || '',
-                type_car: carInfo.type || ''
-            };
-        
-            await editDriver(model);
-
-        } catch (err: any) {
-            Alert.alert('Thất bại', err?.message || 'Có lỗi xảy ra');
-        }
-    };
-    const handleUploadPress = () => setIsDisplayModalUploadImage(true);
-    const insets = useSafeAreaInsets()
     return (
-        <AppView flex={1} backgroundColor={ColorsGlobal.backgroundWhite} padding={16} gap={16} paddingBottom={Platform.OS === 'ios' ? insets.bottom : 0}>
+        <AppView
+            flex={1}
+            backgroundColor={ColorsGlobal.backgroundWhite}
+            padding={16}
+            gap={24}
+            paddingBottom={Platform.OS === 'ios' ? insets.bottom : 16}
+        >
             {/* ====== ẢNH XE ====== */}
-            <AppView justifyContent="center" alignItems="center" marginTop={8}>
-                <View style={{ position: 'relative' }}>
-                    {/* {carInfo.imageUri ? (
+            <AppView justifyContent="center" alignItems="center">
+                <View>
+                    {driverPre.image_car ? (
                         <Image
-                            source={{ uri: carInfo.imageUri }}
+                            source={{ uri: driverPre.image_car }}
                             style={styles.image}
                             resizeMode="cover"
                         />
-                    ) : ( */}
-                        <AppView padding={40} backgroundColor={ColorsGlobal.backgroundGray} radius={12}>
+                    ) : (
+                        <AppView
+                            padding={40}
+                            backgroundColor={ColorsGlobal.backgroundGray}
+                            radius={12}
+                        >
                             <IconCar size={100} />
                         </AppView>
-                    {/* )} */}
-
-                    {/* <AppButton
-                        onPress={handleUploadPress}
-                        style={styles.cameraButton}
-                    >
-                        <IconCamera size={18} />
-                    </AppButton> */}
+                    )}
                 </View>
             </AppView>
 
-            {/* ====== FORM NHẬP ====== */}
-            <AppView gap={8} flex={1}>
-                <AppView row gap={12}>
-                    <AppInput
-                        flex={1}
-                        value={carInfo.name}
-                        onChangeText={(text) => handleChange('name', text)}
-                        placeholder="Toyota, Kia..."
-                        label="Tên xe"
-                    />
-                    <AppInput
-                        flex={1}
-                        value={carInfo.model}
-                        onChangeText={(text) => handleChange('model', text)}
-                        placeholder="Vios, Ranger..."
-                        label="Dòng xe"
-                    />
-                </AppView>
-
-                <AppView row gap={12}>
-                    <AppInput
-                        flex={1}
-                        value={carInfo.color}
-                        onChangeText={(text) => handleChange('color', text)}
-                        placeholder="Đỏ, Trắng, Đen..."
-                        label="Màu xe"
-                    />
-                    {/* <AppInput
-                        flex={1}
-                        value={carInfo.year}
-                        onChangeText={(text) => handleChange('year', text)}
-                        keyboardType="decimal-pad"
-                        error={errors.year}
-                        placeholder="Năm sản xuất"
-                        label="Năm"
-                    /> */}
-                </AppView>
-                <AppInput
-                    value={carInfo.licensePlate}
-                    onChangeText={(text) => handleChange('licensePlate', text)}
-                    error={errors.licensePlate}
-                    placeholder="VD: 51A-123.45"
-                    label="Biển số xe"
-                />
-                <AppInput
-                    value={carInfo.type}
-                    onChangeText={(text) => handleChange('type', text)}
-                    placeholder="4 chỗ, 7 chỗ..."
-                    label="Loại xe"
-                />
-                <AppInput
-                    value={DRIVER_STATUS_LABELS[status] || carInfo.status}
-                    onChangeText={(text) => handleChange('status', text)}
-                    placeholder="Sẵn sàng/ Đang bảo chì..."
+            {/* ====== THÔNG TIN XE ====== */}
+            <AppView gap={16} borderWidth={1} padding={16} radius={8} borderColor={ColorsGlobal.borderColorDark} >
+                <InfoRow label="Tên xe" value={driverPre.name_car} />
+                <InfoRow label="Dòng xe" value={driverPre.model_car} />
+                <InfoRow label="Màu xe" value={driverPre.color_car} />
+                <InfoRow label="Loại xe" value={driverPre.type_car} />
+                <InfoRow label="Biển số xe" value={driverPre.license_number} />
+                <InfoRow
                     label="Trạng thái xe"
-                    type='select'
-                    toggleSelect={() => setIsStatusModalVisible(true)}
+                    value={DRIVER_STATUS_LABELS[driverPre.status_car]}
                 />
             </AppView>
-            <AppView>
-                <ButtonSubmit title='Lưu thay đổi' onPress={SaveChangeInfo} />
-            </AppView>
-            <ModalSelectStatus isVisible={isStatusModalVisible} onClose={closeModalSelectStatus} selectedStatus={status}
-                onSelect={(id) => setStatus(id)} />
-            {/* MODAL UPLOAD ẢNH */}
-            <ModalUploadCarImage
-                isDisplay={isDisplayModalUploadImage}
-                onClose={() => setIsDisplayModalUploadImage(false)}
-                onSelectImage={(uri) => setCarInfo(prev => ({ ...prev, imageUri: uri }))}
-            />
         </AppView>
     );
 }
 
 const styles = StyleSheet.create({
     image: {
-        width: 200,
-        height: 200,
+        width: 220,
+        height: 220,
         borderRadius: 12,
-    },
-    cameraButton: {
-        position: 'absolute',
-        top: -8,
-        right: -8,
-        backgroundColor: 'rgba(0,0,0,0.6)',
-        width: 28,
-        height: 28,
-        borderRadius: 14,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
 });

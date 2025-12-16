@@ -158,10 +158,12 @@ export const fetchReceivedTrips = createAsyncThunk<
   { rejectValue: string }
 >('trips/fetchReceivedTrips', async (params, { rejectWithValue }) => {
   try {
-    console.log('params slice: ', params);
+    console.log('params chuyeesn nhajn slice: ', params);
     const response = await api.get('api/trips/received', { params });
+    console.log('response api/trips/received: ',response)
     return response.data.data;
   } catch (err: any) {
+    console.log('err chuyen nhan: ', err)
     return rejectWithValue(
       err.response?.data?.message || 'Lấy chuyến thất bại',
     );
@@ -173,10 +175,12 @@ export const fetchSoldTrips = createAsyncThunk<
   { rejectValue: string }
 >('trips/fetchSoldTrips', async (params, { rejectWithValue }) => {
   try {
-    console.log('params slice: ', params);
+    console.log('params chuyen ban slice: ', params);
     const response = await api.get('api/trips/sold', { params });
+    console.log('fetchSoldTrips response:', response)
     return response.data.data;
   } catch (err: any) {
+    console.log('err chuyen ban: ', err)
     return rejectWithValue(
       err.response?.data?.message || 'Lấy chuyến thất bại',
     );
@@ -392,7 +396,6 @@ const tripsSlice = createSlice({
       
         // XÓA TRONG soldTrips LIST (nếu có)
         state.soldTrips = state.soldTrips.filter(t => t.id_trip !== action.payload);
-      
         state.successMessage = 'Hủy chuyến thành công';
       })
       .addCase(cancelTrip.rejected, (state, action) => {

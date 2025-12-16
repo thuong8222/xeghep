@@ -1,4 +1,4 @@
-import { Alert, Platform, ScrollView } from 'react-native';
+import { Alert, Platform, ScrollView, TextInput } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import AppView from '../../components/common/AppView';
 import AppButton from '../../components/common/AppButton';
@@ -13,12 +13,14 @@ import Container from '../../components/common/Container';
 import { createAutoBuy, updateAutoBuy } from '../../redux/slices/requestAutoBuyTrip';
 import { useRoute } from '@react-navigation/native';
 import { useAppDispatch } from '../../redux/hooks/useAppDispatch';
+import { NumberFormat } from '../../utils/Helper';
 
 export default function PriorityPurchaseScreen() {
     const route = useRoute();
-    console.log('route.params: ',route.params)
-    const {id, editData}= route?.params
-   // nếu có thì là màn edit
+
+    const { editData } = route?.params ?? {};
+    console.log('route.params editData: ', editData)
+    // nếu có thì là màn edit
     const dispatch = useAppDispatch();
 
     const [placeFrom, setPlaceFrom] = useState('');
@@ -38,15 +40,27 @@ export default function PriorityPurchaseScreen() {
             // Fill dữ liệu khi edit
             setPlaceFrom(Array.isArray(editData.pickup_location) ? editData.pickup_location.join(' | ') : editData.pickup_location || '');
             setPlaceTo(Array.isArray(editData.dropoff_location) ? editData.dropoff_location.join(' | ') : editData.dropoff_location || '');
-            setStartTime(editData.time_receive_start ? new Date(editData.time_receive_start * 1000) : null);
-            setEndTime(editData.time_receive_end ? new Date(editData.time_receive_end * 1000) : null);
+            setStartTime(
+                editData?.time_receive_start
+                    ? new Date(editData.time_receive_start)
+                    : null
+            );
+            setEndTime(
+                editData?.time_receive_end
+                    ? new Date(editData.time_receive_end)
+                    : null
+            );
             setPoint(editData.maximum_point?.toString() || '');
             setPrice(editData.desired_price?.toString() || '');
             setSelectedDirection(editData.direction === 'round_trip' ? 0 : 1);
         }
     }, [editData]);
 
-    const formatTime = (date) => date ? date.toLocaleString('vi-VN') : '';
+    const formatTime = (date) => {
+        if (!date || isNaN(date.getTime())) return '';
+        return date.toLocaleString('vi-VN');
+    };
+
 
     const onConfirmTime = (date) => {
         if (openPickerType === 'start') setStartTime(date);
@@ -71,7 +85,7 @@ export default function PriorityPurchaseScreen() {
             maximum_point: Number(point),
             direction: selectedDirection,
         };
-
+        console.log('updateAutoBuy payload: ', payload)
         if (editData) {
             // update
             dispatch(updateAutoBuy({ id: editData.id, data: payload }))
@@ -106,7 +120,7 @@ export default function PriorityPurchaseScreen() {
                 <AppView>
                     <AppText bold marginBottom={4}>Điểm đón</AppText>
                     <AppButton onPress={() => setIsCommuneWard(true)} backgroundColor={ColorsGlobal.backgroundGray} padding={12} radius={8}>
-                        <AppText color="#666">{placeFrom || "Nhấn để chọn địa chỉ"}</AppText>
+                        <TextInput value={placeFrom} multiline onChangeText={(text)=>setPlaceFrom(text)} placeholder='Nhấn để chọn địa chỉ' style={{color:"#666"}} />
                     </AppButton>
                 </AppView>
 
@@ -114,17 +128,17 @@ export default function PriorityPurchaseScreen() {
                 <AppView>
                     <AppText bold marginBottom={4}>Điểm trả</AppText>
                     <AppButton onPress={() => setIsCommuneWardTo(true)} backgroundColor={ColorsGlobal.backgroundGray} padding={12} radius={8}>
-                        <AppText color="#666">{placeTo || "Nhấn để chọn địa chỉ"}</AppText>
+                    <TextInput value={placeTo} multiline onChangeText={(text)=>setPlaceTo(text)} placeholder='Nhấn để chọn địa chỉ' style={{color:"#666"}}  />
                     </AppButton>
                 </AppView>
 
                 {/* Giá & điểm */}
                 <AppView row justifyContent={'space-between'} alignItems='center' gap={24}>
                     <AppView flex={1}>
-                        <AppInput value={price} onChangeText={setPrice} label="Giá tối thiểu" placeholder="...K/chuyến" />
+                        <AppInput value={(parseInt(price))} onChangeText={setPrice} label="Giá tối thiểu" placeholder="...K/chuyến" keyboardType='numeric' />
                     </AppView>
                 </AppView>
-                <AppInput value={point} onChangeText={setPoint} label="Điểm trừ tối đa" placeholder="Nhập điểm trừ tối đa" />
+                <AppInput value={point} onChangeText={setPoint} label="Điểm trừ tối đa" placeholder="Nhập điểm trừ tối đa" keyboardType='numeric' />
 
                 {/* Thời gian */}
                 <AppView paddingTop={12} gap={8}>
@@ -151,13 +165,14 @@ export default function PriorityPurchaseScreen() {
                 {/* DateTime Picker */}
                 <DateTimePicker isVisible={isPickerVisible} mode="datetime" onConfirm={onConfirmTime} onCancel={() => setPickerVisible(false)} />
 
-                {/* Modal chọn xã/phường */}
+                {/* Modal chọn xã/phường - THAY THẾ địa chỉ cũ */}
                 <SelectProvinceDistrictModal
                     isVisible={isCommuneWard}
                     onClose={() => setIsCommuneWard(false)}
                     onSelected={(value) => {
+                        // ✅ Thay thế hoàn toàn thay vì nối thêm
                         const list = value.districts.map(d => `${value.province.name} - ${d.name}`).join(' | ');
-                        setPlaceFrom(prev => prev ? `${prev} | ${list}` : list);
+                        setPlaceFrom(list);
                         setIsCommuneWard(false);
                     }}
                 />
@@ -165,8 +180,9 @@ export default function PriorityPurchaseScreen() {
                     isVisible={isCommuneWardTo}
                     onClose={() => setIsCommuneWardTo(false)}
                     onSelected={(value) => {
+                        // ✅ Thay thế hoàn toàn thay vì nối thêm
                         const list = value.districts.map(d => `${value.province.name} - ${d.name}`).join(' | ');
-                        setPlaceTo(prev => prev ? `${prev} | ${list}` : list);
+                        setPlaceTo(list);
                         setIsCommuneWardTo(false);
                     }}
                 />

@@ -19,6 +19,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { deleteAccount, logoutAccount } from '../../redux/slices/ authSlice'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/data/store'
+import { NumberFormat } from '../../utils/Helper'
+import { useSocket } from '../../context/SocketContext'
 
 type AccountScreenNavProp = NativeStackNavigationProp<RootParamList>;
 
@@ -29,6 +31,8 @@ export default function AccountScreen({ navigation }: Props) {
   const dispatch = useDispatch<AppDispatch>();
   const { driver, loading, error, successMessage, getDriver, clear } = useDriverApi();
   const { setCurrentDriver } = useAppContext();
+  console.log('driver: ', driver)
+  const { isConnected } = useSocket();
   const [isModalChangePw, setIsModalChangePw] = useState(false);
 
 
@@ -171,7 +175,7 @@ export default function AccountScreen({ navigation }: Props) {
       }
     });
   };
-  console.log('driver: ', driver)
+
   return (
     <ScrollView style={{ flex: 1, backgroundColor: ColorsGlobal.backgroundWhite }}>
       <AppView flex={1} backgroundColor={ColorsGlobal.backgroundWhite} padding={16} gap={12}>
@@ -194,21 +198,21 @@ export default function AccountScreen({ navigation }: Props) {
           <AppView alignItems='center' gap={10}>
             <AppView>
               <AppText bold color={ColorsGlobal.main}>{driver?.full_name}</AppText>
-              <AppText textAlign='center' fontSize={14} color={ColorsGlobal.main2}>{driver?.is_online === 1 ? 'Đang hoạt động' : 'Offline'}</AppText>
+              <AppText textAlign='center' fontSize={14} color={ColorsGlobal.main2}>{isConnected ? 'Đang hoạt động' : 'Offline'}</AppText>
             </AppView>
 
             <AppView row justifyContent={'space-around'} width={'100%'}>
               <AppView alignItems='center' backgroundColor={ColorsGlobal.backgroundGray} padding={10} radius={10} gap={10}>
                 <AppText fontSize={14}>{`Điểm`}</AppText>
-                <AppText bold color={ColorsGlobal.main2}>{driver?.current_points}</AppText>
+                <AppText bold color={ColorsGlobal.main2}>{NumberFormat(driver?.current_points)}</AppText>
               </AppView>
               <AppView alignItems='center' backgroundColor={ColorsGlobal.backgroundGray} padding={10} radius={10} gap={10}>
                 <AppText fontSize={14}>{`Chuyến nhận`}</AppText>
-                <AppText bold color={ColorsGlobal.main2}>{driver?.total_trips_received}</AppText>
+                <AppText bold color={ColorsGlobal.main2}>{NumberFormat(driver?.total_trips_received)}</AppText>
               </AppView>
               <AppView alignItems='center' backgroundColor={ColorsGlobal.backgroundGray} padding={10} radius={10} gap={10}>
                 <AppText fontSize={14}>{`Chuyến bán`}</AppText>
-                <AppText bold color={ColorsGlobal.main2}>{driver?.total_trips_sold}</AppText>
+                <AppText bold color={ColorsGlobal.main2}>{NumberFormat(driver?.total_trips_sold)}</AppText>
               </AppView>
             </AppView>
           </AppView>

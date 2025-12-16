@@ -13,6 +13,8 @@ import AppText from '../../components/common/AppText'
 import MemberGroupScreen from '../../screens/buyTrip/MemberGroupScreen'
 import GroupRulesScreen from '../../screens/buyTrip/GroupRulesScreen'
 import NotificationScreen from './NotificationScreen'
+import { HeaderBackButton } from '@react-navigation/elements'
+import { useNavigation } from '@react-navigation/native'
 
 export type BuyTripStackParamList = {
   GroupArea: undefined
@@ -20,7 +22,7 @@ export type BuyTripStackParamList = {
     nameGroup: string;
     countMember: number;
     id_area: string;
-    isJoin?:string;
+    isJoin?: string;
   }
   SaleTrip: {
     id_area: string;
@@ -45,7 +47,7 @@ const Stack = createNativeStackNavigator<BuyTripStackParamList>()
 export default function BuyTripTabs() {
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [filters, setFilters] = useState({ direction: 'all', time: 'now' })
-
+  const navigation = useNavigation()
   const handleApplyFilter = (newFilters: any) => {
     setFilters(newFilters)
     buyTripEmitter.emit('onFilterChanged', newFilters)
@@ -86,8 +88,12 @@ export default function BuyTripTabs() {
             options={{
               headerBackTitle: '',
               headerTitle: 'Thông tin nhóm',
-              headerTitleAlign: 'center'
+              headerTitleAlign: 'center',
+              headerLeft: () => (
+                <HeaderBackButton onPress={() => navigation.goBack()} />
+              ),
             }}
+
           />
 
           <Stack.Screen
@@ -99,7 +105,7 @@ export default function BuyTripTabs() {
               headerTitleAlign: 'center'
             }}
           />
-           <Stack.Screen
+          <Stack.Screen
             name="GroupRules"
             component={GroupRulesScreen}
             options={{
@@ -108,7 +114,7 @@ export default function BuyTripTabs() {
               headerTitleAlign: 'center'
             }}
           />
-          
+
 
         </Stack.Group>
         <Stack.Screen

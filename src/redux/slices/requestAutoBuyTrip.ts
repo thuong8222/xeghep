@@ -74,7 +74,46 @@ const requestAutoBuySlice = createSlice({
     loading: false,
     error: null,
   },
-  reducers: {},
+  reducers: {
+    // ✅ Thêm reducer để update realtime
+    updateAutoBuyItem: (state, action) => {
+      const updatedItem = action.payload;
+      const index = state.list.findIndex(item => item.id === updatedItem.id);
+      
+      if (index !== -1) {
+        state.list[index] = { ...state.list[index], ...updatedItem };
+      }
+      
+      state.lastUpdate = Date.now();
+    },
+
+    // ✅ Thêm item mới vào list
+    addAutoBuyItem: (state, action) => {
+      const newItem = action.payload;
+      const exists = state.list.some(item => item.id === newItem.id);
+      
+      if (!exists) {
+        state.list.unshift(newItem); // Thêm vào đầu list
+      }
+      
+      state.lastUpdate = Date.now();
+    },
+
+    // ✅ Xóa item khỏi list
+    removeAutoBuyItem: (state, action) => {
+      const id = action.payload;
+      state.list = state.list.filter(item => item.id !== id);
+      state.lastUpdate = Date.now();
+    },
+
+    // ✅ Clear error
+    clearError: (state) => {
+      state.error = null;
+    },
+
+    // ✅ Reset state
+    resetAutoBuy: () => initialState,
+  },
   extraReducers: (builder) => {
     // Create
     builder
@@ -132,5 +171,11 @@ const requestAutoBuySlice = createSlice({
       });
   },
 });
-
+export const {
+  updateAutoBuyItem,
+  addAutoBuyItem,
+  removeAutoBuyItem,
+  clearError,
+  resetAutoBuy,
+} = requestAutoBuySlice.actions;
 export default requestAutoBuySlice.reducer;

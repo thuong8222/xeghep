@@ -79,7 +79,6 @@ export function NumberFormat(num: any, joinChar = ',') {
       arr.reverse().join(joinChar) +
       (hasDot ? '.' + afterDot : '')
     );
-
   } catch (ex) {
     return '';
   }
@@ -105,11 +104,16 @@ export const CONSTANT = {
     point_sale: 'Bán điểm',
     sell_points: 'Bán điểm',
     buy_points: 'Mua điểm',
-    
+
     trip_buy: 'Mua chuyến',
     trip_sale: 'Bán chuyến',
     buy_trip: 'Mua chuyến',
     sell_trip: 'Bán chuyến',
+  },
+  STATUS: {
+    1: 'đã bán',
+    0: 'chưa bán',
+    2: 'đã huỷ chuyến',
   },
   TYPE_CAR_LIST: [
     { id: 1, key: 'car5', name: 'Xe 5 chỗ' },
@@ -538,17 +542,17 @@ export const DRIVER_STATUS_LABELS: Record<number, string> = {
   [DRIVER_STATUS.READY]: 'Sẵn sàng',
   [DRIVER_STATUS.MAINTENANCE]: 'Đang bảo trì',
 };
- export const parseTime = (value) => {
-        // Nếu là dạng số và dài 10 → timestamp giây
-        if (typeof value === 'number' && value.toString().length === 10) {
-            return moment(value * 1000);
-        }
+export const parseTime = value => {
+  // Nếu là dạng số và dài 10 → timestamp giây
+  if (typeof value === 'number' && value.toString().length === 10) {
+    return moment(value * 1000);
+  }
 
-        // Nếu là string dạng timestamp "1763950404"
-        if (typeof value === 'string' && /^\d{10}$/.test(value)) {
-            return moment(Number(value) * 1000);
-        }
+  // Nếu là string dạng timestamp "1763950404"
+  if (typeof value === 'string' && /^\d{10}$/.test(value)) {
+    return moment(Number(value) * 1000);
+  }
 
-        // Còn lại → xem như datetime string bình thường
-        return moment(value);
-    };
+  // Còn lại → xem như datetime string bình thường
+  return moment(value);
+};

@@ -31,7 +31,7 @@ export default function AccountInfoScreen({ navigation }: Props) {
 
     const [isDisplayModalUploadImage, setIsDisplayModalUploadImage] = useState(false);
     const [imageUri, setImageUri] = useState(driverPre?.image_avatar || '');
-    const [experienceYears, setExperienceYears] = useState(driverPre?.experience_years || "");
+    const [experienceYears, setExperienceYears] = useState(driverPre?.experience_years || "--");
 
     useEffect(() => {
         if (successMessage) {
@@ -85,7 +85,7 @@ export default function AccountInfoScreen({ navigation }: Props) {
                         </AppView>
                     )}
 
-                    <AppButton
+                    {/* <AppButton
                         onPress={() => setIsDisplayModalUploadImage(true)}
                         style={{
                             position: 'absolute',
@@ -100,7 +100,7 @@ export default function AccountInfoScreen({ navigation }: Props) {
                         }}
                     >
                         <IconCamera size={20} color="white" />
-                    </AppButton>
+                    </AppButton> */}
                 </View>
             </AppButton>
 
@@ -110,7 +110,7 @@ export default function AccountInfoScreen({ navigation }: Props) {
                 <Item label="Tên hiển thị" value={driverPre.full_name} row />
                 <Item label="Số điện thoại" value={driverPre.phone} row />
                 <Item label="Địa chỉ" value={driverPre.address || 'Chưa cập nhật'}  row />
-                <Item label="Năm kinh nghiệm" value={experienceYears + " năm"} row />
+                <Item label="Năm kinh nghiệm" value={experienceYears} row />
 
                 <AppView row gap={10}>
                     <Item label="Điểm hiện tại" value={String(NumberFormat(driverPre.current_points))} flex={1} />

@@ -23,7 +23,7 @@ export default function AutoBuyDetailScreen() {
     useEffect(() => {
         dispatch(fetchAutoBuyDetail(id));
     }, [id]);
-
+console.log('detail: ', detail)
     if (loading || !detail) {
         return (
             <AppView flex={1} justifyContent="center" alignItems="center">
@@ -61,7 +61,7 @@ export default function AutoBuyDetailScreen() {
             {/* Điểm & giá */}
             <AppView row justifyContent="space-between" alignItems="center" backgroundColor={ColorsGlobal.backgroundLight} padding={8} radius={8}>
                 <AppText color={ColorsGlobal.main}>Tối đa: {detail.maximum_point || 0} điểm</AppText>
-                <AppText color={ColorsGlobal.main2}>Giá mong muốn: {NumberFormat(parseInt(detail.desired_price))}đ</AppText>
+                <AppText color={ColorsGlobal.main2}>Giá mong muốn: {NumberFormat(parseInt(detail.desired_price))}K</AppText>
             </AppView>
 
             {/* Thời gian */}

@@ -25,6 +25,7 @@ import { AppDispatch, RootState } from '../../redux/data/store'
 import { buyTrip, FetchTripsPayload, cancelTrip } from '../../redux/slices/tripsSlice'
 import moment from 'moment'
 import AppModal from '../../components/common/AppModal'
+import { HeaderBackButton } from '@react-navigation/elements'
 
 
 type BuyTripProps = NativeStackNavigationProp<BuyTripStackParamList>;
@@ -39,7 +40,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
     const { buyTripLoading, buyTripError, buyTripSuccess } = useSelector(
         (state: RootState) => state.trips
     );
-    const { setIdArea, setUpdateTrips, updateTrips } = useAppContext();
+    const { setIdArea, setUpdateTrips, updateTrips, currentDriver } = useAppContext();
     const [refreshing, setRefreshing] = useState(false);
     const [selectedArea, setSelectedArea] = useState<string | undefined>(undefined);
     const [startDate, setStartDate] = useState(new Date());
@@ -72,9 +73,11 @@ export default function BuyTripScreen({ navigation, route }: Props) {
         // Now the button includes an `onPress` handler to update the count
         navigation.setOptions({
             headerBackTitleStyle: { fontSize: 0 },
-
+            headerLeft: () => (
+                <HeaderBackButton onPress={() => navigation.goBack()} />
+            ),
             headerTitle: () => (
-                <AppView justifyContent={'flex-start'} alignItems={'flex-start'}>
+                <AppView justifyContent={'flex-start'} alignItems={'flex-start'} flex={1}>
                     <AppText fontWeight={700} numberOfLines={1}>{nameGroup}</AppText>
                     <AppText fontSize={12} lineHeight={16} color={ColorsGlobal.textLight}>{countMember + ' thành viên'}</AppText>
                 </AppView>
@@ -175,17 +178,19 @@ export default function BuyTripScreen({ navigation, route }: Props) {
 
     const renderHiddenItem = (data, rowMap) => {
         if (data.item.is_sold === 1) return null;
-        const isOnwer = data?.item?.id_driver_sell || data?.item?.driver_sell?.id_driver
+        const seller_ = data?.item?.id_driver_sell || data?.item?.driver_sell?.id_driver
+        const isOnwer = seller_ === currentDriver?.id
+        console.log('isOnwer: ',isOnwer)
         return (
 
             <View style={styles.rowBack}>
 
                 {isOnwer ?
-                    <AppButton style={[styles.backBtn, styles.backBtnRight, { backgroundColor: ColorsGlobal.backgroundBuyTrip }]} onPress={() => {
+                    <AppButton justifyContent='center' style={[styles.backBtn, styles.backBtnRight, { backgroundColor: ColorsGlobal.backgroundBuyTrip }]} onPress={() => {
                         setTripToCancel({ rowMap, data });
                         setShowConfirmCancel(true);
                     }}>
-                        <AppText fontWeight={600} textAlign='center' >{'Huỷ bán chuyến'}</AppText>
+                        <AppText fontWeight={600} textAlign='center'  >{'Huỷ bán chuyến'}</AppText>
                     </AppButton>
                     :
                     <AppButton style={[styles.backBtn, styles.backBtnRight, { backgroundColor: ColorsGlobal.backgroundBuyTrip }]} onPress={() => PressBuyTrip(rowMap, data.item.area_id, data)}>

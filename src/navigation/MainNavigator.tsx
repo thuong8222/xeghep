@@ -23,12 +23,15 @@ import { useTripBuyerNotifications } from '../hooks/useTripBuyerNotifications';
 import { useTripsListRealtime } from '../hooks/useTripsListRealtime';
 import { useReceivedTripsRealtime } from '../hooks/useReceivedTripsRealtime';
 import { useNotificationsRealtime } from '../hooks/useNotificationsRealtime';
+import { useAllAutoBuyNotifications } from '../hooks/useAutoBuyNotifications';
+import { useAutoBuyRealtimeUpdates } from '../hooks/useAutoBuyRealtimeUpdates';
+import { useAutoBuyListUpdates } from '../hooks/useAutoBuyListUpdates';
 const Stack = createNativeStackNavigator<RootParamList>();
 export default function MainNavigator() {
   const { currentDriver } = useAppContext();
   const { socket, isConnected } = useSocket();
   const [isSplashDone, setIsSplashDone] = useState(false);
-
+console.log('currentDriver: ',currentDriver)
   const [driver, setDriver] = useState<any>(null);
   useEffect(() => {
     const fetchDriver = async () => {
@@ -41,11 +44,11 @@ export default function MainNavigator() {
   useEffect(() => {
     if (!socket || !isConnected || !currentDriver?.id || !driver?.id) return;
 
-  
+
     socket.emit("register_user", currentDriver.id);
   }, [socket, isConnected, currentDriver?.id]);
 
- 
+
 
   // ✅ Listen cả 2 loại thông báo (vì user có thể vừa là buyer vừa là seller)
   useSellerNotifications(currentDriver?.id || driver?.id);
@@ -57,8 +60,12 @@ export default function MainNavigator() {
   useTripBuyerNotifications(currentDriver?.id || undefined);  // Nhận thông báo khi mua chuyến thành công
   useTripsListRealtime();                          // Auto update danh sách chuyến
   useReceivedTripsRealtime(currentDriver?.id || undefined);   // Auto update danh sách chuyến đã nhận
-   // ✅ Kích hoạt notification system
-   useNotificationsRealtime(currentDriver?.id);
+  // ✅ Kích hoạt notification system
+  useNotificationsRealtime(currentDriver?.id);
+  // ===== ✅ AUTO BUY TRIPS Notifications =====
+  useAllAutoBuyNotifications(currentDriver?.id);          // Tất cả thông báo auto buy
+  useAutoBuyRealtimeUpdates(currentDriver?.id);           // Cập nhật danh sách realtime
+  useAutoBuyListUpdates(currentDriver?.id);
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       {!isSplashDone ? (
@@ -68,8 +75,8 @@ export default function MainNavigator() {
           <Stack.Screen name="Auth" component={AuthNavigator} />
           <Stack.Screen name="RootNavigator" component={RootNavigator} />
         </Stack.Navigator>
-   )}
+      )}
     </GestureHandlerRootView>
   );
-  
+
 }

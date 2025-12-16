@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Platform, TouchableOpacity } from 'react-native';
+import { Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AppView from '../common/AppView';
 import AppButton from '../common/AppButton';
@@ -9,101 +9,120 @@ import IconArrowDown from '../../assets/icons/IconArowDown';
 import IconMinus from '../../assets/icons/IconMinus';
 import IconPlus from '../../assets/icons/IconPlus';
 import AppModal from '../common/AppModal';
-import { scale } from '../../utils/Helper';
 import moment from 'moment';
 import ButtonChange from './ButtonChange';
 
 interface TimeSelectSectionProps {
-    onTimeChange?: (timestampSeconds: number | null
-
-    ) => void;
+    onTimeChange?: (timestampSeconds: number | null) => void;
 }
+
 export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionProps) {
     const [isInstant, setIsInstant] = useState(true);
     const [time, setTime] = useState(15);
     const [showDropdown, setShowDropdown] = useState(false);
     const [showPicker, setShowPicker] = useState(false);
-    const [selectedTime, setSelectedTime] = useState<Date | null>(null);
+
+    const [selectedTime, setSelectedTime] = useState<Date>(new Date());
+
+    // Android: phân biệt date / time
+    const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date');
+
+    /* ================== Đi ngay (+/- phút) ================== */
+    const updateInstantTime = (minutes: number) => {
+        const now = new Date();
+        const future = new Date(now.getTime() + minutes * 60 * 1000);
+        onTimeChange?.(Math.floor(future.getTime() / 1000));
+    };
 
     const addTime = () => {
         setTime(prev => {
-            const newMinutes = Math.min(prev + 5, 60);
-
-            // Tạo timestamp dựa trên now + newMinutes
-            const now = new Date();
-            const futureTime = new Date(now.getTime() + newMinutes * 60 * 1000);
-            const timestampSeconds = Math.floor(futureTime.getTime() / 1000);
-
-            onTimeChange?.(timestampSeconds); // truyền ra parent
-            return newMinutes; // luôn trả về number
+            const next = Math.min(prev + 5, 60);
+            updateInstantTime(next);
+            return next;
         });
     };
 
     const subTime = () => {
         setTime(prev => {
-            const newMinutes = Math.max(prev - 5, 0);
-
-            const now = new Date();
-            const futureTime = new Date(now.getTime() + newMinutes * 60 * 1000);
-            const timestampSeconds = Math.floor(futureTime.getTime() / 1000);
-
-            onTimeChange?.(timestampSeconds); // truyền ra parent
-            return newMinutes; // luôn trả về number
+            const next = Math.max(prev - 5, 0);
+            updateInstantTime(next);
+            return next;
         });
     };
 
-
+    /* ================== Dropdown ================== */
     const handleSelectOption = (option: string) => {
         setShowDropdown(false);
+
         if (option === 'Đi ngay') {
             setIsInstant(true);
             setShowPicker(false);
             setTime(0);
-            const now = new Date();
-            const futureTime = new Date(now.getTime());
-            onTimeChange?.(futureTime); ///truyen ra ngoai
+            updateInstantTime(0);
         } else {
             setIsInstant(false);
-            setShowPicker(true);
+
+            if (Platform.OS === 'android') {
+                setPickerMode('date');
+                setShowPicker(true);
+            } else {
+                setShowPicker(true);
+            }
         }
     };
 
-    const onChangeTime = (_: any, date?: Date) => {
-        setShowPicker(false);
+    /* ================== Android onChange ================== */
+    const onChangeAndroid = (_: any, date?: Date) => {
+        if (!date) {
+            setShowPicker(false);
+            return;
+        }
+
+        if (pickerMode === 'date') {
+            const newDate = new Date(selectedTime);
+            newDate.setFullYear(date.getFullYear());
+            newDate.setMonth(date.getMonth());
+            newDate.setDate(date.getDate());
+
+            setSelectedTime(newDate);
+            setPickerMode('time');
+            setShowPicker(true);
+        } else {
+            const newDate = new Date(selectedTime);
+            newDate.setHours(date.getHours());
+            newDate.setMinutes(date.getMinutes());
+
+            setSelectedTime(newDate);
+            setShowPicker(false);
+
+            onTimeChange?.(Math.floor(newDate.getTime() / 1000));
+        }
+    };
+
+    /* ================== iOS onChange ================== */
+    const onChangeIOS = (_: any, date?: Date) => {
         if (date) {
             setSelectedTime(date);
-            const timestampSeconds = Math.floor(date.getTime() / 1000);
-            onTimeChange?.(timestampSeconds, false); //////truyen ra ngoai
+            onTimeChange?.(Math.floor(date.getTime() / 1000));
         }
     };
 
     return (
         <AppView row justifyContent="space-between" alignItems="center" paddingVertical={9}>
-            <AppText>{'Thời gian :'}</AppText>
+            <AppText>Thời gian :</AppText>
 
             <AppView gap={8} alignItems="center" row>
-                {/* Nút dropdown */}
+                {/* Dropdown */}
                 <AppView>
-                    <AppButton
-                        row
-                        gap={4}
-                        onPress={() => setShowDropdown(prev => !prev)}
-                        paddingHorizontal={10}
-                    >
+                    <AppButton row gap={4} onPress={() => setShowDropdown(p => !p)} paddingHorizontal={10}>
                         <AppText fontWeight={700}>
                             {isInstant
                                 ? 'Đi ngay'
-                                : selectedTime
-                                    ? moment(selectedTime).format('DD/MM/YYYY HH:mm') ||
-                                    `${selectedTime.getHours().toString().padStart(2, '0')}:${selectedTime
-                                        .getMinutes()
-                                        .toString()
-                                        .padStart(2, '0')}`
-                                    : 'Chọn thời gian'}
+                                : moment(selectedTime).format('DD/MM/YYYY HH:mm')}
                         </AppText>
                         <IconArrowDown color={ColorsGlobal.colorIconNoActive} />
                     </AppButton>
-                    {/* Menu chọn */}
+
                     {showDropdown && (
                         <AppView
                             position="absolute"
@@ -114,13 +133,12 @@ export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionPro
                             borderColor={ColorsGlobal.borderColor}
                             radius={8}
                             padding={6}
-                            zIndex={10}
                             width={150}
+                            zIndex={10}
                         >
-                            {['Đi ngay', 'Chọn thời gian'].map((item, index) => (
-                                <AppButton key={index} onPress={() => handleSelectOption(item)} paddingVertical={6}>
+                            {['Đi ngay', 'Chọn thời gian'].map((item, i) => (
+                                <AppButton key={i} onPress={() => handleSelectOption(item)}>
                                     <AppText
-
                                         color={item === (isInstant ? 'Đi ngay' : 'Chọn thời gian')
                                             ? ColorsGlobal.main
                                             : ColorsGlobal.textDark}
@@ -133,41 +151,39 @@ export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionPro
                     )}
                 </AppView>
 
-                {/* Hiển thị +/- khi không chọn giờ cụ thể */}
+                {/* +/- phút */}
                 {isInstant && (
                     <AppView row gap={8} alignItems="center">
-                        <ButtonChange
-                            onPress={subTime}
-                            icon={<IconMinus size={20} color={ColorsGlobal.colorIconNoActive} />}
-                        />
-
-                        <AppText fontWeight={700}>{`${time}p`}</AppText>
-                        <ButtonChange
-                            onPress={addTime}
-                            icon={<IconPlus size={18} color={ColorsGlobal.colorIconNoActive} />}
-                        />
-                        
+                        <ButtonChange onPress={subTime} icon={<IconMinus />} />
+                        <AppText fontWeight={700}>{time}p</AppText>
+                        <ButtonChange onPress={addTime} icon={<IconPlus />} />
                     </AppView>
                 )}
             </AppView>
 
-            {/* Bộ chọn giờ */}
-            {showPicker && Platform.OS === 'android' && <DateTimePicker
-                value={selectedTime || new Date()}
-                mode="datetime"
-                is24Hour={true}
-                display="spinner"
-                onChange={onChangeTime}
-                style={{ width: '100%' }}
-            />}
-            <AppModal isVisible={showPicker && Platform.OS === 'ios'} onClose={() => setShowPicker(false)} heightPercent={0.4}  >
+            {/* ================= ANDROID PICKER ================= */}
+            {showPicker && Platform.OS === 'android' && (
                 <DateTimePicker
-                    value={selectedTime || new Date()}
-                    mode='datetime'
-                    // is24Hour={true}
+                    value={selectedTime}
+                    mode={pickerMode}
+                    is24Hour
                     display="spinner"
-                    onChange={onChangeTime}
-                    style={{ width: '100%' }}
+                    onChange={onChangeAndroid}
+                />
+            )}
+
+            {/* ================= iOS PICKER ================= */}
+            <AppModal
+                isVisible={showPicker && Platform.OS === 'ios'}
+                onClose={() => setShowPicker(false)}
+                heightPercent={0.4}
+            >
+                <DateTimePicker
+                    value={selectedTime}
+                    mode="datetime"
+                    is24Hour
+                    display="spinner"
+                    onChange={onChangeIOS}
                 />
 
                 <AppButton
@@ -183,8 +199,6 @@ export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionPro
                     </AppText>
                 </AppButton>
             </AppModal>
-
-
         </AppView>
     );
 }

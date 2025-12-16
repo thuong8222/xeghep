@@ -62,15 +62,19 @@ export default function ReceivingScheduleScreen() {
   const loadTrips = useCallback(() => {
     const start_date = dateToTimestamp(fromDate);
     const end_date = dateToTimestamp(toDate);
-    const params: FetchReceivedTripsParams = {};
 
+    const params: FetchReceivedTripsParams = {};
     if (start_date) params.start_date = start_date;
     if (end_date) params.end_date = end_date;
+    console.log('FETCH PARAMS:', selectedType, params);
     // dispatch(fetchReceivedTrips(params));
     // dispatch(fetchSoldTrips(params));
-    if (selectedType === 'chuyến nhận') {
+    if (selectedType == 'chuyến nhận') {
+      console.log('chuyến nhận fetchReceivedTrips')
       return dispatch(fetchReceivedTrips(params));
     } else {
+      console.log('chuyến nhận fetchSoldTrips')
+
       return dispatch(fetchSoldTrips(params));
     }
 
@@ -80,7 +84,7 @@ export default function ReceivingScheduleScreen() {
   useEffect(() => {
     if (selectedType)
       loadTrips();
-  }, [loadTrips, updateTrips, selectedType]);
+  }, [loadTrips]);
 
   // 🔹 Pull to refresh handler - clear filters and reload
   const onRefresh = useCallback(async () => {
@@ -88,11 +92,16 @@ export default function ReceivingScheduleScreen() {
     setFromDate('');
     setToDate('');
     setErrorMessage('');
-
-    // Dispatch without any date filters
-    await dispatch(fetchReceivedTrips({}));
+  
+    if (selectedType == 'chuyến nhận') {
+      await dispatch(fetchReceivedTrips({}));
+    } else {
+      await dispatch(fetchSoldTrips({}));
+    }
+  
     setRefreshing(false);
-  }, [dispatch]);
+  }, [dispatch, selectedType]);
+  
 
   // 🔹 Render trip item
   const renderItem_trip = useCallback(
@@ -228,7 +237,8 @@ export default function ReceivingScheduleScreen() {
       <AppView flex={1}>
         <FlatList
           data={selectedType === 'chuyến nhận' ? receivedTrips : soldTrips}
-          keyExtractor={(item) => item?.id.toString()}
+          // keyExtractor={(item) => item?.id.toString()}
+          keyExtractor={(item, index) => item.id_trip ?? index.toString()}
           showsVerticalScrollIndicator={false}
           renderItem={renderItem_trip}
           ItemSeparatorComponent={() => <AppView height={scale(16)} />}
