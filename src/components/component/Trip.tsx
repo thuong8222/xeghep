@@ -25,7 +25,6 @@ export default function Trip(props) {
         ? time.format("HH:mm")
         : time.format("DD/MM/YYYY HH:mm");
     const countdown = useCountdown(time_start_sec);
-
     const type_car = props?.data?.type_car;
 
     const name_type_car = CONSTANT.TYPE_CAR_LIST.find(item => item.key === type_car)?.name;
@@ -64,7 +63,7 @@ export default function Trip(props) {
 
                     <AppView row gap={8} alignItems='center'>
                         <AppText fontWeight={600}>{formatted}</AppText>
-                        <CountdownStyled seconds={countdown} />
+                        { <CountdownStyled seconds={countdown} />}|
                     </AppView>
                 </AppView>
                 <AppView row gap={8} >

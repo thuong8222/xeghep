@@ -237,7 +237,6 @@ export default function BuyTripScreen({ navigation, route }: Props) {
         setIsModalVisible(false);
     };
 
-
     return (
         <AppView flex={1} backgroundColor='#fff' padding={scale(16)} position='relative'>
             <SwipeListView
