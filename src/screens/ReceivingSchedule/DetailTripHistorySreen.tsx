@@ -13,13 +13,14 @@ import IconComment from '../../assets/icons/iconComment';
 import { useAppContext } from '../../context/AppContext';
 
 export default function DetailTripHistorySreen({ route, navigation }) {
-    const data = route.params.data;
-    console.log('data DetailTripHistorySreen: ', data)
+    const data = route?.params?.data;
+    // console.log('data DetailTripHistorySreen: ', data)
     const { currentDriver } = useAppContext();
     const isSeller = currentDriver?.id === data?.id_driver_sell;
-    console.log('isSeller: ', isSeller)
-    const driverSell = data.driver_sell || {};
-    const driverReceive = data?.driver_receive
+    // console.log('isSeller: ', isSeller)
+    const driverSell = data?.driver_sell || {};
+    const driverReceive = data?.driver_receive;
+    const isSold = data?.is_sold;
     const formatTime = (value) => {
         if (!value) return "--";
 
@@ -45,51 +46,68 @@ export default function DetailTripHistorySreen({ route, navigation }) {
     const gotoChat = () => {
         navigation.navigate('ChatScreen', { data: data })
     }
+    let status_ = '';
 
+    if (isSold === 1) {
+        status_ = 'Đã bán';
+    } else if (isSold === 2 && data?.status === 0) {
+        status_ = 'Đã huỷ';
+    } else {
+        status_ = 'Không bán được';
+    }
     return (
         <AppView style={styles.container}>
-
+            <AppView padding={16} marginBottom={16} borderWidth={1} borderColor={isSold === 1 ? 'green' : 'red'} radius={999} row justifyContent={'space-between'}>
+                <AppText  >{'Trạng thái: '}</AppText>
+                <AppText textAlign={'right'} color={isSold === 1 ? 'green' : 'red'}>{status_}</AppText>
+            </AppView>
             {/* --- Header tài xế bán chuyến --- */}
-            <View style={styles.section}>
-                <AppText style={styles.sectionTitle}>{isSeller ? 'Tài xế nhận chuyến' : 'Tài xế bán chuyến: '}</AppText>
-                {isSeller ?
-                    <View style={styles.row}>
-                        <IconUser size={22} />
-                        <AppText style={styles.value}>
-                            {driverReceive.full_name} ({driverReceive.phone})
-                        </AppText>
-                    </View> :
-                    <View style={styles.row}>
-                        <IconUser size={22} />
-                        <AppText style={styles.value}>
-                            {driverSell.full_name} ({driverSell.phone})
-                        </AppText>
-                    </View>
-                }
+            {isSold === 1 &&
+                <View style={styles.section}>
 
-                <AppView row justifyContent={'space-between'} alignItems={'center'}>
-                    <AppButton
-                        row gap={6}
-                        onPress={gotoChat}
-                    >
-                        <IconComment color={ColorsGlobal.main} />
-                        <AppText color={ColorsGlobal.main}>{isSeller ? 'Chat với lái xe nhận' : 'Chat với lái xe bán'}</AppText>
-                    </AppButton>
-                    <AppButton
+                    <AppView>
 
-                        onPress={() => {
-                            Linking.openURL(`tel:${driverSell.phone}`);
-                        }}
-                        style={styles.callBtn}
-                        row gap={8} alignItems='center'
-                    >
-                        <IconPhone />
-                        <AppText color={ColorsGlobal.main2}>{'Gọi'}</AppText>
 
-                    </AppButton>
-                </AppView>
-            </View>
+                        <AppText style={styles.sectionTitle}>{isSeller ? 'Tài xế nhận chuyến' : 'Tài xế bán chuyến: '}</AppText>
+                        {isSeller ?
+                            <View style={styles.row}>
+                                <IconUser size={22} />
+                                <AppText style={styles.value}>
+                                    {driverReceive?.full_name} ({driverReceive?.phone})
+                                </AppText>
+                            </View> :
+                            <View style={styles.row}>
+                                <IconUser size={22} />
+                                <AppText style={styles.value}>
+                                    {driverSell?.full_name} ({driverSell?.phone})
+                                </AppText>
+                            </View>
+                        }
+                    </AppView>
 
+                    <AppView row justifyContent={'space-between'} alignItems={'center'}>
+                        <AppButton
+                            row gap={6}
+                            onPress={gotoChat}
+                        >
+                            <IconComment color={ColorsGlobal.main} />
+                            <AppText color={ColorsGlobal.main}>{isSeller ? 'Chat với lái xe nhận' : 'Chat với lái xe bán'}</AppText>
+                        </AppButton>
+                        <AppButton
+
+                            onPress={() => {
+                                Linking.openURL(`tel:${driverSell.phone}`);
+                            }}
+                            style={styles.callBtn}
+                            row gap={8} alignItems='center'
+                        >
+                            <IconPhone />
+                            <AppText color={ColorsGlobal.main2}>{'Gọi'}</AppText>
+
+                        </AppButton>
+                    </AppView>
+                </View>
+            }
             {/* --- Thông tin hành trình --- */}
             <View style={styles.section}>
                 <AppText style={styles.sectionTitle}>Thông tin chuyến</AppText>
