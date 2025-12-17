@@ -1,11 +1,11 @@
 import { FlatList, TouchableOpacity, RefreshControl, Alert } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Container from '../../components/common/Container';
 import AppText from '../../components/common/AppText';
 import AppButton from '../../components/common/AppButton';
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal';
 import IconPlus from '../../assets/icons/IconPlus';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import AppView from '../../components/common/AppView';
 import IconPencil from '../../assets/icons/iconPencil';
 import IconArrowDown from '../../assets/icons/IconArowDown';
@@ -20,6 +20,7 @@ import { NumberFormat } from '../../utils/Helper';
 
 export default function ListPriorityPurchaseScreen() {
     const navigation = useNavigation();
+    const route = useRoute();
     const dispatch = useAppDispatch();
     const { list, loading, lastUpdate } = useSelector((state) => state.requestAutoBuyTrip);
     const [refreshing, setRefreshing] = useState(false);
@@ -27,7 +28,14 @@ export default function ListPriorityPurchaseScreen() {
     useEffect(() => {
         dispatch(fetchAutoBuyList());
     }, []);
-
+    useFocusEffect(
+        useCallback(() => {
+            if (route?.params?.refresh) {
+                console.log('🔄 Refresh auto buy list');
+                fetchAutoBuyList(); // call API / dispatch redux
+            }
+        }, [route?.params?.refresh])
+    );
     // ✅ Auto refresh khi có lastUpdate thay đổi
     useEffect(() => {
         if (lastUpdate) {

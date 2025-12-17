@@ -9,6 +9,7 @@ import AppView from "../../components/common/AppView";
 import AppText from "../../components/common/AppText";
 import moment from "moment";
 import AppButton from "../../components/common/AppButton";
+import { useNavigation } from "@react-navigation/native";
 
 export default function NotificationScreen() {
   const {
@@ -21,11 +22,11 @@ export default function NotificationScreen() {
     loadPage,
     refresh,
   } = useDriverNotifications();
-
+  const navigation = useNavigation();
   useEffect(() => {
     loadPage(1);
   }, []);
-console.log(items);
+
   const loadMore = () => {
     if (loadingMore || page >= lastPage) return;
     loadPage(page + 1);
@@ -34,18 +35,21 @@ console.log(items);
   const onRefresh = () => {
     refresh();
   };
-
+  const goDetailNotification = (item) => {
+    navigation.navigate('DetailNotification', {
+      data: item,
+    });
+  };
   const renderItem = ({ item }) => (
-    <AppButton style={{ padding: 15, backgroundColor:ColorsGlobal.backgroundLight, marginBottom: 10, borderRadius: 8 }}>
+    <AppButton onPress={() => goDetailNotification(item)} style={{ padding: 15, backgroundColor: ColorsGlobal.backgroundLight, marginBottom: 10, borderRadius: 8 }}>
       <AppView>
-      <AppText bold>{item.title}</AppText>
-      <AppText style={{ marginTop: 4 }}>{item.content}</AppText>
+        <AppText bold>{item.title}</AppText>
+        <AppText style={{ marginTop: 4 }}>{item.content}</AppText>
       </AppView>
       <AppText fontSize={12} textAlign="right" color={ColorsGlobal.textLight}>{moment(item.created_at).format('DD/MM/YYYY hh:mm')}</AppText>
-     
     </AppButton>
   );
-console.log('items: ',items)
+
   return (
     <Container loading={loading}>
       <FlatList

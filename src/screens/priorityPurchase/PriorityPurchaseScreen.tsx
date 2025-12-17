@@ -10,19 +10,18 @@ import SelectProvinceDistrictModal from '../../components/component/modals/Modal
 import IconTickCircle from '../../assets/icons/IconTickCircle';
 import IconNoneTickCircle from '../../assets/icons/IconNoneTickCircle';
 import Container from '../../components/common/Container';
-import { createAutoBuy, updateAutoBuy } from '../../redux/slices/requestAutoBuyTrip';
-import { useRoute } from '@react-navigation/native';
+import { createAutoBuy, fetchAutoBuyList, updateAutoBuy } from '../../redux/slices/requestAutoBuyTrip';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAppDispatch } from '../../redux/hooks/useAppDispatch';
 import { NumberFormat } from '../../utils/Helper';
 
 export default function PriorityPurchaseScreen() {
     const route = useRoute();
-
     const { editData } = route?.params ?? {};
     console.log('route.params editData: ', editData)
     // nếu có thì là màn edit
     const dispatch = useAppDispatch();
-
+    const navigation = useNavigation();
     const [placeFrom, setPlaceFrom] = useState('');
     const [placeTo, setPlaceTo] = useState('');
     const [startTime, setStartTime] = useState(null);
@@ -90,13 +89,35 @@ export default function PriorityPurchaseScreen() {
             // update
             dispatch(updateAutoBuy({ id: editData.id, data: payload }))
                 .unwrap()
-                .then(() => Alert.alert("Thành công", "Cập nhật thành công!"))
+                .then(() => {
+                    dispatch(fetchAutoBuyList());
+                    Alert.alert(
+                        "Thành công",
+                        "Cập nhật thành công!",
+                        [{ text: "OK", onPress: () => navigation.goBack() }]
+                    );
+                })
                 .catch((err) => Alert.alert("Lỗi", err?.message || "Cập nhật thất bại"));
         } else {
             // create
             dispatch(createAutoBuy(payload))
                 .unwrap()
-                .then(() => Alert.alert("Thành công", "Tạo mới thành công!"))
+                .then(() => {
+                    dispatch(fetchAutoBuyList());
+                    Alert.alert(
+                        "Thành công",
+                        "Tạo mới thành công!",
+                        [
+                            {
+                                text: "OK",
+                                onPress: () => {
+                                    navigation.getParent()?.setParams({ refresh: Date.now() });
+                                    navigation.goBack();
+                                }
+                            }
+                        ]
+                    );
+                })
                 .catch((err) => Alert.alert("Lỗi", err?.message || "Gửi yêu cầu thất bại"));
         }
     };

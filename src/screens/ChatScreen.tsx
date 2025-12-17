@@ -448,7 +448,7 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
         )}
 
         {/* ⌨️ Input area */}
-        <AppView row alignItems="center" gap={5} >
+        <AppView row alignItems="center" gap={5} paddingHorizontal={16}>
           {/* 📎 Button chọn ảnh */}
           <AppButton onPress={() => setIsDisplayModalUploadImage(true)}>
             <Text style={{ fontSize: 24 }}>📎</Text>
@@ -462,11 +462,11 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
               multiline
               style={{
                 paddingHorizontal: 12,
-                paddingVertical: 8,
+                paddingVertical: 10,
                 backgroundColor: ColorsGlobal.backgroundLight,
                 borderRadius: 20,
                 minHeight: 40,
-                marginTop: -10
+                marginTop: -12
               }}
             />
           </AppView>

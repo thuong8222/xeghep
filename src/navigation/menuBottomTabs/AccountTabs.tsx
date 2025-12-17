@@ -10,6 +10,8 @@ import { Driver } from '../../redux/slices/driverSlice';
 import NotificationScreen from '../../screens/accountScreen/NotificationScreen';
 import { HeaderBackButton } from '@react-navigation/elements';
 import { useNavigation } from '@react-navigation/native';
+import DetailNotification from '../../screens/accountScreen/DetailNotificationScreen';
+import DetailNotificationScreen from '../../screens/accountScreen/DetailNotificationScreen';
 
 export type AccountTabsParamList = {
   AccountScreen: undefined;
@@ -17,6 +19,7 @@ export type AccountTabsParamList = {
   AccountInfoScreen: {data:Driver};
   CarInfoScreen: {data:Driver};
   Notification: undefined;
+  DetailNotification: {data:any}
 }
 
 const Stack = createNativeStackNavigator<AccountTabsParamList>();
@@ -49,8 +52,11 @@ export default function AccountTabs() {
         headerTitle: 'Thông báo',
         headerTitleAlign: 'center'
       }} />
-
-
+       <Stack.Screen name="DetailNotification" component={DetailNotificationScreen} options={{
+        presentation: 'modal',
+        headerTitle: 'Chi tiết thông báo',
+        headerTitleAlign: 'center'
+      }} />
 
     </Stack.Navigator>
   )
