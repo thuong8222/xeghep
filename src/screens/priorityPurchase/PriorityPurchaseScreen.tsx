@@ -19,7 +19,7 @@ export default function PriorityPurchaseScreen() {
     const route = useRoute();
     const { editData } = route?.params ?? {};
     console.log('route.params editData: ', editData)
-    // nếu có thì là màn edit
+    
     const dispatch = useAppDispatch();
     const navigation = useNavigation();
     const [placeFrom, setPlaceFrom] = useState('');
@@ -36,7 +36,7 @@ export default function PriorityPurchaseScreen() {
 
     useEffect(() => {
         if (editData) {
-            // Fill dữ liệu khi edit
+            
             setPlaceFrom(Array.isArray(editData.pickup_location) ? editData.pickup_location.join(' | ') : editData.pickup_location || '');
             setPlaceTo(Array.isArray(editData.dropoff_location) ? editData.dropoff_location.join(' | ') : editData.dropoff_location || '');
             setStartTime(
@@ -86,7 +86,7 @@ export default function PriorityPurchaseScreen() {
         };
         console.log('updateAutoBuy payload: ', payload)
         if (editData) {
-            // update
+            
             dispatch(updateAutoBuy({ id: editData.id, data: payload }))
                 .unwrap()
                 .then(() => {
@@ -99,7 +99,7 @@ export default function PriorityPurchaseScreen() {
                 })
                 .catch((err) => Alert.alert("Lỗi", err?.message || "Cập nhật thất bại"));
         } else {
-            // create
+            
             dispatch(createAutoBuy(payload))
                 .unwrap()
                 .then(() => {
@@ -138,20 +138,20 @@ export default function PriorityPurchaseScreen() {
                 </AppView>
 
                 {/* Điểm đón */}
-                <AppView>
+                <AppButton onPress={() => setIsCommuneWard(true)}>
                     <AppText bold marginBottom={4}>Điểm đón</AppText>
                     <AppButton onPress={() => setIsCommuneWard(true)} backgroundColor={ColorsGlobal.backgroundGray} padding={12} radius={8}>
-                        <TextInput value={placeFrom} multiline onChangeText={(text)=>setPlaceFrom(text)} placeholder='Nhấn để chọn địa chỉ' style={{color:"#666"}} />
+                        <TextInput value={placeFrom} multiline onChangeText={(text) => setPlaceFrom(text)} placeholder='Nhấn để chọn địa chỉ' style={{ color: "#666" }} />
                     </AppButton>
-                </AppView>
+                </AppButton>
 
                 {/* Điểm trả */}
-                <AppView>
+                <AppButton onPress={() => setIsCommuneWardTo(true)}>
                     <AppText bold marginBottom={4}>Điểm trả</AppText>
                     <AppButton onPress={() => setIsCommuneWardTo(true)} backgroundColor={ColorsGlobal.backgroundGray} padding={12} radius={8}>
-                    <TextInput value={placeTo} multiline onChangeText={(text)=>setPlaceTo(text)} placeholder='Nhấn để chọn địa chỉ' style={{color:"#666"}}  />
+                        <TextInput value={placeTo} multiline onChangeText={(text) => setPlaceTo(text)} placeholder='Nhấn để chọn địa chỉ' style={{ color: "#666" }} />
                     </AppButton>
-                </AppView>
+                </AppButton>
 
                 {/* Giá & điểm */}
                 <AppView row justifyContent={'space-between'} alignItems='center' gap={24}>
@@ -188,20 +188,22 @@ export default function PriorityPurchaseScreen() {
 
                 {/* Modal chọn xã/phường - THAY THẾ địa chỉ cũ */}
                 <SelectProvinceDistrictModal
+                    multiSelect={true}
                     isVisible={isCommuneWard}
                     onClose={() => setIsCommuneWard(false)}
                     onSelected={(value) => {
-                        // ✅ Thay thế hoàn toàn thay vì nối thêm
+                        
                         const list = value.districts.map(d => `${value.province.name} - ${d.name}`).join(' | ');
                         setPlaceFrom(list);
                         setIsCommuneWard(false);
                     }}
                 />
                 <SelectProvinceDistrictModal
+                    multiSelect={true}
                     isVisible={isCommuneWardTo}
                     onClose={() => setIsCommuneWardTo(false)}
                     onSelected={(value) => {
-                        // ✅ Thay thế hoàn toàn thay vì nối thêm
+                        
                         const list = value.districts.map(d => `${value.province.name} - ${d.name}`).join(' | ');
                         setPlaceTo(list);
                         setIsCommuneWardTo(false);

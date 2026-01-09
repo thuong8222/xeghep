@@ -63,7 +63,7 @@ export default function Trip(props) {
 
                     <AppView row gap={8} alignItems='center'>
                         <AppText fontWeight={600}>{formatted}</AppText>
-                        { <CountdownStyled seconds={countdown} />}|
+                        {<CountdownStyled seconds={countdown} />}
                     </AppView>
                 </AppView>
                 <AppView row gap={8} >

@@ -1,4 +1,4 @@
-import { Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native'
 import React, { useState } from 'react'
 import AppView from '../../components/common/AppView'
 import AppText from '../../components/common/AppText'
@@ -17,10 +17,11 @@ import NoteInputSection from '../../components/component/NoteInputSection'
 
 import SelectProvinceDistrictModal from '../../components/component/modals/ModalSelectWard'
 import TripOptionsSection from '../../components/component/TripOptionsSection'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { createTrip, CreateTripPayload, fetchTrips } from '../../redux/slices/tripsSlice'
 import moment from 'moment'
 import { useAppContext } from '../../context/AppContext'
+
 interface Props {
   route: any;
   navigation: any;
@@ -41,8 +42,8 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
   const [placeEnd, setPlaceEnd] = useState('');
   const [communeWard, setCommuneWard] = useState('');
   const [communeWardTo, setCommuneWardTo] = useState('');
+  const { loading } = useSelector((state: any) => state.trips);
 
-  // ✅ Initial state với giá trị mặc định
   const [tripOptions, setTripOptions] = useState({
     numGuests: 1,
     price: '250',
@@ -54,7 +55,7 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
   const [noteOptions, setNoteOptions] = useState();
 
 
-  // ✅ FIX: Hàm này phải UPDATE state với giá trị MỚI, không phải giá trị cũ
+
   const handleTripOptionsChange = (
     numGuests: number | null,
     price?: string,
@@ -72,14 +73,14 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
       typeCar
     });
 
-    // ✅ Update với giá trị MỚI từ params
+
     setTripOptions(prev => ({
       numGuests: numGuests ?? prev.numGuests,
       price: price ?? prev.price,
       points: points?.toString() ?? prev.points,
       guestType: guestType ?? prev.guestType,
       timeStart: timeStart ?? prev.timeStart,
-      typeCar: typeCar !== undefined ? typeCar : prev.typeCar  // ✅ Cho phép null
+      typeCar: typeCar !== undefined ? typeCar : prev.typeCar
     }));
   };
 
@@ -114,7 +115,7 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
 
     try {
       const res = await dispatch(createTrip(payload)).unwrap();
-      await fetchTrips(id_area); // nếu cần refetch
+      await fetchTrips(id_area);
       console.log("🎉 Kết quả API trả về:", res);
       setUpdateTrips(moment().unix());
       setSelectedDirection();
@@ -145,10 +146,10 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
   };
 
   const selectCommuneWard = () => {
-    setIsCommuneWard(true); // mở modal chọn xã/phường
+    setIsCommuneWard(true);
   };
   const selectCommuneWardTo = () => {
-    setIsCommuneWardTo(true); // mở modal chọn xã/phường
+    setIsCommuneWardTo(true);
   };
   const toggleMoreDetailEnd = () => {
     setMoreInputEnd(!moreInputEnd)
@@ -161,8 +162,32 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
 
   return (
 
-    <AppView flex={1} backgroundColor='#fff' paddingHorizontal={16} paddingTop={16} gap={18} paddingBottom={Platform.OS === 'ios' ? insets.bottom : 0}  >
-
+    <AppView flex={1} backgroundColor='#fff' paddingHorizontal={16} paddingTop={16} gap={18} paddingBottom={Platform.OS === 'ios' ? insets.bottom : 0} position='relative'  >
+      {/* ⭐ Loading Overlay */}
+      {loading && (
+        <AppView flex={1}
+          // position="absolute"
+          // top={0}
+          // left={0}
+          // right={0}
+          // bottom={0}
+          // backgroundColor="rgba(0,0,0,0.3)"
+          // justifyContent="center"
+          // alignItems="center"
+          // zIndex={9999}
+        >
+          <AppView
+            backgroundColor="#fff"
+            padding={20}
+            radius={10}
+            alignItems="center"
+            gap={12}
+          >
+            <ActivityIndicator size="large" color={ColorsGlobal.main} />
+            <AppText>Đang tạo chuyến...</AppText>
+          </AppView>
+        </AppView>
+      )}
       <AppView row gap={32}>
         <AppButton onPress={() => setSelectedDirection(1)} row gap={8}>
           <AppText>{'Chiều đi'}</AppText>
@@ -233,25 +258,26 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
       </ScrollView>
       <ButtonSubmit title='Đăng bán' onPress={handleCreateTrip} />
       <SelectProvinceDistrictModal
+        multiSelect={false}
         isVisible={isCommuneWard}
         onClose={() => {
           setIsCommuneWard(false);
         }}
         onSelected={(value) => {
           console.log('✅ Kết quả chọn:', value);
-          // Ví dụ: value = { province: {...}, district: {...} }
+
           setCommuneWard(`${value.province.name} - ${value.district.name}`);
 
         }}
       />
       <SelectProvinceDistrictModal
+        multiSelect={false}
         isVisible={isCommuneWardTo}
         onClose={() => {
           setIsCommuneWardTo(false);
         }}
         onSelected={(value) => {
           console.log('✅ Kết quả chọn:', value);
-          // Ví dụ: value = { province: {...}, district: {...} }
 
           setCommuneWardTo(`${value.province.name} - ${value.district.name}`);
         }}

@@ -1,3 +1,4 @@
+// ModalSelectWard.tsx
 import React, { useEffect, useState } from 'react';
 import { FlatList } from 'react-native';
 import AppModal from '../../common/AppModal';
@@ -9,13 +10,20 @@ import { ColorsGlobal } from '../../base/Colors/ColorsGlobal';
 import { removeVietnameseTones } from '../../../utils/Helper';
 import IconTickCircle from '../../../assets/icons/IconTickCircle';
 import IconNoneTickCircle from '../../../assets/icons/IconNoneTickCircle';
+
 interface Props {
   isVisible: boolean;
   onClose: () => void;
-  onSelected: () => void;
+  onSelected: (value: any) => void;
+  multiSelect?: boolean; // ⭐ Thêm prop này
 }
 
-export default function SelectProvinceDistrictModal({ isVisible, onClose, onSelected }: Props) {
+export default function SelectProvinceDistrictModal({ 
+  isVisible, 
+  onClose, 
+  onSelected,
+  multiSelect = false // ⭐ Default là single select
+}: Props) {
   const [step, setStep] = useState<'province' | 'district'>('province');
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
@@ -29,7 +37,6 @@ export default function SelectProvinceDistrictModal({ isVisible, onClose, onSele
     })
       .then(res => res.json())
       .then(data => {
-
         setProvinces(data.provinces);
       })
       .catch(err => console.error('❌ Lỗi tải tỉnh:', err));
@@ -38,7 +45,7 @@ export default function SelectProvinceDistrictModal({ isVisible, onClose, onSele
   const handleSelectProvince = async (province) => {
     setSelectedProvince(province);
     setStep('district');
-    setSearchText(''); // reset search khi sang bước huyện
+    setSearchText('');
 
     try {
       const res = await fetch(
@@ -53,7 +60,24 @@ export default function SelectProvinceDistrictModal({ isVisible, onClose, onSele
       console.error('❌ Lỗi tải huyện:', err);
     }
   };
-  // ⭕ Multi Select
+
+  // ⭐ Xử lý chọn district
+  const handleSelectDistrict = (district) => {
+    if (multiSelect) {
+      // Multi select: toggle checkbox
+      toggleSelectDistrict(district);
+    } else {
+      // Single select: chọn xong đóng luôn
+      onSelected({
+        province: selectedProvince,
+        district,
+      });
+      onClose();
+      resetState();
+    }
+  };
+
+  // Multi Select
   const toggleSelectDistrict = (district) => {
     setSelectedDistricts(prev => {
       const exists = prev.find(item => item.code === district.code);
@@ -64,7 +88,7 @@ export default function SelectProvinceDistrictModal({ isVisible, onClose, onSele
     });
   };
 
-  // ⭕ Confirm: gửi toàn bộ xã/phường ra ngoài
+  // Confirm cho multi select
   const handleConfirm = () => {
     if (!selectedProvince || selectedDistricts.length === 0) return;
 
@@ -74,18 +98,17 @@ export default function SelectProvinceDistrictModal({ isVisible, onClose, onSele
     });
 
     onClose();
+    resetState();
   };
-  // const handleSelectDistrict = (district) => {
-  //   onSelected({
-  //     province: selectedProvince,
-  //     district,
-  //   });
-  //   onClose();
-  //   setStep('province');
-  //   setSearchText('');
-  // };
 
-  // ✅ Lọc danh sách theo searchText
+  // Reset state khi đóng modal
+  const resetState = () => {
+    setStep('province');
+    setSearchText('');
+    setSelectedDistricts([]);
+    setSelectedProvince(null);
+  };
+
   const filteredProvinces = provinces.filter((item) =>
     removeVietnameseTones(item.name).includes(removeVietnameseTones(searchText))
   );
@@ -94,41 +117,35 @@ export default function SelectProvinceDistrictModal({ isVisible, onClose, onSele
     removeVietnameseTones(item.name).includes(removeVietnameseTones(searchText))
   );
 
-
   const renderProvince = ({ item }) => (
     <AppButton onPress={() => handleSelectProvince(item)} padding={12}>
       <AppText>{item.name}</AppText>
     </AppButton>
   );
+
   const renderDistrict = ({ item }) => {
     const isSelected = selectedDistricts.some(d => d.code === item.code);
 
     return (
       <AppButton
-        onPress={() => toggleSelectDistrict(item)}
+        onPress={() => handleSelectDistrict(item)}
         padding={12}
         row
         justifyContent="space-between"
       >
-        <AppText>{item.name}</AppText>
-        {isSelected ? <IconTickCircle /> : <IconNoneTickCircle />}
+        <AppText>{item?.name}</AppText>
+        {/* ⭐ Chỉ hiển thị checkbox khi multiSelect = true */}
+        {multiSelect && (isSelected ? <IconTickCircle /> : <IconNoneTickCircle />)}
       </AppButton>
     );
   };
 
-  // const renderDistrict = ({ item }) => (
-  //   <AppButton onPress={() => handleSelectDistrict(item)} padding={12}>
-  //     <AppText>{item.name}</AppText>
-  //   </AppButton>
-  // );
-
   return (
-    <AppModal isVisible={isVisible} onClose={onClose} heightPercent={0.8}>
+    <AppModal isVisible={isVisible} onClose={() => { onClose(); resetState(); }} heightPercent={0.8}>
       <AppView flex={1} gap={8}>
         {step === 'province' && (
           <>
             <AppText bold fontSize={18}>Chọn Tỉnh / Thành phố</AppText>
-            {/* ✅ Ô nhập tìm kiếm tỉnh */}
             <AppInput
               type='search'
               value={searchText}
@@ -149,7 +166,9 @@ export default function SelectProvinceDistrictModal({ isVisible, onClose, onSele
 
         {step === 'district' && (
           <>
-            <AppText bold fontSize={18}>Chọn Xã / Phường thuộc {selectedProvince?.name}</AppText>
+            <AppText bold fontSize={18}>
+              Chọn Xã / Phường thuộc {selectedProvince?.name}
+            </AppText>
             <AppButton onPress={() => { setStep('province'); setSearchText(''); }}>
               <AppText>{"⬅ Quay lại"}</AppText>
             </AppButton>
@@ -161,16 +180,20 @@ export default function SelectProvinceDistrictModal({ isVisible, onClose, onSele
               placeholder="Tìm kiếm xã/phường..."
             />
 
-            <AppButton
-              backgroundColor={ColorsGlobal.main}
-              padding={12}
-              radius={10}
-              onPress={handleConfirm}
-            >
-              <AppText color="#fff" textAlign="center">
-                Xác nhận ({selectedDistricts.length})
-              </AppText>
-            </AppButton>
+            {/* ⭐ Chỉ hiển thị nút xác nhận khi multiSelect = true */}
+            {multiSelect && (
+              <AppButton
+                backgroundColor={ColorsGlobal.main}
+                padding={12}
+                radius={10}
+                onPress={handleConfirm}
+              >
+                <AppText color="#fff" textAlign="center">
+                  Xác nhận ({selectedDistricts.length})
+                </AppText>
+              </AppButton>
+            )}
+
             <FlatList
               data={filteredDistricts}
               scrollEnabled={false}
@@ -180,7 +203,6 @@ export default function SelectProvinceDistrictModal({ isVisible, onClose, onSele
                 <AppView height={1} backgroundColor={ColorsGlobal.borderColor} />
               )}
             />
-
           </>
         )}
       </AppView>

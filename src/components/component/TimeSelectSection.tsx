@@ -156,7 +156,7 @@ export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionPro
                     <AppView row gap={8} alignItems="center">
                         <ButtonChange onPress={subTime} icon={<IconMinus />} />
                         <AppText fontWeight={700}>{time}p</AppText>
-                        <ButtonChange onPress={addTime} icon={<IconPlus />} />
+                        <ButtonChange onPress={addTime} icon={<IconPlus size={18} color={ColorsGlobal.colorIconNoActive} />} />
                     </AppView>
                 )}
             </AppView>

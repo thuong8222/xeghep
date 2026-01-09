@@ -180,7 +180,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
         if (data.item.is_sold === 1) return null;
         const seller_ = data?.item?.id_driver_sell || data?.item?.driver_sell?.id_driver
         const isOnwer = seller_ === currentDriver?.id
-    
+
         return (
 
             <View style={styles.rowBack}>
@@ -256,7 +256,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
                 tension={50}
                 onRefresh={onRefresh}
                 onRowDidOpen={rowKey => console.log(`Hàng ${rowKey} đã mở`)}
-                ListEmptyComponent={() => <AppView alignItems='center' justifyContent='center'><AppText>{'Chưa có chuyến nào trong khu vực này'}</AppText></AppView>}
+                ListEmptyComponent={() => <AppView alignItems='center' justifyContent='center'><AppText title={'Chưa có chuyến nào trong khu vực này'}/></AppView>}
             />
             <AppButton onPress={SaleTrips} position={'absolute'} right={36} bottom={34} width={48} height={48} radius={999} backgroundColor={ColorsGlobal.main} justifyContent='center' alignItems='center'>
                 <IconPlus size={20} />

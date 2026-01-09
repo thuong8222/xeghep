@@ -29,7 +29,7 @@ export default function ModalBuyTrip({ visible, onRequestClose, onApplyFilter }:
   const [customDate, setCustomDate] = useState<Date | null>(null);
   const [placeStart, setPlaceStart] = useState('');
   const [placeEnd, setPlaceEnd] = useState('');
-  // ⭐ Convert lựa chọn → Date thật
+
   const dateValue = useMemo(() => {
     const vietnamNow = moment().tz('Asia/Ho_Chi_Minh');
 
@@ -82,30 +82,30 @@ export default function ModalBuyTrip({ visible, onRequestClose, onApplyFilter }:
       ...(selectedDirection !== 'all' && {
         direction: selectedDirection === 'go' ? 1 : 0
       }),
-      ...(selectedTime && { time: selectedTime }), // ⭐ Chỉ truyền nếu user chọn
+      ...(selectedTime && { time: selectedTime }),
       ...(placeStart && { place_start: placeStart }),
       ...(placeEnd && { place_end: placeEnd }),
     };
     console.log('handleApplyFilter selectedTime: ', selectedTime)
 
-    // console.log('handleApplyFilter  dateValue: ', dateValue?.toISOString());
-    // onApplyFilter?.(payload, dateValue?.toISOString(), placeStart, placeEnd);
+
+
     let dateFilter = null;
 
-if (dateValue && "start" in dateValue) {
-  dateFilter = {
-    start_date: Math.floor(dateValue.start.getTime() / 1000),
-    end_date: Math.floor(dateValue.end.getTime() / 1000)
-  };
-}
-    
+    if (dateValue && "start" in dateValue) {
+      dateFilter = {
+        start_date: Math.floor(dateValue.start.getTime() / 1000),
+        end_date: Math.floor(dateValue.end.getTime() / 1000)
+      };
+    }
+
     onApplyFilter?.(
       payload,
       dateFilter,
       placeStart,
       placeEnd
     );
-  
+
 
 
     resetFilter()
@@ -131,17 +131,17 @@ if (dateValue && "start" in dateValue) {
           radius={12}
           padding={16}
         >
-          {/* Đóng modal */}
+
           <AppButton alignItems="flex-end" onPress={onRequestClose}>
             <IconClose />
           </AppButton>
 
-          {/* Cuộn nội dung */}
+
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 16 }}
           >
-            {/* Hướng di chuyển */}
+
             <AppView>
               <AppView
                 paddingVertical={12}
@@ -172,7 +172,7 @@ if (dateValue && "start" in dateValue) {
               </AppView>
             </AppView>
 
-            {/* Thời gian */}
+       
             <AppView marginTop={16}>
               <AppView
                 paddingVertical={12}
@@ -222,7 +222,7 @@ if (dateValue && "start" in dateValue) {
             </AppView>
           </ScrollView>
 
-          {/* Nút OK */}
+      
           <ButtonSubmit title="OK" onPress={handleOk} />
         </AppView>
       </AppView>

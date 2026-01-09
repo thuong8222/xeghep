@@ -123,14 +123,14 @@ export const fetchTrips = createAsyncThunk<
         drop_off: payload.drop_off,
       },
     });
-    console.log('modal truyen vao: ',{
+    console.log('modal truyen vao: ', {
       area_id: payload.area_id,
       start_date: payload.start_date,
       end_date: payload.end_date,
       direction: payload.direction,
       pick_up: payload.pick_up,
       drop_off: payload.drop_off,
-    })
+    });
     console.log('fetchTrips res ', response);
     return {
       trips: response.data.data,
@@ -160,10 +160,10 @@ export const fetchReceivedTrips = createAsyncThunk<
   try {
     console.log('params chuyeesn nhajn slice: ', params);
     const response = await api.get('api/trips/received', { params });
-    console.log('response api/trips/received: ',response)
+    console.log('response api/trips/received: ', response);
     return response.data.data;
   } catch (err: any) {
-    console.log('err chuyen nhan: ', err)
+    console.log('err chuyen nhan: ', err);
     return rejectWithValue(
       err.response?.data?.message || 'Lấy chuyến thất bại',
     );
@@ -177,10 +177,10 @@ export const fetchSoldTrips = createAsyncThunk<
   try {
     console.log('params chuyen ban slice: ', params);
     const response = await api.get('api/trips/sold', { params });
-    console.log('fetchSoldTrips response:', response)
+    console.log('fetchSoldTrips response:', response);
     return response.data.data;
   } catch (err: any) {
-    console.log('err chuyen ban: ', err)
+    console.log('err chuyen ban: ', err);
     return rejectWithValue(
       err.response?.data?.message || 'Lấy chuyến thất bại',
     );
@@ -208,12 +208,14 @@ export const cancelTrip = createAsyncThunk<
   { rejectValue: string }
 >('trips/cancelTrip', async (tripId, { rejectWithValue }) => {
   try {
-    console.log("HỦY CHUYẾN: ", tripId);
+    console.log('HỦY CHUYẾN: ', tripId);
     const response = await api.delete(`/api/trips/${tripId}`);
-console.log('response:  huyr chuyen: ', response)
+    console.log('response:  huyr chuyen: ', response);
     return tripId; // trả lại id để xóa ở state
   } catch (err: any) {
-    return rejectWithValue(err.response?.data?.message || 'Hủy chuyến thất bại');
+    return rejectWithValue(
+      err.response?.data?.message || 'Hủy chuyến thất bại',
+    );
   }
 });
 export interface BuyTripPayload {
@@ -387,22 +389,25 @@ const tripsSlice = createSlice({
       })
       .addCase(cancelTrip.fulfilled, (state, action: PayloadAction<string>) => {
         state.loading = false;
-      
+
         // XÓA TRONG trips LIST
         state.trips = state.trips.filter(t => t.id_trip !== action.payload);
-      
+
         // XÓA TRONG receivedTrips LIST (nếu có)
-        state.receivedTrips = state.receivedTrips.filter(t => t.id_trip !== action.payload);
-      
+        state.receivedTrips = state.receivedTrips.filter(
+          t => t.id_trip !== action.payload,
+        );
+
         // XÓA TRONG soldTrips LIST (nếu có)
-        state.soldTrips = state.soldTrips.filter(t => t.id_trip !== action.payload);
+        state.soldTrips = state.soldTrips.filter(
+          t => t.id_trip !== action.payload,
+        );
         state.successMessage = 'Hủy chuyến thành công';
       })
       .addCase(cancelTrip.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Hủy chuyến thất bại';
       });
-      
   },
 });
 
