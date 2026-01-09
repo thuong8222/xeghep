@@ -1,11 +1,11 @@
-// redux/slices/driverSlice.ts
+
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 import AppConfig from '../../services/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface Driver {
-    id: string;               // API trả về id là string (UUID)
+    id: string;               
     full_name: string;
     image_avatar:string;
     phone: string;
@@ -47,7 +47,7 @@ export const api = axios.create({
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
   });
   
-  // Thêm interceptor
+  
   api.interceptors.request.use(async (config) => {
     const token = await AsyncStorage.getItem('token');
     if (token) {
@@ -58,7 +58,7 @@ export const api = axios.create({
   
 
 
-// ---- GET DRIVER INFO ----
+
 export const fetchDriver = createAsyncThunk<Driver, void, { rejectValue: string }>(
   'driver/fetchDriver',
   async (_, { rejectWithValue }) => {
@@ -73,7 +73,7 @@ export const fetchDriver = createAsyncThunk<Driver, void, { rejectValue: string 
   }
 );
 
-// ---- UPDATE DRIVER INFO ----
+
 export const updateDriver = createAsyncThunk<Driver, Partial<Driver>, { rejectValue: string }>(
   'driver/updateDriver',
   async (payload, { rejectWithValue }) => {
@@ -85,7 +85,7 @@ export const updateDriver = createAsyncThunk<Driver, Partial<Driver>, { rejectVa
     }
   }
 );
-// ---- CHANGE PASSWORD ----
+
 export const changeDriverPassword = createAsyncThunk<
   string, 
   { current_password: string; password: string; confirm_password: string }, 
@@ -95,7 +95,7 @@ export const changeDriverPassword = createAsyncThunk<
   async (payload, { rejectWithValue }) => {
     try {
       const response = await api.post('api/auth/password/change', payload);
-      // Giả sử API trả về message thành công
+      
       return response.data.message || 'Thay đổi mật khẩu thành công';
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message || 'Thay đổi mật khẩu thất bại');
@@ -113,7 +113,7 @@ const driverSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // FETCH DRIVER
+      
       .addCase(fetchDriver.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -128,7 +128,7 @@ const driverSlice = createSlice({
         state.error = action.payload || 'Lấy thông tin thất bại';
       })
 
-      // UPDATE DRIVER
+      
       .addCase(updateDriver.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -144,7 +144,7 @@ const driverSlice = createSlice({
         state.error = action.payload || 'Cập nhật thất bại';
       })
 
-      // CHANGE PASSWORD
+      
       .addCase(changeDriverPassword.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -152,7 +152,7 @@ const driverSlice = createSlice({
       })
       .addCase(changeDriverPassword.fulfilled, (state, action: PayloadAction<string>) => {
         state.loading = false;
-        state.successMessage = action.payload; // message thành công
+        state.successMessage = action.payload; 
       })
       .addCase(changeDriverPassword.rejected, (state, action) => {
         state.loading = false;

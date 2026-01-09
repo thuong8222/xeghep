@@ -30,12 +30,12 @@ export default function ModalShowInfoTranferMoney({ isVisible, onRequestClose, d
       }
   
       const formData = new FormData();
-      formData.append('transaction_code', idTranferMoney); // string
+      formData.append('transaction_code', idTranferMoney); 
       formData.append('image', {
-        uri: evidenceImage.imageUri, // local uri
-        name: 'transfer.jpg',        // tên file
-        type: 'image/jpeg',          // MIME type
-      } as any); // cast để TS không lỗi
+        uri: evidenceImage.imageUri, 
+        name: 'transfer.jpg',        
+        type: 'image/jpeg',          
+      } as any); 
     
         const response = await uploadTransferProof(data.id, formData);
     

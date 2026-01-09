@@ -32,7 +32,7 @@ export default function AccountScreen({ navigation }: Props) {
   const dispatch = useDispatch<AppDispatch>();
   const { driver, loading, error, successMessage, getDriver, clear } = useDriverApi();
   const { setCurrentDriver } = useAppContext();
-  console.log('driver: ', driver)
+ 
   const { isConnected } = useSocket();
   const [isModalChangePw, setIsModalChangePw] = useState(false);
 
@@ -84,7 +84,7 @@ export default function AccountScreen({ navigation }: Props) {
         },
         {
           text: 'Đăng xuất',
-          onPress: handleLogout, // gọi hàm async ở đây
+          onPress: handleLogout, 
         },
       ]
     );
@@ -127,11 +127,11 @@ export default function AccountScreen({ navigation }: Props) {
   const gotoHistoryBuySalePoint = () => {
 
     navigation.navigate('RootNavigator', {
-      screen: 'BottomTabs',      // bước 1: đi vào bottom tabs
+      screen: 'BottomTabs',      
       params: {
-        screen: 'AccountTabs',       // bước 2: vào account tab
+        screen: 'AccountTabs',       
         params: {
-          screen: 'HistoryBuySalePoint'// bước 3: tới màn hình History
+          screen: 'HistoryBuySalePoint'
         }
       }
     });
@@ -139,13 +139,13 @@ export default function AccountScreen({ navigation }: Props) {
   }
   const gotoInfoAccount = () => {
     navigation.navigate('RootNavigator', {
-      screen: 'BottomTabs',       // bước 1: đi vào BottomTabs
+      screen: 'BottomTabs',       
       params: {
-        screen: 'AccountTabs',    // bước 2: vào AccountTabs
+        screen: 'AccountTabs',    
         params: {
-          screen: 'AccountInfoScreen',  // bước 3: vào màn AccountInfoScreen
+          screen: 'AccountInfoScreen',  
           params: {
-            data: driver,              // truyền object driver
+            data: driver,              
           },
         },
       },
@@ -153,13 +153,13 @@ export default function AccountScreen({ navigation }: Props) {
   }
   const gotoInfoCar = () => {
     navigation.navigate('RootNavigator', {
-      screen: 'BottomTabs',      // bước 1: đi vào bottom tabs
+      screen: 'BottomTabs',      
       params: {
-        screen: 'AccountTabs',       // bước 2: vào account tab
+        screen: 'AccountTabs',       
         params: {
           screen: 'CarInfoScreen',
           params: {
-            data: driver,              // truyền object driver
+            data: driver,              
           },
         }
       }

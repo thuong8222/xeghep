@@ -11,6 +11,7 @@ import { AppDispatch, RootState } from '../../redux/data/store'
 import { createSalePoint, fetchPointsOnSale } from '../../redux/slices/pointSlice'
 import moment from 'moment'
 import { useAppContext } from '../../context/AppContext'
+import { useDriverApi } from '../../redux/hooks/userDriverApi'
 
 export default function PointAddScreen({ navigation }) {
     const dispatch = useDispatch<AppDispatch>();
@@ -18,7 +19,7 @@ export default function PointAddScreen({ navigation }) {
     const { loading, error, successMessage } = useSelector(
         (state: RootState) => state.point
     );
-
+    const { driver, getDriver } = useDriverApi();
     const [amountPoint, setAmountPoint] = useState<Number>();
     const [pricePoint, setPricePoint] = useState<Number>();
     const [priceError, setPriceError] = useState('');
@@ -27,11 +28,17 @@ export default function PointAddScreen({ navigation }) {
     const [onwer, setOnwer] = useState('');
     const [nameBank, setNameBank] = useState('');
 
-
+  useEffect(() => {
+    if (!driver) {
+      getDriver().catch(err => {
+        console.log('Lỗi lấy thông tin driver:', err);
+      });
+    }
+  }, [driver]);
 
     const postBuyPoint = async () => {
         if (!pricePoint || !amountPoint) {
-            Alert.alert('Thông báo','Bạn phải điền đủ thông tin');
+            Alert.alert('Thông báo', 'Bạn phải điền đủ thông tin');
             return;
         }
         if (pointError || priceError) {
@@ -52,16 +59,24 @@ export default function PointAddScreen({ navigation }) {
 
         Alert.alert('Thông báo', 'Thêm lệnh bán chuyến thành công');
         setTimeout(() => { navigation.goBack() }, 1000)
-
-
     };
+
+
+    const point_max = driver?.current_points ||0;
+
+    const cleanNumber = (value: string) => {
+        return value.replace(/,/g, '')
+    }
     return (
         <AppView flex={1} padding={16} backgroundColor={ColorsGlobal.backgroundWhite} gap={8}>
             <AppInput
                 value={NumberFormat(amountPoint)}
                 onChangeText={(text) => {
-                    setAmountPoint(text)
-                    setPointError(validatePoint(text, 200))
+                    const cleanText = cleanNumber(text)
+                    const numberValue = Number(cleanText)
+
+                    setAmountPoint(numberValue)
+                    setPointError(validatePoint(numberValue, point_max))
                 }}
                 label='Số điểm bán'
                 placeholder='Nhập số lượng điểm' keyboardType='decimal-pad'

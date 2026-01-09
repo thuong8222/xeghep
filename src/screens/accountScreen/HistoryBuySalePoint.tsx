@@ -33,16 +33,16 @@ export default function HistoryBuySalePoint() {
   const [lastPage, setLastPage] = useState(1);
 
 
-  
+
   // ✅ Kích hoạt real-time updates
   useTransactionHistoryRealtime(currentDriver?.id);
-  
+
   useEffect(() => {
     if (!currentDriver?.id) return;
-  
+
     const start_date = fromDate ? dateToTimestamp(fromDate, false) : undefined;
     const end_date = toDate ? dateToTimestamp(toDate, true) : undefined;
-  
+
     const params: FetchHistoryPointParams = { page: 1 };
     if (start_date) params.start_date = start_date;
     if (end_date) params.end_date = end_date;
@@ -74,7 +74,7 @@ export default function HistoryBuySalePoint() {
   }, []);
 
 
-  
+
 
   // ✅ Xử lý khi chọn ngày
   const handleConfirmDate = useCallback(
@@ -116,10 +116,10 @@ export default function HistoryBuySalePoint() {
 
       // ✅ Gọi filter ngay sau khi chọn ngày
       setTimeout(() => {
-        const start = selectedDateType === 'from' 
+        const start = selectedDateType === 'from'
           ? moment(selectedDate).startOf('day').unix()
           : fromDate ? dateToTimestamp(fromDate, false) : null;
-        
+
         const end = selectedDateType === 'to'
           ? moment(selectedDate).endOf('day').unix()
           : toDate ? dateToTimestamp(toDate, true) : null;
@@ -141,7 +141,7 @@ export default function HistoryBuySalePoint() {
     setSelectedDateType('from');
     setIsDatePickerVisible(true);
   }
-  
+
   const openSelectFromTo = () => {
 
     setSelectedDateType('to');
@@ -151,10 +151,10 @@ export default function HistoryBuySalePoint() {
   // ✅ LoadMore với timestamp
   const loadMore = () => {
     if (page >= lastPage || loading) return;
-    
+
     const start_date = dateToTimestamp(fromDate, false);
     const end_date = dateToTimestamp(toDate, true);
-    
+
     const params: FetchHistoryPointParams = { page: page + 1 };
     if (start_date) params.start_date = start_date;
     if (end_date) params.end_date = end_date;
@@ -177,7 +177,7 @@ export default function HistoryBuySalePoint() {
     </View>
   );
 
-if (!history) return null;
+  if (!history) return null;
 
   return (
     <Container ignoreBottomInset style={{ gap: 6 }} loading={loading}>
@@ -229,8 +229,8 @@ if (!history) return null;
           {"! " + errorMessage}
         </AppText>
       )}
-  <AppView >
-       <TypeFilterBar
+      <AppView >
+        <TypeFilterBar
           types={types}
           selectedType={selectedType}
           toggleFilter={(type) => setSelectedType(prev => (prev === type ? null : type))}
@@ -257,7 +257,7 @@ if (!history) return null;
         mode="date"
         onConfirm={handleConfirmDate}
         onCancel={() => setIsDatePickerVisible(false)}
-        locale="en_GB" 
+        locale="en_GB"
       />
     </Container>
   );

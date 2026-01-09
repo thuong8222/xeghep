@@ -69,8 +69,8 @@ export default function BuyTripScreen({ navigation, route }: Props) {
         </AppView>
     )
     React.useEffect(() => {
-        // Use `setOptions` to update the button that we previously specified
-        // Now the button includes an `onPress` handler to update the count
+        
+        
         navigation.setOptions({
             headerBackTitleStyle: { fontSize: 0 },
             headerLeft: () => (
@@ -90,7 +90,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
     useEffect(() => {
         const listener = (newFilters: any) => {
             console.log('Filters changed:', newFilters)
-            // Xử lý filter ở đây
+            
         }
 
         buyTripEmitter.on('onFilterChanged', listener)
@@ -212,22 +212,22 @@ export default function BuyTripScreen({ navigation, route }: Props) {
             area_id: id_area
         };
 
-        // ------------- TIME FILTER (đã sửa) --------------
-        // if (dateFilter && dateFilter.start && dateFilter.end) {
-        //     model.start_date = dateFilter.start;   // ⭐ GIỮ NGUYÊN ISO từ child
-        //     model.end_date = dateFilter.end;
-        // }
+        
+        
+        
+        
+        
         if (dateFilter) {
             model.start_date = dateFilter.start_date;
             model.end_date = dateFilter.end_date;
         }
 
-        // ------------ DIRECTION ------------
+        
         if (filters.direction !== undefined) {
             model.direction = filters.direction;
         }
 
-        // ------------ PICKUP / DROPOFF ------------
+        
         if (filters.place_start) model.place_start = filters.place_start;
         if (filters.place_end) model.place_end = filters.place_end;
 

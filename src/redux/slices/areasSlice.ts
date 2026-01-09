@@ -1,10 +1,10 @@
-// redux/slices/areaSlice.ts
+
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 import AppConfig from '../../services/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// ---- INTERFACE ----
+
 export interface AreaGroup {
   id: string;
   name: string;
@@ -30,7 +30,7 @@ const initialState: AreaState = {
   successMessage: null,
 };
 
-// ---- AXIOS INSTANCE ----
+
 export const api = axios.create({
   baseURL: AppConfig.BASE_URL,
   headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -44,7 +44,7 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-// ---- FETCH AREA GROUPS ----
+
 export const fetchAreaGroups = createAsyncThunk<
   AreaGroup[],
   void,
@@ -65,7 +65,7 @@ export const fetchAreaGroups = createAsyncThunk<
   }
 );
 
-// ---- SLICE ----
+
 const areaSlice = createSlice({
   name: 'area',
   initialState,

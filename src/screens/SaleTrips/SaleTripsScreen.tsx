@@ -163,28 +163,15 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
   return (
 
     <AppView flex={1} backgroundColor='#fff' paddingHorizontal={16} paddingTop={16} gap={18} paddingBottom={Platform.OS === 'ios' ? insets.bottom : 0} position='relative'  >
-      {/* ⭐ Loading Overlay */}
+
       {loading && (
-        <AppView flex={1}
-          // position="absolute"
-          // top={0}
-          // left={0}
-          // right={0}
-          // bottom={0}
-          // backgroundColor="rgba(0,0,0,0.3)"
-          // justifyContent="center"
-          // alignItems="center"
-          // zIndex={9999}
-        >
+        <AppView>
           <AppView
-            backgroundColor="#fff"
-            padding={20}
-            radius={10}
             alignItems="center"
             gap={12}
           >
             <ActivityIndicator size="large" color={ColorsGlobal.main} />
-            <AppText>Đang tạo chuyến...</AppText>
+            <AppText color={ColorsGlobal.main} title={'Đang tạo chuyến...'} />
           </AppView>
         </AppView>
       )}

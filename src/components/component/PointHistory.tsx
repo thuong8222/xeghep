@@ -8,14 +8,14 @@ import { CONSTANT, NumberFormat } from '../../utils/Helper';
 
 
 export default function PointHistory(props) {
-    // console.log('PointHistory props.data: ', props.data)
+    
     const isBuy = props.data.related_type === 'point_buy' || props.data.related_type === 'trip_buy'
     const minus_points = props.data.related_type === 'point_sale' || props.data.related_type === 'trip_buy'
     const key_related = props.data.related_type;
     const name_related = CONSTANT.TRANSACTION_TYPE_BY_KEY[key_related];
     const key_reason = props.data.reason
     const reason_name = CONSTANT.TRANSACTION_TYPE_BY_KEY[key_reason];
-
+    console.log('props: ', props)
     return (
         <AppView radius={12} padding={12} gap={8} backgroundColor={ColorsGlobal.backgroundLight}  >
             <AppView row justifyContent={'space-between'}>
@@ -23,14 +23,15 @@ export default function PointHistory(props) {
                     <AppText fontSize={14}
                         color={ColorsGlobal.main2}>{reason_name}</AppText>
 
-                    {(props.data?.partner) &&
+                    {(props.data?.partner) ?
                         <AppText fontSize={14}
-                            color={ColorsGlobal.main2}>{isBuy ? ` của ${props.data?.partner?.full_name||props.data?.partner?.full_name}` : ` cho ${props.data?.partner?.full_name|| props.data.partner?.full_name}`}</AppText>
-                    } 
+                            color={ColorsGlobal.main2}>{isBuy ? ` của ${props.data?.partner?.full_name || props.data?.partner?.full_name}` : ` cho ${props.data?.partner?.full_name || props.data.partner?.full_name}`}</AppText>
+                        : <AppText fontSize={14} color={ColorsGlobal.main2} title={' trên website'} />
+                    }
                 </AppView>
 
                 <AppText color={minus_points ? ColorsGlobal.main : ColorsGlobal.main2} fontWeight={600}>
-                    {/* {isBuy ? `+${reason} điểm` : `-${reason} điểm`} */}
+                 
                     {NumberFormat(props?.data?.change) + ' điểm'}
                 </AppText>
             </AppView>

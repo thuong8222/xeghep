@@ -49,7 +49,7 @@ export default function DetailTripHistorySreen({ route, navigation }) {
     let status_ = '';
 
     if (isSold === 1) {
-        status_ = 'Đã bán';
+        status_ = isSeller ? 'Đã bán' : 'Đã nhận';
     } else if (isSold === 2 && data?.status === 0) {
         status_ = 'Đã huỷ';
     } else {

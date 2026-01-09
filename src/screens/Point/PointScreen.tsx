@@ -4,8 +4,6 @@ import AppView from '../../components/common/AppView'
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal'
 import { SwipeListView } from 'react-native-swipe-list-view'
 import AppButton from '../../components/common/AppButton'
-
-import { tranferPoints } from '../../dataDemoJson'
 import Point from '../../components/component/Point'
 import IconPlus from '../../assets/icons/IconPlus'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -31,7 +29,7 @@ export default function PointScreen({ navigation }: Props) {
     const [openModalTranferMoney, setOpenModalTranferMoney] = useState(false);
     const [pointSelected, setPointSelected] = useState({});
     const { points, loading, error } = useSelector((state: RootState) => state.point);
-  // ✅ Kích hoạt real-time updates
+  
   usePointsListRealtime();
     useEffect(() => {
         dispatch(fetchPointsOnSale());
@@ -56,11 +54,6 @@ export default function PointScreen({ navigation }: Props) {
             rowMap[rowKey].closeRow();
         }
     };
-    // const buyTrip = (rowMap, rowKey, data) =>{
-    //     setPointSelected(data.item);
-    //     closeRow && closeRow(rowMap, rowKey);
-    //     navigation.navigate('ChatScreen', {data:data.item})
-    // }
     const buyTrip = (rowMap, rowKey, data) => {
         dispatch(
             buyPointAction({
@@ -117,8 +110,8 @@ export default function PointScreen({ navigation }: Props) {
                 renderItem={renderItem_trip} ItemSeparatorComponent={() => <AppView height={16} />}
                 renderHiddenItem={renderHiddenItem}
                 rightOpenValue={-92}
-                leftOpenValue={0}              // Tắt vuốt sang phải
-                disableRightSwipe={true}       // Chỉ vuốt trái
+                leftOpenValue={0}              
+                disableRightSwipe={true}       
                 swipeToOpenPercent={10}
                 directionalDistanceChangeThreshold={2}
                 friction={8}

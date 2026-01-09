@@ -292,38 +292,40 @@ export const formatCurrency = (value: string) => {
   return cleaned.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 };
 export const validatePoint = (value: string, currentPoints: number) => {
+
   if (!value) return 'Vui lòng nhập số điểm';
 
-  if (!/^\d+$/.test(value)) return 'Số điểm chỉ được chứa số';
+
 
   if (parseInt(value, 10) <= 0) return 'Số điểm phải lớn hơn 0';
 
   if (parseInt(value, 10) > currentPoints) {
-    return `Số điểm không được lớn hơn số điểm hiện tại (${currentPoints})`;
+    
+    return `Số điểm không được lớn hơn số điểm hiện tại (${NumberFormat(currentPoints)})`;
   }
 
   return '';
 };
 export const validatePhoneNumber = (value: string) => {
-  // Biểu thức chính quy kiểm tra số điện thoại Việt Nam (10 chữ số, bắt đầu bằng 03-09)
+ 
   const phonePattern = /^(03|05|07|08|09)\d{8}$/;
 
-  // Kiểm tra nếu không có giá trị
+
   if (!value) {
     return 'Vui lòng nhập số điện thoại';
   }
 
-  // Kiểm tra nếu có ký tự không phải số (bao gồm chữ cái và ký tự đặc biệt)
+  
   if (!/^\d+$/.test(value)) {
     return 'Số điện thoại chỉ được chứa số';
   }
 
-  // Kiểm tra nếu số điện thoại không khớp với pattern
+
   if (!phonePattern.test(value)) {
     return 'Số điện thoại không hợp lệ';
   }
 
-  // Nếu hợp lệ, trả về chuỗi rỗng
+ 
   return '';
 };
 export const validateExperienceYears = (value: string) => {
@@ -374,12 +376,12 @@ export const validatePassword = (value: string) => {
   return '';
 };
 export const validateYear = (text: string) => {
-  // Chỉ cho phép nhập số
+
   if (!/^\d*$/.test(text)) {
     return 'Chỉ được nhập số';
   }
 
-  // Nếu đủ 4 ký tự thì kiểm tra hợp lệ
+
   if (text.length === 4) {
     const yearNumber = parseInt(text, 10);
     const currentYear = new Date().getFullYear();
@@ -403,7 +405,7 @@ export const validateConfirmPassword = ({
   if (value !== password) {
     return 'Mật khẩu nhập lại không khớp';
   }
-  return ''; // Nếu không có lỗi thì trả về chuỗi rỗng
+  return ''; 
 };
 
 export function validatePlateVN(input: string): string {
@@ -516,14 +518,13 @@ export const openMapSmart = (trip: any) => {
   const { lat_start, lng_start, lat_end, lng_end, place_start, place_end } =
     trip;
 
-  // Ưu tiên dùng tọa độ nếu có
+
   if (lat_start && lng_start && lat_end && lng_end) {
     const url = `https://www.google.com/maps/dir/?api=1&origin=${lat_start},${lng_start}&destination=${lat_end},${lng_end}&travelmode=driving`;
     Linking.openURL(url);
     return;
   }
 
-  // Nếu không có tọa độ thì fallback sang địa chỉ
   if (place_start && place_end) {
     const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
       place_start,
@@ -543,16 +544,15 @@ export const DRIVER_STATUS_LABELS: Record<number, string> = {
   [DRIVER_STATUS.MAINTENANCE]: 'Đang bảo trì',
 };
 export const parseTime = value => {
-  // Nếu là dạng số và dài 10 → timestamp giây
+ 
   if (typeof value === 'number' && value.toString().length === 10) {
     return moment(value * 1000);
   }
 
-  // Nếu là string dạng timestamp "1763950404"
   if (typeof value === 'string' && /^\d{10}$/.test(value)) {
     return moment(Number(value) * 1000);
   }
 
-  // Còn lại → xem như datetime string bình thường
+
   return moment(value);
 };

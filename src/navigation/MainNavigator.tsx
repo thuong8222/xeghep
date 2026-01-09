@@ -31,7 +31,6 @@ export default function MainNavigator() {
   const { currentDriver } = useAppContext();
   const { socket, isConnected } = useSocket();
   const [isSplashDone, setIsSplashDone] = useState(false);
-console.log('currentDriver: ',currentDriver)
   const [driver, setDriver] = useState<any>(null);
   useEffect(() => {
     const fetchDriver = async () => {
@@ -40,7 +39,7 @@ console.log('currentDriver: ',currentDriver)
     };
     fetchDriver();
   }, []);
-  // ✅ Đăng ký socket khi app khởi động
+
   useEffect(() => {
     if (!socket || !isConnected || !currentDriver?.id || !driver?.id) return;
 
