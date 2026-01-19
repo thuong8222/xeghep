@@ -90,7 +90,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
     useEffect(() => {
         const listener = (newFilters: any) => {
             console.log('Filters changed:', newFilters)
-            
+    
         }
 
         buyTripEmitter.on('onFilterChanged', listener)

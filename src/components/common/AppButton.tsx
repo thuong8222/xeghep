@@ -84,15 +84,15 @@ const AppButton: React.FC<CustomButtonProps> = ({
     left,
     right,
     position,
-    ...(row && { flexDirection: 'row' }),  // Row layout nếu row prop được truyền
+    ...(row && { flexDirection: 'row' }),  
   };
 
   return (
     <TouchableOpacity
-      style={[viewStyle, style]}  // Kết hợp style từ props và các style động
+      style={[viewStyle, style]}  
       onPress={onPress}
       disabled={disabled}
-      activeOpacity={activeOpacity || 0.7}  // Có thể tùy chỉnh activeOpacity khi bấm
+      activeOpacity={activeOpacity || 0.7}  
     >
       {children}
     </TouchableOpacity>

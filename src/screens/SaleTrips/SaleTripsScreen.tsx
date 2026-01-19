@@ -190,14 +190,19 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
           <AppView gap={6}>
             <AppView gap={6}>
               <AppView row gap={8} alignItems='flex-end' justifyContent={'space-between'}>
-                <AppInput
-                  label={placeStart ? 'Điểm đón' : ''}
-                  value={placeStart}
-                  onChangeText={setPlaceStart}
-                  placeholder="Nhập điểm đón"
-                  type='select'
-                  toggleSelect={toggleMoreInput}
-                />
+                <AppView flex={1}>
+                  <AppInput
+                    label={placeStart ? 'Điểm đón' : ''}
+                    value={placeStart}
+                    onChangeText={setPlaceStart}
+                    placeholder="Nhập điểm đón"
+                  // type='select'
+                  // toggleSelect={toggleMoreInput}
+                  />
+                </AppView>
+                <AppButton onPress={toggleMoreInput} borderWidth={1} padding={7} radius={6} borderColor={ColorsGlobal.borderColor}>
+                  <IconDotHorizonal />
+                </AppButton>
               </AppView>
               {moreInput &&
                 <AppView row gap={16} >
@@ -214,15 +219,19 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
             </AppView>
             <AppView gap={6}>
               <AppView row gap={8} alignItems='flex-end' justifyContent={'space-between'}>
-                <AppInput
-                  label={placeEnd ? 'Điểm trả' : ''}
-                  value={placeEnd}
-                  onChangeText={setPlaceEnd}
-                  placeholder="Nhập điểm trả"
-                  type='select'
-                  toggleSelect={toggleMoreDetailEnd}
-                />
-
+                <AppView flex={1}>
+                  <AppInput
+                    label={placeEnd ? 'Điểm trả' : ''}
+                    value={placeEnd}
+                    onChangeText={setPlaceEnd}
+                    placeholder="Nhập điểm trả"
+                    // type='select'
+                    // toggleSelect={toggleMoreDetailEnd}
+                  />
+                </AppView>
+                <AppButton onPress={toggleMoreDetailEnd} borderWidth={1} padding={7} radius={6} borderColor={ColorsGlobal.borderColor}>
+                  <IconDotHorizonal />
+                </AppButton>
               </AppView>
               {moreInputEnd &&
                 <AppView row gap={16} >

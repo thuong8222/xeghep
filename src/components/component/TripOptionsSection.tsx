@@ -81,7 +81,7 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
     };
 
     const subPoint = () => {
-        const newPoints = Math.max(points - 0.5, 1);
+        const newPoints = Math.max(points - 0.5, 0);
         setPoints(newPoints);
         notifyChange(undefined, undefined, newPoints);
     };

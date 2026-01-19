@@ -86,6 +86,7 @@ export default function PointScreen({ navigation }: Props) {
             });
     };
     const renderHiddenItem = (data, rowMap) => {
+        console.log('data: ',data)
         return (
 
             <AppView flex={1} alignItems='center' backgroundColor={ColorsGlobal.backgroundBuyTrip} radius={12} row justifyContent={'flex-end'}>

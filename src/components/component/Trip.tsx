@@ -15,7 +15,7 @@ import { useCountdown } from '../../hooks/useCountdown';
 import CountdownStyled from './CountdownStyled';
 
 export default function Trip(props) {
-    // console.log('trips:  props: ', props)
+
     const guests = props.data?.guests;
     const time_start_sec = props.data?.time_start;
     const isSold = props.data?.is_sold === 1;
@@ -63,7 +63,7 @@ export default function Trip(props) {
 
                     <AppView row gap={8} alignItems='center'>
                         <AppText fontWeight={600}>{formatted}</AppText>
-                        {<CountdownStyled seconds={countdown} />}
+                        {/* {<CountdownStyled seconds={countdown} />} */}
                     </AppView>
                 </AppView>
                 <AppView row gap={8} >

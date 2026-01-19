@@ -10,7 +10,7 @@ export default function CountdownStyled({ seconds }: any) {
     
     const duration = moment.duration(seconds, 'seconds');
 
-    // ✅ SỬA: Lấy tổng số giờ, không phải hours() trong ngày
+  
     const totalHours = Math.floor(duration.asHours());
     const m = String(duration.minutes()).padStart(2, '0');
     const s = String(duration.seconds()).padStart(2, '0');
