@@ -35,8 +35,6 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
   const [selectedDirection, setSelectedDirection] = useState(1);
   const [isCommuneWard, setIsCommuneWard] = useState(false);
   const [isCommuneWardTo, setIsCommuneWardTo] = useState(false);
-  const [moreInputEnd, setMoreInputEnd] = useState(false);
-  const [moreInput, setMoreInput] = useState(false);
 
   const [placeStart, setPlaceStart] = useState('');
   const [placeEnd, setPlaceEnd] = useState('');
@@ -53,8 +51,6 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
     typeCar: null as { type: string; name: string } | null
   });
   const [noteOptions, setNoteOptions] = useState();
-
-
 
   const handleTripOptionsChange = (
     numGuests: number | null,
@@ -73,7 +69,6 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
       typeCar
     });
 
-
     setTripOptions(prev => ({
       numGuests: numGuests ?? prev.numGuests,
       price: price ?? prev.price,
@@ -86,45 +81,38 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
 
   const handleNoteChange = (val?: string) => {
     setNoteOptions(val ?? "");
-    console.log("Ghi chú nhận được từ con:", val);
   };
-  const handleCreateTrip = async () => {
 
+  const handleCreateTrip = async () => {
     if (!placeStart || !placeEnd) {
       Alert.alert('Điểm đi/ Điểm đến không được để trống!')
       return;
     }
 
-    console.log('selectedDirection: ', selectedDirection)
-
-    console.log('tripOptions: ', tripOptions)
     const payload: CreateTripPayload = {
       area_id: id_area,
       direction: selectedDirection,
       guests: tripOptions?.numGuests || 1,
       time_start: tripOptions?.timeStart || (Math.floor(Date.now() / 1000)),
       price_sell: Number(tripOptions.price) || 250,
-      place_start: placeStart,
-      place_end: placeEnd + ', ' + communeWard,
+      place_start: communeWardTo ? `${placeStart}, ${communeWardTo}` : placeStart,
+      place_end: communeWard ? `${placeEnd}, ${communeWard}` : placeEnd,
       point: Number(tripOptions?.points),
       note: noteOptions || '',
       type_car: tripOptions?.guestType,
       cover_car: tripOptions.guestType === 'normal' ? 0 : 1,
     };
-    console.log('payload handleCreateTrip: ', payload)
 
     try {
       const res = await dispatch(createTrip(payload)).unwrap();
       await fetchTrips(id_area);
-      console.log("🎉 Kết quả API trả về:", res);
+
       setUpdateTrips(moment().unix());
-      setSelectedDirection();
+      setSelectedDirection(1);
       setPlaceStart("");
       setPlaceEnd("");
       setCommuneWard("");
-      setCommuneWardTo('')
-      setMoreInputEnd(false);
-      setMoreInput(false);
+      setCommuneWardTo('');
 
       setTripOptions({
         numGuests: 1,
@@ -140,41 +128,40 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
       navigation.goBack()
     } catch (err) {
       Alert.alert('Lỗi tạo chuyến', JSON.stringify(err, null, 2));
-
       console.log('Lỗi tạo chuyến:', JSON.stringify(err, null, 2));
     }
   };
 
-  const selectCommuneWard = () => {
-    setIsCommuneWard(true);
-  };
-  const selectCommuneWardTo = () => {
+  // Mở modal chọn tỉnh/huyện cho điểm đón
+  const handleSelectCommuneWardStart = () => {
     setIsCommuneWardTo(true);
   };
-  const toggleMoreDetailEnd = () => {
-    setMoreInputEnd(!moreInputEnd)
-  }
-  const toggleMoreInput = () => {
-    setMoreInput(!moreInput)
-  }
 
-
+  // Mở modal chọn tỉnh/huyện cho điểm trả
+  const handleSelectCommuneWardEnd = () => {
+    setIsCommuneWard(true);
+  };
 
   return (
-
-    <AppView flex={1} backgroundColor='#fff' paddingHorizontal={16} paddingTop={16} gap={18} paddingBottom={Platform.OS === 'ios' ? insets.bottom : 0} position='relative'  >
-
+    <AppView 
+      flex={1} 
+      backgroundColor='#fff' 
+      paddingHorizontal={16} 
+      paddingTop={16} 
+      gap={18} 
+      paddingBottom={Platform.OS === 'ios' ? insets.bottom : 0} 
+      position='relative'
+    >
       {loading && (
         <AppView>
-          <AppView
-            alignItems="center"
-            gap={12}
-          >
+          <AppView alignItems="center" gap={12}>
             <ActivityIndicator size="large" color={ColorsGlobal.main} />
             <AppText color={ColorsGlobal.main} title={'Đang tạo chuyến...'} />
           </AppView>
         </AppView>
       )}
+
+      {/* Chọn chiều đi/về */}
       <AppView row gap={32}>
         <AppButton onPress={() => setSelectedDirection(1)} row gap={8}>
           <AppText>{'Chiều đi'}</AppText>
@@ -185,74 +172,89 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
           {selectedDirection === 0 ? <IconTickCircle /> : <IconNoneTickCircle />}
         </AppButton>
       </AppView>
+
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         <AppView gap={18}>
-          <AppView gap={6}>
+          <AppView gap={12}>
+            {/* ĐIỂM ĐÓN */}
             <AppView gap={6}>
-              <AppView row gap={8} alignItems='flex-end' justifyContent={'space-between'}>
+              <AppView row gap={8} alignItems='flex-end'>
                 <AppView flex={1}>
                   <AppInput
                     label={placeStart ? 'Điểm đón' : ''}
                     value={placeStart}
                     onChangeText={setPlaceStart}
                     placeholder="Nhập điểm đón"
-                  // type='select'
-                  // toggleSelect={toggleMoreInput}
                   />
                 </AppView>
-                <AppButton onPress={toggleMoreInput} borderWidth={1} padding={7} radius={6} borderColor={ColorsGlobal.borderColor}>
+                <AppButton 
+                  onPress={handleSelectCommuneWardStart} 
+                  borderWidth={1} 
+                  padding={7} 
+                  radius={6} 
+                  borderColor={ColorsGlobal.borderColor}
+                >
                   <IconDotHorizonal />
                 </AppButton>
               </AppView>
-              {moreInput &&
-                <AppView row gap={16} >
+
+              {/* Hiển thị input xã/phường nếu đã chọn */}
+              {communeWardTo && (
+                <AppView>
                   <AppInput
+                    label="Xã/Phường"
                     value={communeWardTo}
-                    onChangeText={setCommuneWardTo}
-                    placeholder="Chọn xã/phường"
-                    type='select'
                     editable={false}
-                    toggleSelect={selectCommuneWardTo}
+                    placeholder="Chưa chọn"
                   />
                 </AppView>
-              }
+              )}
             </AppView>
+
+            {/* ĐIỂM TRẢ */}
             <AppView gap={6}>
-              <AppView row gap={8} alignItems='flex-end' justifyContent={'space-between'}>
+              <AppView row gap={8} alignItems='flex-end'>
                 <AppView flex={1}>
                   <AppInput
                     label={placeEnd ? 'Điểm trả' : ''}
                     value={placeEnd}
                     onChangeText={setPlaceEnd}
                     placeholder="Nhập điểm trả"
-                    // type='select'
-                    // toggleSelect={toggleMoreDetailEnd}
                   />
                 </AppView>
-                <AppButton onPress={toggleMoreDetailEnd} borderWidth={1} padding={7} radius={6} borderColor={ColorsGlobal.borderColor}>
+                <AppButton 
+                  onPress={handleSelectCommuneWardEnd} 
+                  borderWidth={1} 
+                  padding={7} 
+                  radius={6} 
+                  borderColor={ColorsGlobal.borderColor}
+                >
                   <IconDotHorizonal />
                 </AppButton>
               </AppView>
-              {moreInputEnd &&
-                <AppView row gap={16} >
 
+              {/* Hiển thị input xã/phường nếu đã chọn */}
+              {communeWard && (
+                <AppView>
                   <AppInput
+                    label="Xã/Phường"
                     value={communeWard}
-                    onChangeText={setCommuneWard}
-                    placeholder="Chọn xã/phường"
-                    type='select'
                     editable={false}
-                    toggleSelect={selectCommuneWard}
+                    placeholder="Chưa chọn"
                   />
                 </AppView>
-              }
+              )}
             </AppView>
           </AppView>
+
           <TripOptionsSection onTripOptionsChange={handleTripOptionsChange} />
           <NoteInputSection onNoteChange={handleNoteChange} />
         </AppView>
       </ScrollView>
+
       <ButtonSubmit title='Đăng bán' onPress={handleCreateTrip} />
+
+      {/* Modal chọn tỉnh/huyện cho ĐIỂM TRẢ */}
       <SelectProvinceDistrictModal
         multiSelect={false}
         isVisible={isCommuneWard}
@@ -260,12 +262,12 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
           setIsCommuneWard(false);
         }}
         onSelected={(value) => {
-          console.log('✅ Kết quả chọn:', value);
-
+          console.log('✅ Kết quả chọn điểm trả:', value);
           setCommuneWard(`${value.province.name} - ${value.district.name}`);
-
         }}
       />
+
+      {/* Modal chọn tỉnh/huyện cho ĐIỂM ĐÓN */}
       <SelectProvinceDistrictModal
         multiSelect={false}
         isVisible={isCommuneWardTo}
@@ -273,14 +275,10 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
           setIsCommuneWardTo(false);
         }}
         onSelected={(value) => {
-          console.log('✅ Kết quả chọn:', value);
-
+          console.log('✅ Kết quả chọn điểm đón:', value);
           setCommuneWardTo(`${value.province.name} - ${value.district.name}`);
         }}
       />
-
     </AppView>
-
   )
 }
-

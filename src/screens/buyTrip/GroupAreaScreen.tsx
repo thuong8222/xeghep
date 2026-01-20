@@ -15,6 +15,7 @@ import ModalBuyTrip from '../../components/component/modals/ModalBuyTrip';
 import { useAreaApi } from '../../redux/hooks/useAreaApi';
 import { getNameByCode } from '../../utils/province';
 import Container from '../../components/common/Container';
+import { useFocusEffect } from '@react-navigation/native';
 
 type GroupAreaNavProp = NativeStackNavigationProp<BuyTripStackParamList, "BuyTrip">;
 
@@ -28,10 +29,14 @@ export default function GroupAreaScreen({ navigation }: Props) {
   const [refreshing, setRefreshing] = useState(false);
 
   // Lấy danh sách khi mount
-  useEffect(() => {
-    fetchGroups();
-
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      if (!groups || groups.length === 0) {
+        fetchGroups();
+      }
+    }, [groups, fetchGroups])
+  );
+  
 
   const fetchGroups = useCallback(async () => {
     try {
@@ -66,7 +71,7 @@ export default function GroupAreaScreen({ navigation }: Props) {
       headerTitle: () => (
         <AppView justifyContent={'center'} alignItems={'center'}>
           <AppText fontWeight={700}>{'Nhóm khu vực'}</AppText>
-         
+
         </AppView>
       ),
       // headerRight: HeaderRightButton,
@@ -76,7 +81,7 @@ export default function GroupAreaScreen({ navigation }: Props) {
 
   const gotoDetailArea = (props) => {
 
-    navigation.navigate('BuyTrip', { nameGroup: props.name + ' - ' + getNameByCode(props.province_code), countMember: props.members_count || 0, id_area: props.id ,isJoin: props.is_member})
+    navigation.navigate('BuyTrip', { nameGroup: props.name + ' - ' + getNameByCode(props.province_code), countMember: props.members_count || 0, id_area: props.id, isJoin: props.is_member })
   }
   const renderItem_groupArea = ({ item, index }) => {
     return (<>
@@ -89,11 +94,13 @@ export default function GroupAreaScreen({ navigation }: Props) {
       <FlatList
         data={groups}
         renderItem={renderItem_groupArea}
-        numColumns={1} // 1 cột cho list, 2 cột cho grid
+        numColumns={1}
         ItemSeparatorComponent={<AppView height={1} backgroundColor={ColorsGlobal.borderColor} />}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
+        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           !loading && <AppView alignItems='center'><AppText>Không có khu vực nào</AppText></AppView>
         }
@@ -115,7 +122,7 @@ const Area = (props) => {
       </AppView>
       <AppView >
         <AppText color={props.data.is_read ? ColorsGlobal.textLight : ColorsGlobal.main} fontSize={16} fontWeight={700}>{props.data.name}</AppText>
-        <AppText color={props.data.is_read ? ColorsGlobal.textLight : ColorsGlobal.main} fontSize={12}>{'Khu vực ' + getNameByCode(props.data.province_code)}</AppText>
+        <AppText color={props.data.is_read ? ColorsGlobal.textLight : ColorsGlobal.main} fontSize={12}>{'Khu vực ' + props?.data?.description}</AppText>
       </AppView>
     </AppButton>
   )

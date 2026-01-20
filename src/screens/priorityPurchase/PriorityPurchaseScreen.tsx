@@ -14,12 +14,13 @@ import { createAutoBuy, fetchAutoBuyList, updateAutoBuy } from '../../redux/slic
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAppDispatch } from '../../redux/hooks/useAppDispatch';
 import { NumberFormat } from '../../utils/Helper';
+import IconDotHorizonal from '../../assets/icons/IconDotHorizonal';
 
 export default function PriorityPurchaseScreen() {
     const route = useRoute();
     const { editData } = route?.params ?? {};
-    console.log('route.params editData: ', editData)
-    
+
+
     const dispatch = useAppDispatch();
     const navigation = useNavigation();
     const [placeFrom, setPlaceFrom] = useState('');
@@ -33,10 +34,10 @@ export default function PriorityPurchaseScreen() {
     const [point, setPoint] = useState('');
     const [price, setPrice] = useState('');
     const [selectedDirection, setSelectedDirection] = useState(1);
+    const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
         if (editData) {
-            
             setPlaceFrom(Array.isArray(editData.pickup_location) ? editData.pickup_location.join(' | ') : editData.pickup_location || '');
             setPlaceTo(Array.isArray(editData.dropoff_location) ? editData.dropoff_location.join(' | ') : editData.dropoff_location || '');
             setStartTime(
@@ -69,7 +70,7 @@ export default function PriorityPurchaseScreen() {
 
     const convertToTimestamp = (date) => date ? Math.floor(new Date(date).getTime() / 1000) : null;
 
-    const sendToBackend = () => {
+    const sendToBackend = async () => {
         if (!placeFrom || !placeTo || !startTime || !endTime || !price || !point) {
             Alert.alert("Thiếu thông tin", "Vui lòng nhập đầy đủ dữ liệu.");
             return;
@@ -84,48 +85,50 @@ export default function PriorityPurchaseScreen() {
             maximum_point: Number(point),
             direction: selectedDirection,
         };
-        console.log('updateAutoBuy payload: ', payload)
-        if (editData) {
-            
-            dispatch(updateAutoBuy({ id: editData.id, data: payload }))
-                .unwrap()
-                .then(() => {
-                    dispatch(fetchAutoBuyList());
-                    Alert.alert(
-                        "Thành công",
-                        "Cập nhật thành công!",
-                        [{ text: "OK", onPress: () => navigation.goBack() }]
-                    );
-                })
-                .catch((err) => Alert.alert("Lỗi", err?.message || "Cập nhật thất bại"));
-        } else {
-            
-            dispatch(createAutoBuy(payload))
-                .unwrap()
-                .then(() => {
-                    dispatch(fetchAutoBuyList());
-                    Alert.alert(
-                        "Thành công",
-                        "Tạo mới thành công!",
-                        [
-                            {
-                                text: "OK",
-                                onPress: () => {
-                                    navigation.getParent()?.setParams({ refresh: Date.now() });
-                                    navigation.goBack();
-                                }
+
+        try {
+            setSubmitting(true); // 🔥 BẬT LOADING
+
+            if (editData) {
+                await dispatch(updateAutoBuy({ id: editData.id, data: payload })).unwrap();
+                await dispatch(fetchAutoBuyList());
+
+                Alert.alert(
+                    "Thành công",
+                    "Cập nhật thành công!",
+                    [{ text: "OK", onPress: () => navigation.goBack() }]
+                );
+            } else {
+                await dispatch(createAutoBuy(payload)).unwrap();
+                await dispatch(fetchAutoBuyList());
+
+                Alert.alert(
+                    "Thành công",
+                    "Tạo mới thành công!",
+                    [
+                        {
+                            text: "OK",
+                            onPress: () => {
+                                navigation.getParent()?.setParams({ refresh: Date.now() });
+                                navigation.goBack();
                             }
-                        ]
-                    );
-                })
-                .catch((err) => Alert.alert("Lỗi", err?.message || "Gửi yêu cầu thất bại"));
+                        }
+                    ]
+                );
+            }
+        } catch (err: any) {
+            Alert.alert(
+                "Lỗi",
+                err?.message || (editData ? "Cập nhật thất bại" : "Gửi yêu cầu thất bại")
+            );
+        } finally {
+            setSubmitting(false); 
         }
     };
 
     return (
         <ScrollView style={{ flex: 1, gap: 8, backgroundColor: "#fff" }} contentContainerStyle={{ flex: 1 }}>
             <AppView flex={1} backgroundColor="#fff" padding={16} gap={24}>
-                {/* Chọn chiều đi/chiều về */}
                 <AppView row gap={32}>
                     <AppButton onPress={() => setSelectedDirection(1)} row gap={8}>
                         <AppText>{'Chiều đi'}</AppText>
@@ -137,23 +140,27 @@ export default function PriorityPurchaseScreen() {
                     </AppButton>
                 </AppView>
 
-                {/* Điểm đón */}
+
                 <AppButton onPress={() => setIsCommuneWard(true)}>
                     <AppText bold marginBottom={4}>Điểm đón</AppText>
-                    <AppButton onPress={() => setIsCommuneWard(true)} backgroundColor={ColorsGlobal.backgroundGray} padding={12} radius={8}>
-                        <TextInput value={placeFrom} multiline onChangeText={(text) => setPlaceFrom(text)} placeholder='Nhấn để chọn địa chỉ' style={{ color: "#666" }} />
+                    <AppButton onPress={() => setIsCommuneWard(true)} radius={8} row gap={8}>
+                        <TextInput value={placeFrom} multiline onChangeText={(text) => setPlaceFrom(text)} placeholder='Nhấn để chọn địa chỉ' style={{ color: "#666", borderWidth: 1, borderRadius: 10, borderColor: ColorsGlobal.borderColor, flex: 1, paddingLeft: 10 }} />
+                        <AppButton onPress={() => setIsCommuneWard(true)} borderColor={ColorsGlobal.borderColor} borderWidth={1} radius={10} alignItems='center' justifyContent='center' paddingHorizontal={10}>
+                            <IconDotHorizonal />
+                        </AppButton>
                     </AppButton>
                 </AppButton>
 
-                {/* Điểm trả */}
-                <AppButton onPress={() => setIsCommuneWardTo(true)}>
-                    <AppText bold marginBottom={4}>Điểm trả</AppText>
-                    <AppButton onPress={() => setIsCommuneWardTo(true)} backgroundColor={ColorsGlobal.backgroundGray} padding={12} radius={8}>
-                        <TextInput value={placeTo} multiline onChangeText={(text) => setPlaceTo(text)} placeholder='Nhấn để chọn địa chỉ' style={{ color: "#666" }} />
+
+
+                <AppButton onPress={() => setIsCommuneWardTo(true)} radius={8} row gap={8}>
+                    <TextInput value={placeTo} multiline onChangeText={(text) => setPlaceTo(text)} placeholder='Nhấn để chọn địa chỉ' style={{ color: "#666", borderWidth: 1, borderRadius: 10, borderColor: ColorsGlobal.borderColor, flex: 1, paddingLeft: 10 }} />
+                    <AppButton onPress={() => setIsCommuneWardTo(true)} borderColor={ColorsGlobal.borderColor} borderWidth={1} radius={10} alignItems='center' justifyContent='center' paddingHorizontal={10}>
+                        <IconDotHorizonal />
                     </AppButton>
                 </AppButton>
 
-                {/* Giá & điểm */}
+
                 <AppView row justifyContent={'space-between'} alignItems='center' gap={24}>
                     <AppView flex={1}>
                         <AppInput value={(parseInt(price))} onChangeText={setPrice} label="Giá tối thiểu" placeholder="...K/chuyến" keyboardType='numeric' />
@@ -176,23 +183,33 @@ export default function PriorityPurchaseScreen() {
                     </AppView>
                 </AppView>
 
-                {/* Gửi */}
-                <AppButton onPress={sendToBackend} backgroundColor={ColorsGlobal.main} paddingVertical={12} radius={8}>
+
+                <AppButton
+                    onPress={sendToBackend}
+                    disabled={submitting}
+                    backgroundColor={ColorsGlobal.main}
+                    paddingVertical={12}
+                    radius={8}
+                >
                     <AppText color="white" fontWeight={700} textAlign="center">
-                        {editData ? "Cập nhật yêu cầu" : "Gửi yêu cầu"}
+                        {submitting
+                            ? 'Đang xử lý...'
+                            : editData
+                                ? 'Cập nhật yêu cầu'
+                                : 'Gửi yêu cầu'}
                     </AppText>
                 </AppButton>
 
-                {/* DateTime Picker */}
+
                 <DateTimePicker isVisible={isPickerVisible} mode="datetime" onConfirm={onConfirmTime} onCancel={() => setPickerVisible(false)} />
 
-                {/* Modal chọn xã/phường - THAY THẾ địa chỉ cũ */}
+
                 <SelectProvinceDistrictModal
                     multiSelect={true}
                     isVisible={isCommuneWard}
                     onClose={() => setIsCommuneWard(false)}
                     onSelected={(value) => {
-                        
+
                         const list = value.districts.map(d => `${value.province.name} - ${d.name}`).join(' | ');
                         setPlaceFrom(list);
                         setIsCommuneWard(false);
@@ -203,7 +220,7 @@ export default function PriorityPurchaseScreen() {
                     isVisible={isCommuneWardTo}
                     onClose={() => setIsCommuneWardTo(false)}
                     onSelected={(value) => {
-                        
+
                         const list = value.districts.map(d => `${value.province.name} - ${d.name}`).join(' | ');
                         setPlaceTo(list);
                         setIsCommuneWardTo(false);

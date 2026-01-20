@@ -12,11 +12,12 @@ import IconArrowDown from '../../assets/icons/IconArowDown';
 import IconClock from '../../assets/icons/IconClock';
 import IconLocation from '../../assets/icons/iconLocation';
 import IconMinus from '../../assets/icons/IconMinus';
-import { fetchAutoBuyList } from '../../redux/slices/requestAutoBuyTrip';
+import { cancelAutoBuyTrip, fetchAutoBuyList } from '../../redux/slices/requestAutoBuyTrip';
 import { useAppDispatch } from '../../redux/hooks/useAppDispatch';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
-import { NumberFormat } from '../../utils/Helper';
+import { CONSTANT, NumberFormat } from '../../utils/Helper';
+import IconClose from '../../assets/icons/IconClose';
 
 export default function ListPriorityPurchaseScreen() {
     const navigation = useNavigation();
@@ -32,11 +33,11 @@ export default function ListPriorityPurchaseScreen() {
         useCallback(() => {
             if (route?.params?.refresh) {
                 console.log('🔄 Refresh auto buy list');
-                fetchAutoBuyList(); // call API / dispatch redux
+                fetchAutoBuyList(); 
             }
         }, [route?.params?.refresh])
     );
-    // ✅ Auto refresh khi có lastUpdate thay đổi
+    
     useEffect(() => {
         if (lastUpdate) {
             console.log('📋 Auto buy list updated:', lastUpdate);
@@ -50,7 +51,7 @@ export default function ListPriorityPurchaseScreen() {
     };
 
     const addNewTripAuto = () => {
-        navigation.navigate("PriorityPurchaseScreen"); // Tạo mới
+        navigation.navigate("PriorityPurchaseScreen"); 
     };
 
     const goToDetail = (item) => {
@@ -58,7 +59,7 @@ export default function ListPriorityPurchaseScreen() {
     };
 
     const goToEdit = (item) => {
-        // Chỉ cho edit nếu status = 0 (đang chờ)
+        
         if (item.status !== 0) {
             Alert.alert('Không thể sửa yêu cầu đã hoàn thành hoặc đã hủy');
             return;
@@ -70,7 +71,7 @@ export default function ListPriorityPurchaseScreen() {
         });
     };
 
-    // ✅ Hàm hiển thị status badge
+    
     const getStatusBadge = (status: number) => {
         switch (status) {
             case 0:
@@ -99,122 +100,133 @@ export default function ListPriorityPurchaseScreen() {
                 };
         }
     };
+    const confirmCancel = (item) => {
+        Alert.alert(
+          'Huỷ yêu cầu',
+          'Bạn có chắc muốn huỷ yêu cầu mua chuyến này?',
+          [
+            { text: 'Không', style: 'cancel' },
+            {
+              text: 'Huỷ',
+              style: 'destructive',
+              onPress: async () => {
+                try {
+                  await dispatch(cancelAutoBuyTrip({ id: item.id })).unwrap();
+      
+                  
+                  Alert.alert('Thành công', 'Đã huỷ yêu cầu mua chuyến này');
+                } catch (err: any) {
+                  
+                  Alert.alert(
+                    'Thất bại',
+                    err?.message || 'Huỷ yêu cầu không thành công, vui lòng thử lại',
+                  );
+                }
+              },
+            },
+          ],
+        );
+      };
+      
 
     const renderItem = ({ item }) => {
-        const statusBadge = getStatusBadge(item.status);
+        const status = CONSTANT.STATUS_STYLE[item.status] || CONSTANT.STATUS_STYLE[0];
 
         return (
-            <TouchableOpacity onPress={() => goToDetail(item)}>
+            <TouchableOpacity activeOpacity={0.9} onPress={() => goToDetail(item)}>
                 <AppView
-                    row
-                    backgroundColor={ColorsGlobal.backgroundLight}
-                    padding={10}
-                    radius={10}
-                    width={'100%'}
+                    backgroundColor="#FFF"
+                    radius={12}
+                    padding={12}
                     style={{
-                        opacity: item.status === 2 ? 0.6 : 1, // Mờ nếu đã hủy
+                        borderWidth: 1,
+                        borderColor: '#EEE',
+                        opacity: item.status === 2 ? 0.6 : 1,
                     }}
                 >
-                    <AppView flex={1} gap={6}>
-                        {/* Status Badge */}
+           
+                    <AppView row justifyContent="space-between" alignItems="center">
                         <AppView
-                            backgroundColor={statusBadge.bgColor}
-                            paddingHorizontal={8}
+                            backgroundColor={status.bg}
+                            paddingHorizontal={10}
                             paddingVertical={4}
-                            radius={4}
-                            alignSelf="flex-start"
+                            radius={99}
                         >
-                            <AppText
-                                fontSize={12}
-                                color={statusBadge.color}
-                                fontWeight={600}
-                            >
-                                {statusBadge.text}
+                            <AppText fontSize={12} color={status.color} bold>
+                                {status.text}
                             </AppText>
                         </AppView>
 
-                        {/* Địa điểm */}
-                        <AppView justifyContent={'space-between'} gap={8}>
-                            <AppView flex={1} row gap={3}>
-                                <IconLocation />
-                                <AppText fontSize={14} >
-                                    {Array.isArray(item.pickup_location)
-                                        ? item.pickup_location.join(", ")
-                                        : item.pickup_location || "Chưa có địa điểm"}
-                                </AppText>
-                            </AppView>
-                            <AppView flex={1} row  >
-                                <AppView>
-                                    <IconArrowDown rotate={-90} color={ColorsGlobal.main2} />
-                                </AppView>
-                                <AppView flex={1}>
-                                    <AppText fontSize={14} >
-                                        {Array.isArray(item.dropoff_location)
-                                            ? item.dropoff_location.join(", ")
-                                            : item.dropoff_location || "Chưa có địa điểm"}
-                                    </AppText>
-                                </AppView>
-
-                            </AppView>
-                        </AppView>
-
-                        {/* Điểm & giá */}
-                        <AppView row justifyContent="space-between" alignItems="center">
-                            <AppView row alignItems="center">
-                                <AppText fontSize={14}>Tối đa: </AppText>
-                                <AppText color={ColorsGlobal.main} bold>
-                                    {item.maximum_point || 0} điểm
-                                </AppText>
-                            </AppView>
-
-                            <IconMinus color={ColorsGlobal.main2} />
-                            <AppText color={ColorsGlobal.main2} bold>
-                                {NumberFormat(parseInt(item.desired_price))}K
-                            </AppText>
-                        </AppView>
-
-                        {/* Thời gian */}
-                        <AppView row gap={4} alignItems='center'>
-                            <IconClock />
-                            <AppText fontSize={14} color={ColorsGlobal.textLight}>
-                                {moment(item.time_receive_start).format('HH:mm, DD/MM/YYYY')}
-                                {" - "}
-                                {moment(item.time_receive_end).format('HH:mm, DD/MM/YYYY')}
-                            </AppText>
-                        </AppView>
-
-                        {/* Hiển thị thông tin chuyến đã mua (nếu có) */}
-                        {item.status === 1 && item.trip && (
-                            <AppView
-                                backgroundColor="#E8F5E9"
-                                padding={8}
-                                radius={6}
-                                marginTop={4}
-                            >
-                                <AppText fontSize={12} color={ColorsGlobal.success}>
-                                    ✅ Đã mua: {item.trip.place_start} → {item.trip.place_end}
-                                </AppText>
-                                <AppText fontSize={11} color={ColorsGlobal.textLight}>
-                                    {item.trip.points} điểm - {NumberFormat(item.trip.price_sell)}K
-                                </AppText>
+                        {item.status === 0 && (
+                            <AppView row gap={10} alignItems='center'>
+                                <AppButton onPress={() => goToEdit(item)}>
+                                    <IconPencil size={18} color={ColorsGlobal.main} />
+                                </AppButton>
+                                <AppButton onPress={() => confirmCancel(item)} backgroundColor={ColorsGlobal.borderColor} radius={99}>
+                                    <IconClose size={28} color="#C0392B" />
+                                </AppButton>
                             </AppView>
                         )}
                     </AppView>
 
-                    {/* Nút sửa - Chỉ hiện khi status = 0 */}
-                    {item.status === 0 && (
-                        <AppButton
-                            paddingLeft={16}
-                            justifyContent="center"
-                            onPress={() => goToEdit(item)}
+                    {/* ===== BODY: LOCATION ===== */}
+                    <AppView marginTop={10} gap={6}>
+                        <AppView row gap={6}>
+                            <IconLocation />
+                            <AppText fontSize={14} bold>
+                                {Array.isArray(item.pickup_location)
+                                    ? item.pickup_location.join(', ')
+                                    : item.pickup_location}
+                            </AppText>
+                        </AppView>
+
+                        <AppView row gap={6} paddingLeft={4}>
+                            <IconArrowDown rotate={-90} />
+                            <AppText fontSize={14}>
+                                {Array.isArray(item.dropoff_location)
+                                    ? item.dropoff_location.join(', ')
+                                    : item.dropoff_location}
+                            </AppText>
+                        </AppView>
+                    </AppView>
+
+      
+                    <AppView
+                        row
+                        justifyContent="space-between"
+                        alignItems="center"
+                        marginTop={12}
+                    >
+                        <AppText fontSize={13} color={ColorsGlobal.textLight}>
+                            ⏰ {moment(item.time_receive_start).format('HH:mm DD/MM')} — {' '}
+                            {moment(item.time_receive_end).format('HH:mm DD/MM')}
+                        </AppText>
+
+                        <AppText bold color={ColorsGlobal.main}>
+                            [{item.maximum_point} điểm — {NumberFormat(parseInt(item.desired_price))}K]
+                        </AppText>
+                    </AppView>
+
+                    {item.status === 1 && item.trip && (
+                        <AppView
+                            backgroundColor="#F0FDF4"
+                            padding={8}
+                            radius={8}
+                            marginTop={10}
                         >
-                            <IconPencil color={ColorsGlobal.main} size={18} />
-                        </AppButton>
+                            <AppText fontSize={12} color="#27AE60">
+                                ✅ Đã mua: {item.trip.place_start} → {item.trip.place_end}
+                            </AppText>
+                            <AppText fontSize={11} color={ColorsGlobal.textLight}>
+                                {item.trip.point} điểm • {NumberFormat(item.trip.price_sell)}K
+                            </AppText>
+                        </AppView>
                     )}
                 </AppView>
             </TouchableOpacity>
         );
     };
+
 
     return (
         <Container style={{ position: 'relative' }} padding={0} ignoreBottomInset>
@@ -256,7 +268,7 @@ export default function ListPriorityPurchaseScreen() {
                 />
             </AppView>
 
-            {/* Button tạo mới */}
+         
             <AppButton
                 onPress={addNewTripAuto}
                 position={'absolute'}

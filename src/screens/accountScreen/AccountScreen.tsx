@@ -96,8 +96,6 @@ export default function AccountScreen({ navigation }: Props) {
         const result = await dispatch(deleteAccount()).unwrap();
 
 
-
-
         await AsyncStorage.removeItem('token');
         await AsyncStorage.removeItem('driver');
 
@@ -123,7 +121,19 @@ export default function AccountScreen({ navigation }: Props) {
       ]
     );
   };
+//gotoBankStatementBuySalePoint
+const gotoBankStatementBuySalePoint = () => {
+  navigation.navigate('RootNavigator', {
+    screen: 'BottomTabs',      
+    params: {
+      screen: 'AccountTabs',       
+      params: {
+        screen: 'BankStatementBuySalePoint'
+      }
+    }
+  });
 
+}
   const gotoHistoryBuySalePoint = () => {
 
     navigation.navigate('RootNavigator', {
@@ -131,7 +141,7 @@ export default function AccountScreen({ navigation }: Props) {
       params: {
         screen: 'AccountTabs',       
         params: {
-          screen: 'HistoryBuySalePoint'
+          screen: 'BankStatementBuySalePoint'
         }
       }
     });
@@ -224,16 +234,14 @@ export default function AccountScreen({ navigation }: Props) {
           <FunctionSection label='Thông tin cá nhân' onPress={gotoInfoAccount} data={driver} />
           <FunctionSection label='Thông tin xe' onPress={gotoInfoCar} />
         </AppView>
-        {/* <AppView gap={6} height={'auto'} >
-          <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Thông tin xe'}</AppText>
-          <FunctionSection label='Thông tin xe' onPress={gotoInfoCar} />
-        </AppView> */}
+       
 
         <AppView gap={6} >
           <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Tính năng'}</AppText>
           <AppView gap={8}>
             <FunctionSection label='Đổi mật khẩu' onPress={() => setIsModalChangePw(true)} />
-            <FunctionSection label='Sao kê lịch sử điểm' onPress={gotoHistoryBuySalePoint} />
+            <FunctionSection label='Sao kê lịch sử điểm' onPress={gotoBankStatementBuySalePoint} />
+            <FunctionSection label='Lịch sử mua bán điểm' onPress={gotoHistoryBuySalePoint} />
             <FunctionSection label='Thông báo hệ thống' onPress={gotoNotification} />
 
             {/* <FunctionSection label='Xoá tài khoản' onPress={DeleteAccount} /> */}

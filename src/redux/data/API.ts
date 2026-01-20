@@ -63,9 +63,17 @@ export const createSale = async (data: any) => {
 export const buyPoint = async (id: string, data: any) => {
   return api.post(`api/points/${id}/buy`, data);
 };
-
-export const uploadTransferProof = async (id: string, formData: FormData) => {
-  return apiFormData.post(`api/points/${id}/transfer_proof`, formData);
+export const historyPointAPI = async () => {
+  return api.get(`api/points/historyPoint`);
+};
+export const cancelSalePointAPI = async (id: string) => {
+  return api.post(`api/points/${id}/cancel`);
+};
+export const pauseSalePointAPI = async (id: string) => {
+  return api.post(`api/points/${id}/pause`);
+};
+export const resumeSalePointAPI = async (id: string) => {
+  return api.post(`api/points/${id}/resume`);
 };
 
 export const confirmPoint = async (id: string) => {

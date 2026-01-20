@@ -6,10 +6,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PointerType } from 'react-native-gesture-handler';
 import {
   buyPoint,
+  cancelSalePointAPI,
   confirmPoint,
   createSale,
   getHistoryTrandsactionPoints,
   getPoints,
+  historyPointAPI,
+  pauselSalePointAPI,
+  pauseSalePointAPI,
+  resumeSalePointAPI,
   uploadTransferProof,
 } from '../data/API';
 
@@ -90,7 +95,7 @@ export const fetchPointsOnSale = createAsyncThunk<
   try {
     // const response = await api.get('api/points');
     const response = await getPoints();
-    console.log('fetchPointsOnSale: ', response.data.data);
+
     if (response.data.status === 1) {
       return response.data.data;
     } else {
@@ -124,32 +129,87 @@ export const buyPointAction = createAsyncThunk<
     return rejectWithValue(err.response?.data?.message || 'Mua điểm thất bại');
   }
 });
-
-// 2️⃣ Upload hình chuyển khoản
-export const uploadTransferProofAction = createAsyncThunk<
-  any,
-  { id: string; formData: FormData },
+//historyPointAPI
+export const historyPoint = createAsyncThunk<
+  Point[],
+  void,
   { rejectValue: string }
->(
-  'point/uploadTransferProof',
-  async ({ id, formData }, { rejectWithValue }) => {
-    try {
-      const response = await uploadTransferProof(id, formData);
-      if (response.data.status === 1) {
-        return response.data;
-      } else {
-        return rejectWithValue(
-          response.data.message || 'Upload chứng từ thất bại',
-        );
-      }
-    } catch (err: any) {
+>('point/historyPoint', async (_, { rejectWithValue }) => {
+  try {
+    // const response = await api.get('api/points');
+    const response = await historyPointAPI();
+    console.log('historyPoint: ', response.data.data);
+    if (response.data.status === 1) {
+      return response.data.data;
+    } else {
       return rejectWithValue(
-        err.response?.data?.message || 'Upload chứng từ thất bại',
+        response.data.message || 'Lấy danh sách điểm thất bại',
       );
     }
-  },
-);
-
+  } catch (err: any) {
+    console.log('historyPoint err: ', err);
+    return rejectWithValue(
+      err.response?.data?.message || 'Lấy danh sách điểm thất bại',
+    );
+  }
+});
+//points-for-sale/{id}/cancel'
+export const cancelSalePoint = createAsyncThunk<
+  any, // trả về data từ API
+  { id: string },
+  { rejectValue: string }
+>('point/cancelSalePoint', async ({ id }, { rejectWithValue, dispatch }) => {
+  try {
+    const response = await cancelSalePointAPI(id);
+    console.log('point/cancelSalePoint mua diem: ', response);
+    if (response.data.status === 1) {
+      dispatch(fetchPointsOnSale()); // refresh danh sách
+      return response.data;
+    } else {
+      return rejectWithValue(response.data.message || 'Huỷ bán điểm thất bại');
+    }
+  } catch (err: any) {
+    return rejectWithValue(err.response?.data?.message || 'Huỷ bán điểm thất bại');
+  }
+});
+export const pauseSalePoint = createAsyncThunk<
+  any, // trả về data từ API
+  { id: string },
+  { rejectValue: string }
+>('point/pauseSalePoint', async ({ id }, { rejectWithValue, dispatch }) => {
+  try {
+    console.log('pauseSalePoint id: ',id)
+    const response = await pauseSalePointAPI(id);
+    console.log('point/pauseSalePoint mua diem: ', response);
+    if (response.data.status === 1) {
+      dispatch(fetchPointsOnSale()); // refresh danh sách
+      return response.data;
+    } else {
+      return rejectWithValue(response.data.message || 'Huỷ bán điểm thất bại');
+    }
+  } catch (err: any) {
+    console.log('err: ',err)
+    return rejectWithValue(err.response?.data?.message || 'Huỷ bán điểm thất bại');
+  }
+});
+export const resumeSalePoint = createAsyncThunk<
+  any, // trả về data từ API
+  { id: string },
+  { rejectValue: string }
+>('point/resumeSalePoint', async ({ id }, { rejectWithValue, dispatch }) => {
+  try {
+    const response = await resumeSalePointAPI(id);
+    console.log('point/resumeSalePoint mua diem: ', response);
+    if (response.data.status === 1) {
+      dispatch(fetchPointsOnSale()); // refresh danh sách
+      return response.data;
+    } else {
+      return rejectWithValue(response.data.message || 'Huỷ bán điểm thất bại');
+    }
+  } catch (err: any) {
+    return rejectWithValue(err.response?.data?.message || 'Huỷ bán điểm thất bại');
+  }
+});
 // 3️⃣ Xác nhận điểm
 export const confirmPointAction = createAsyncThunk<
   any,
@@ -283,7 +343,7 @@ const pointSlice = createSlice({
         state.loading = false;
         state.error = action.payload || 'Lấy danh sách điểm đang bán thất bại';
       })
-      //tao moi point
+      
       .addCase(createSalePoint.pending, state => {
         state.loading = true;
         state.error = null;
@@ -314,21 +374,67 @@ const pointSlice = createSlice({
         state.loading = false;
         state.error = action.payload || 'Mua điểm thất bại';
       })
-
-      .addCase(uploadTransferProofAction.pending, state => {
+      //historyPoint
+      .addCase(historyPoint.pending, state => {
         state.loading = true;
         state.error = null;
         state.successMessage = null;
       })
-      .addCase(uploadTransferProofAction.fulfilled, (state, action) => {
+      .addCase(
+        historyPoint.fulfilled,
+        (state, action: PayloadAction<Point[]>) => {
+          state.loading = false;
+          state.history = action.payload;
+          state.successMessage = 'Lấy lịch sử mua / bán điểm thành công';
+        },
+      )
+      .addCase(historyPoint.rejected, (state, action) => {
         state.loading = false;
-        state.successMessage = 'Upload chứng từ thành công';
+        state.error = action.payload || 'Lấy danh sách điểm đang bán thất bại';
       })
-      .addCase(uploadTransferProofAction.rejected, (state, action) => {
+      ///cancelSalePoint
+      .addCase(cancelSalePoint.pending, state => {
+        state.loading = true;
+        state.error = null;
+        state.successMessage = null;
+      })
+      .addCase(cancelSalePoint.fulfilled, (state, action) => {
         state.loading = false;
-        state.error = action.payload || 'Upload thất bại';
+        state.successMessage = 'Huỷ bán điểm thành công';
       })
-
+      .addCase(cancelSalePoint.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Huỷ bán điểm thất bại';
+      })
+     //pauseSalePoint
+     .addCase(pauseSalePoint.pending, state => {
+      state.loading = true;
+      state.error = null;
+      state.successMessage = null;
+    })
+    .addCase(pauseSalePoint.fulfilled, (state, action) => {
+      state.loading = false;
+      state.successMessage = 'Tạm dừng bán điểm này';
+    })
+    .addCase(pauseSalePoint.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload || 'Tạm dừng bán điểm thất bại';
+    })
+    // resumeSalePoint
+    .addCase(resumeSalePoint.pending, state => {
+      state.loading = true;
+      state.error = null;
+      state.successMessage = null;
+    })
+    .addCase(resumeSalePoint.fulfilled, (state, action) => {
+      state.loading = false;
+      state.successMessage = 'Bán lại điểm này thành công';
+    })
+    .addCase(resumeSalePoint.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload || 'Bán lại điểm này thất bại';
+    })
+    //
       .addCase(confirmPointAction.pending, state => {
         state.loading = true;
         state.error = null;

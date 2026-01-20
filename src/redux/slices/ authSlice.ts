@@ -59,9 +59,7 @@ export const loginUser = createAsyncThunk<
 >('auth/loginUser', async (payload, { rejectWithValue }) => {
   try {
     const response = await api.post('/api/auth/login', payload);
-    console.log('response login: ', response);
-    console.log('response login driver: ', response.data.data.driver);
-    console.log('response login  message: ', response.data.message);
+ 
 
     const token = response.data.data.token;
     const successMessage = response.data.message || 'Đăng nhập thành công'; // ✅ lấy message

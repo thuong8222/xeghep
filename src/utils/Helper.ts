@@ -104,7 +104,6 @@ export const CONSTANT = {
     point_sale: 'Bán điểm',
     sell_points: 'Bán điểm',
     buy_points: 'Mua điểm',
-
     trip_buy: 'Mua chuyến',
     trip_sale: 'Bán chuyến',
     buy_trip: 'Mua chuyến',
@@ -114,6 +113,51 @@ export const CONSTANT = {
     1: 'đã bán',
     0: 'chưa bán',
     2: 'đã huỷ chuyến',
+  },
+  STATUS_POINT : {
+    pending_payment: {
+      label: 'Chờ thanh toán',
+      color: '#7F8C8D',          // chữ xám
+      background: '#F2F3F4',     // nền cam nhạt
+    },
+    available: {
+      label: 'Đang bán',
+      color: '#27AE60',          // chữ xanh lá
+      background: '#E9F7EF',     // nền xanh lá nhạt
+    },
+    completed: {
+      label: 'Đã bán',
+      color: '#2980B9',          // chữ xanh dương
+      background: '#EBF5FB',     // nền xanh dương nhạt
+    },
+    paused: {
+      label: 'Tạm dừng bán',
+   
+      color: '#F39C12',          // chữ cam
+      background: '#FEF5E7', 
+    },
+    cancelled: {
+      label: 'Huỷ bán',
+      color: '#E74C3C',          // chữ đỏ
+      background: '#FDEDEC',     // nền đỏ nhạt
+    },
+  },
+  STATUS_STYLE :{
+    0: { // đang chờ
+      text: 'Đang chờ',
+      color: '#F39C12',
+      bg: '#FFF3E0',
+    },
+    1: { // đã mua
+      text: 'Đã mua',
+      color: '#27AE60',
+      bg: '#E9F7EF',
+    },
+    2: { // đã huỷ
+      text: 'Đã huỷ',
+      color: '#C0392B',
+      bg: '#FDEDEC',
+    },
   },
   TYPE_CAR_LIST: [
     { id: 1, key: 'car5', name: 'Xe 5 chỗ' },
@@ -292,40 +336,33 @@ export const formatCurrency = (value: string) => {
   return cleaned.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 };
 export const validatePoint = (value: string, currentPoints: number) => {
-
   if (!value) return 'Vui lòng nhập số điểm';
-
-
 
   if (parseInt(value, 10) <= 0) return 'Số điểm phải lớn hơn 0';
 
   if (parseInt(value, 10) > currentPoints) {
-    
-    return `Số điểm không được lớn hơn số điểm hiện tại (${NumberFormat(currentPoints)})`;
+    return `Số điểm không được lớn hơn số điểm hiện tại (${NumberFormat(
+      currentPoints,
+    )})`;
   }
 
   return '';
 };
 export const validatePhoneNumber = (value: string) => {
- 
   const phonePattern = /^(03|05|07|08|09)\d{8}$/;
-
 
   if (!value) {
     return 'Vui lòng nhập số điện thoại';
   }
 
-  
   if (!/^\d+$/.test(value)) {
     return 'Số điện thoại chỉ được chứa số';
   }
-
 
   if (!phonePattern.test(value)) {
     return 'Số điện thoại không hợp lệ';
   }
 
- 
   return '';
 };
 export const validateExperienceYears = (value: string) => {
@@ -376,11 +413,9 @@ export const validatePassword = (value: string) => {
   return '';
 };
 export const validateYear = (text: string) => {
-
   if (!/^\d*$/.test(text)) {
     return 'Chỉ được nhập số';
   }
-
 
   if (text.length === 4) {
     const yearNumber = parseInt(text, 10);
@@ -405,7 +440,7 @@ export const validateConfirmPassword = ({
   if (value !== password) {
     return 'Mật khẩu nhập lại không khớp';
   }
-  return ''; 
+  return '';
 };
 
 export function validatePlateVN(input: string): string {
@@ -518,7 +553,6 @@ export const openMapSmart = (trip: any) => {
   const { lat_start, lng_start, lat_end, lng_end, place_start, place_end } =
     trip;
 
-
   if (lat_start && lng_start && lat_end && lng_end) {
     const url = `https://www.google.com/maps/dir/?api=1&origin=${lat_start},${lng_start}&destination=${lat_end},${lng_end}&travelmode=driving`;
     Linking.openURL(url);
@@ -544,7 +578,6 @@ export const DRIVER_STATUS_LABELS: Record<number, string> = {
   [DRIVER_STATUS.MAINTENANCE]: 'Đang bảo trì',
 };
 export const parseTime = value => {
- 
   if (typeof value === 'number' && value.toString().length === 10) {
     return moment(value * 1000);
   }
@@ -552,7 +585,6 @@ export const parseTime = value => {
   if (typeof value === 'string' && /^\d{10}$/.test(value)) {
     return moment(Number(value) * 1000);
   }
-
 
   return moment(value);
 };

@@ -1,4 +1,4 @@
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import AppView from '../../components/common/AppView';
 import AppButton from '../../components/common/AppButton';
@@ -12,16 +12,14 @@ import PointHistory from '../../components/component/PointHistory';
 import Container from '../../components/common/Container';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/data/store';
-import { FetchHistoryPointParams, fetchPointHistory, historyPoint, resumeSalePoint } from '../../redux/slices/pointSlice';
+import { FetchHistoryPointParams, fetchPointHistory } from '../../redux/slices/pointSlice';
 import { useTransactionHistoryRealtime } from '../../hooks/useTransactionHistoryRealtime';
 import { useAppContext } from '../../context/AppContext';
 import { useAppDispatch } from '../../redux/hooks/useAppDispatch';
 import moment from 'moment';
 import TypeFilterBar from '../../components/component/TypeFilterBar';
-import Point from '../../components/component/Point';
-import PointHis from '../../components/component/PointHis';
 
-export default function HistoryBuySalePoint() {
+export default function BankStatementBuySalePoint() {
   const dispatch = useAppDispatch()
   const { history, loading, error, types } = useSelector((state: RootState) => state.point);
   const { currentDriver } = useAppContext();
@@ -34,7 +32,7 @@ export default function HistoryBuySalePoint() {
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
 
-  console.log('history: ', history)
+
 
   // ✅ Kích hoạt real-time updates
   useTransactionHistoryRealtime(currentDriver?.id);
@@ -50,7 +48,7 @@ export default function HistoryBuySalePoint() {
     if (end_date) params.end_date = end_date;
     if (selectedType) params.related_type = selectedType;
 
-    dispatch(historyPoint(params));
+    dispatch(fetchPointHistory(params));
   }, [selectedType, fromDate, toDate, currentDriver?.id]);
 
   // ✅ Hàm chuyển dd/mm/yyyy thành timestamp (startOfDay)
@@ -161,33 +159,12 @@ export default function HistoryBuySalePoint() {
     if (start_date) params.start_date = start_date;
     if (end_date) params.end_date = end_date;
     if (selectedType) params.type = selectedType;
+
     dispatch(fetchPointHistory(params));
-  };
-  const sellPointContinute = (id: string) => {
-    Alert.alert(
-      'Xe ghép',
-      'Bạn có chắc muốn tiếp tục bán điểm này không?',
-      [
-        { text: 'Huỷ', style: 'cancel' },
-        {
-          text: 'OK',
-          onPress: () => {
-            dispatch(resumeSalePoint({ id }))
-              .unwrap()
-              .then(() => {
-                Alert.alert('Thành công', 'Đã tiếp tục bán điểm');
-              })
-              .catch(msg => {
-                Alert.alert('Lỗi', msg || 'Tiếp tục bán thất bại');
-              });
-          },
-        },
-      ]
-    );
   };
 
   const renderItem_trip = ({ item }) => {
-    return <PointHis props={item} resume={sellPointContinute} />;
+    return <PointHistory data={item} />;
   };
 
   const SkeletonItem = () => (
@@ -252,8 +229,14 @@ export default function HistoryBuySalePoint() {
           {"! " + errorMessage}
         </AppText>
       )}
-
-      <AppView flex={1} >
+      <AppView >
+        <TypeFilterBar
+          types={types}
+          selectedType={selectedType}
+          toggleFilter={(type) => setSelectedType(prev => (prev === type ? null : type))}
+        />
+      </AppView>
+      <AppView flex={1}>
         <FlatList
           data={history}
           keyExtractor={(item) => item.id.toString()}

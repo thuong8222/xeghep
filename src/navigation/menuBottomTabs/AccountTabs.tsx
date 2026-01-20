@@ -12,10 +12,12 @@ import { HeaderBackButton } from '@react-navigation/elements';
 import { useNavigation } from '@react-navigation/native';
 import DetailNotification from '../../screens/accountScreen/DetailNotificationScreen';
 import DetailNotificationScreen from '../../screens/accountScreen/DetailNotificationScreen';
+import BankStatementBuySalePoint from '../../screens/accountScreen/BankStatementBuySalePoint';
 
 export type AccountTabsParamList = {
   AccountScreen: undefined;
   HistoryBuySalePoint: undefined;
+  BankStatementBuySalePoint:undefined;
   AccountInfoScreen: {data:Driver};
   CarInfoScreen: {data:Driver};
   Notification: undefined;
@@ -37,6 +39,12 @@ export default function AccountTabs() {
         headerTitleAlign: 'center',
     
       }} />
+       <Stack.Screen name="BankStatementBuySalePoint" component={BankStatementBuySalePoint} options={{
+        headerTitle: 'Sao kê lịch sử điểm',
+        headerTitleAlign: 'center',
+    
+      }} />
+  
       <Stack.Screen name="AccountInfoScreen" component={AccountInfoScreen} options={{
         presentation: 'modal',
         headerTitle: 'Thông tin tài khoản',

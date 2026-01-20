@@ -122,8 +122,7 @@ export default function BuyTripTabs() {
           component={SaleTripsScreen}
           options={{
             headerTitleAlign: 'center',
-            headerTitle: 'Bán chuyến'
-            ,
+            headerTitle: 'Bán chuyến',
             presentation: 'modal',
           }}
         />

@@ -12,12 +12,13 @@ import { PointTabsParamList } from '../../navigation/menuBottomTabs/PointTabs'
 import { useTripsApi } from '../../redux/hooks/useTripsApi'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/data/store'
-import { buyPointAction, fetchPointsOnSale } from '../../redux/slices/pointSlice'
+import { buyPointAction, cancelSalePoint, fetchPointsOnSale, pauseSalePoint } from '../../redux/slices/pointSlice'
 import ModalShowInfoTranferMoney from '../../components/component/modals/ModalShowInfoTranferMoney'
 import ChatScreen from '../ChatScreen'
 import AppText from '../../components/common/AppText'
 import { usePointsListRealtime } from '../../hooks/usePointsListRealtime'
 import { useSocket } from '../../context/SocketContext'
+import { useAppContext } from '../../context/AppContext'
 
 type BuyTripProps = NativeStackNavigationProp<PointTabsParamList, 'PointAddScreen'>;
 interface Props {
@@ -25,23 +26,17 @@ interface Props {
 }
 export default function PointScreen({ navigation }: Props) {
     const dispatch = useDispatch<AppDispatch>();
+    const { currentDriver } = useAppContext();
     const { socket } = useSocket();
     const [openModalTranferMoney, setOpenModalTranferMoney] = useState(false);
     const [pointSelected, setPointSelected] = useState({});
     const { points, loading, error } = useSelector((state: RootState) => state.point);
-  
-  usePointsListRealtime();
+
+    usePointsListRealtime();
     useEffect(() => {
         dispatch(fetchPointsOnSale());
     }, []);
 
-    if (loading) {
-        return (
-            <View >
-                <ActivityIndicator size="large" color={ColorsGlobal.main} />
-            </View>
-        );
-    }
 
 
     const renderItem_trip = ({ item }) => {
@@ -85,14 +80,88 @@ export default function PointScreen({ navigation }: Props) {
                 Alert.alert('Lỗi', msg || 'Mua điểm thất bại');
             });
     };
-    const renderHiddenItem = (data, rowMap) => {
-        console.log('data: ',data)
-        return (
+    const cancelSalePointPress = (rowMap, rowKey, data) => {
+        Alert.alert(
+            'Xe ghép',
+            'Bạn có chắc mình muốn huỷ bán điểm này không? ',
+            [
+                {
+                    text: 'OK',
+                    onPress: () => {
+                        dispatch(cancelSalePoint({ id: rowKey, }))
+                            .unwrap()
+                            .then((result) => {
+                                Alert.alert(
+                                    'Thành công',
+                                    'Bạn vừa huỷ bán điểm thành công')
+                                console.log('result: ', result)
+                                setPointSelected(data.item);
+                                closeRow && closeRow(rowMap, rowKey);
+                            })
+                            .catch(msg => {
+                                console.log('msg:  ', msg)
+                                Alert.alert('Lỗi', msg || 'Huỷ bấn điểm thất bại');
+                            });
+                    },
+                },
+            ],
+            { cancelable: false }
+        )
+    };
+    const pauseSalePointPress = (rowMap, rowKey, data) => {
+        Alert.alert(
+            'Xe ghép',
+            'Bạn có muốn tạm dừng bán điểm này không? ',
+            [
+                {
+                    text: 'OK',
+                    onPress: () => {
+                        dispatch(pauseSalePoint({ id: rowKey }))
+                            .unwrap()
+                            .then((result) => {
+                                Alert.alert(
+                                    'Thành công',
+                                    'Bạn vừa tạm dừng bán điểm thành công')
+                                console.log('result: ', result)
+                                setPointSelected(data.item);
+                                closeRow && closeRow(rowMap, rowKey);
+                            })
+                            .catch(msg => {
+                                console.log('msg:  ', msg)
+                                Alert.alert('Lỗi', msg || 'Tạm dừng bán điểm thất bại');
+                            });
+                    },
+                },
+            ],
+            { cancelable: false }
+        )
+    };
 
+    const renderHiddenItem = (data, rowMap) => {
+
+        const seller_ = data?.item?.seller_id || data?.item?.seller?.id
+        const isOnwer = seller_ === currentDriver?.id;
+
+        return (
             <AppView flex={1} alignItems='center' backgroundColor={ColorsGlobal.backgroundBuyTrip} radius={12} row justifyContent={'flex-end'}>
-                <AppButton style={[styles.backBtn, styles.backBtnRight, { backgroundColor: ColorsGlobal.backgroundBuyTrip }]} onPress={() => buyTrip(rowMap, data.item.id, data)}>
-                    <Text style={styles.backBtnText}>{'Mua điểm'}</Text>
-                </AppButton>
+                {isOnwer ?
+                    <AppView flex={1} gap={10} justifyContent={'space-around'} style={styles.backBtnn}>
+                        <AppButton radius={12} style={[styles.backBtnRight]} onPress={() => cancelSalePointPress(rowMap, data.item.id, data)}>
+                            <AppText fontSize={12} color='#E74C3C'>{'Huỷ bán'}</AppText>
+                        </AppButton>
+
+
+                        <AppButton style={[styles.backBtnRight, { backgroundColor: ColorsGlobal.backgroundBuyTrip }]} onPress={() => pauseSalePointPress(rowMap, data.item.id, data)}>
+                            <AppText fontSize={12} color='#7F8C8D' textAlign='center'>{'Tạm dừng bán'}</AppText>
+                        </AppButton>
+                    </AppView>
+                    :
+
+                    <AppButton style={[styles.backBtn, styles.backBtnRight, { backgroundColor: ColorsGlobal.backgroundBuyTrip }]} onPress={() => buyTrip(rowMap, data.item.id, data)}>
+
+                        <Text style={styles.backBtnText}>{'Mua điểm'}</Text>
+                    </AppButton>
+                }
             </AppView>
 
         )
@@ -100,10 +169,16 @@ export default function PointScreen({ navigation }: Props) {
     const SaleTrips = () => {
         navigation.navigate('PointAddScreen')
     }
- 
+
     return (
         <AppView flex={1} padding={16} backgroundColor={ColorsGlobal.backgroundWhite}>
-           
+            {(loading) &&
+                <View >
+                    <ActivityIndicator size="large" color={ColorsGlobal.main} />
+                </View>
+
+            }
+
             <SwipeListView
                 data={points}
                 keyExtractor={(item) => item.id.toString()}
@@ -111,8 +186,8 @@ export default function PointScreen({ navigation }: Props) {
                 renderItem={renderItem_trip} ItemSeparatorComponent={() => <AppView height={16} />}
                 renderHiddenItem={renderHiddenItem}
                 rightOpenValue={-92}
-                leftOpenValue={0}              
-                disableRightSwipe={true}       
+                leftOpenValue={0}
+                disableRightSwipe={true}
                 swipeToOpenPercent={10}
                 directionalDistanceChangeThreshold={2}
                 friction={8}
@@ -160,6 +235,14 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 0,
         width: 92,
+    },
+    backBtnn: {
+        alignItems: 'center',
+        bottom: 0,
+        justifyContent: 'center',
+        position: 'absolute',
+        top: 0,
+        width: 100,
     },
     backBtnRight: {
 

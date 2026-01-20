@@ -1,42 +1,41 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { api } from "../data/API";
-
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { api } from '../data/API';
 
 // =======================
 // 1. Tạo yêu cầu mua chuyến
 // =======================
 export const createAutoBuy = createAsyncThunk(
-  "autoBuy/create",
+  'autoBuy/create',
   async (payload, { rejectWithValue }) => {
     try {
-      const res = await api.post("api/autoBuy/create", payload);
+      const res = await api.post('api/autoBuy/create', payload);
       return res.data;
     } catch (err: any) {
       return rejectWithValue(err.response?.data || err.message);
     }
-  }
+  },
 );
 
 // =======================
 // 2. Lấy danh sách yêu cầu
 // =======================
 export const fetchAutoBuyList = createAsyncThunk(
-  "autoBuy/list",
+  'autoBuy/list',
   async (_, { rejectWithValue }) => {
     try {
-      const res = await api.get("api/autoBuy/list_request");
+      const res = await api.get('api/autoBuy/list_request');
       return res.data.data;
     } catch (err: any) {
       return rejectWithValue(err.response?.data || err.message);
     }
-  }
+  },
 );
 
 // =======================
 // 3. Chi tiết một yêu cầu
 // =======================
 export const fetchAutoBuyDetail = createAsyncThunk(
-  "autoBuy/detail",
+  'autoBuy/detail',
   async (id: string, { rejectWithValue }) => {
     try {
       const res = await api.get(`api/autoBuy/detail/${id}`);
@@ -44,46 +43,64 @@ export const fetchAutoBuyDetail = createAsyncThunk(
     } catch (err: any) {
       return rejectWithValue(err.response?.data || err.message);
     }
-  }
+  },
 );
 
 // =======================
 // 4. Cập nhật yêu cầu
 // =======================
 export const updateAutoBuy = createAsyncThunk(
-  "autoBuy/update",
+  'autoBuy/update',
   async ({ id, data }: { id: string; data: any }, { rejectWithValue }) => {
     try {
       const res = await api.put(`api/autoBuy/update/${id}`, data);
       return res.data.data;
     } catch (err: any) {
-        console.log('update err; ', err)
+      console.log('update err; ', err);
       return rejectWithValue(err.response?.data || err.message);
     }
-  }
+  },
 );
+// =======================
+// 4. Huỷ yêu cầu
+// =======================
+export const cancelAutoBuyTrip = createAsyncThunk(
+  'autoBuy/cancel',
+  async ({ id }: { id: string }, { rejectWithValue }) => {
+    try {
+      await api.post(`api/autoBuy/cancel/${id}`);
+
+      // ✅ CHỦ ĐỘNG TRẢ ID
+      return { id };
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  },
+);
+
 
 // =======================
 // Slice
 // =======================
 const requestAutoBuySlice = createSlice({
-  name: "autoBuy",
+  name: 'autoBuy',
   initialState: {
     list: [],
     detail: null,
     loading: false,
     error: null,
+    lastUpdate: null,
   },
   reducers: {
     // ✅ Thêm reducer để update realtime
     updateAutoBuyItem: (state, action) => {
       const updatedItem = action.payload;
       const index = state.list.findIndex(item => item.id === updatedItem.id);
-      
+
       if (index !== -1) {
         state.list[index] = { ...state.list[index], ...updatedItem };
       }
-      
+
       state.lastUpdate = Date.now();
     },
 
@@ -91,11 +108,11 @@ const requestAutoBuySlice = createSlice({
     addAutoBuyItem: (state, action) => {
       const newItem = action.payload;
       const exists = state.list.some(item => item.id === newItem.id);
-      
+
       if (!exists) {
         state.list.unshift(newItem); // Thêm vào đầu list
       }
-      
+
       state.lastUpdate = Date.now();
     },
 
@@ -107,20 +124,20 @@ const requestAutoBuySlice = createSlice({
     },
 
     // ✅ Clear error
-    clearError: (state) => {
+    clearError: state => {
       state.error = null;
     },
 
     // ✅ Reset state
     resetAutoBuy: () => initialState,
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     // Create
     builder
-      .addCase(createAutoBuy.pending, (state) => {
+      .addCase(createAutoBuy.pending, state => {
         state.loading = true;
       })
-      .addCase(createAutoBuy.fulfilled, (state) => {
+      .addCase(createAutoBuy.fulfilled, state => {
         state.loading = false;
       })
       .addCase(createAutoBuy.rejected, (state, action) => {
@@ -130,7 +147,7 @@ const requestAutoBuySlice = createSlice({
 
     // List
     builder
-      .addCase(fetchAutoBuyList.pending, (state) => {
+      .addCase(fetchAutoBuyList.pending, state => {
         state.loading = true;
       })
       .addCase(fetchAutoBuyList.fulfilled, (state, action) => {
@@ -144,7 +161,7 @@ const requestAutoBuySlice = createSlice({
 
     // Detail
     builder
-      .addCase(fetchAutoBuyDetail.pending, (state) => {
+      .addCase(fetchAutoBuyDetail.pending, state => {
         state.loading = true;
       })
       .addCase(fetchAutoBuyDetail.fulfilled, (state, action) => {
@@ -158,7 +175,7 @@ const requestAutoBuySlice = createSlice({
 
     // Update
     builder
-      .addCase(updateAutoBuy.pending, (state) => {
+      .addCase(updateAutoBuy.pending, state => {
         state.loading = true;
       })
       .addCase(updateAutoBuy.fulfilled, (state, action) => {
@@ -166,6 +183,31 @@ const requestAutoBuySlice = createSlice({
         state.detail = action.payload;
       })
       .addCase(updateAutoBuy.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+    //cancelAutoBuyTrip
+    builder
+      .addCase(cancelAutoBuyTrip.pending, state => {
+        state.loading = true;
+      })
+      .addCase(cancelAutoBuyTrip.fulfilled, (state, action) => {
+        state.loading = false;
+      
+        const { id } = action.payload;
+      
+        // ✅ XÓA KHỎI LIST
+        state.list = state.list.filter(item => item.id !== id);
+      
+        // nếu đang xem detail
+        if (state.detail?.id === id) {
+          state.detail = null;
+        }
+      
+        state.lastUpdate = Date.now();
+      })
+      
+      .addCase(cancelAutoBuyTrip.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
