@@ -8,8 +8,7 @@ import AppButton from '../../components/common/AppButton'
 import IconSort from '../../assets/icons/IconSort'
 import ModalBuyTrip from '../../components/component/modals/ModalBuyTrip'
 import InfoGroupScreen from '../../screens/buyTrip/InfoGroupScreen'
-import AppView from '../../components/common/AppView'
-import AppText from '../../components/common/AppText'
+
 import MemberGroupScreen from '../../screens/buyTrip/MemberGroupScreen'
 import GroupRulesScreen from '../../screens/buyTrip/GroupRulesScreen'
 import NotificationScreen from './NotificationScreen'
@@ -26,6 +25,7 @@ export type BuyTripStackParamList = {
   }
   SaleTrip: {
     id_area: string;
+    ereaData?:string;
   };
   InfoGroup: {
     nameGroup: string;

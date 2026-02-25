@@ -16,13 +16,15 @@ interface Props {
   onClose: () => void;
   onSelected: (value: any) => void;
   multiSelect?: boolean; // ⭐ Thêm prop này
+  provinceName?: string;
 }
 
 export default function SelectProvinceDistrictModal({ 
   isVisible, 
   onClose, 
   onSelected,
-  multiSelect = false // ⭐ Default là single select
+  multiSelect = false, // ⭐ Default là single select
+  provinceName
 }: Props) {
   const [step, setStep] = useState<'province' | 'district'>('province');
   const [provinces, setProvinces] = useState([]);
@@ -37,10 +39,32 @@ export default function SelectProvinceDistrictModal({
     })
       .then(res => res.json())
       .then(data => {
-        setProvinces(data.provinces);
+        // setProvinces(data.provinces);
+         const list = data.provinces;
+
+    setProvinces(list);
+
+    // ⭐ auto chọn province theo currentArea
+
+    if (provinceName) {
+
+      const found = list.find(
+        p => removeVietnameseTones(p.name)
+          .includes(removeVietnameseTones(provinceName))
+      );
+
+      if (found) {
+
+        handleSelectProvince(found);
+
+      }
+
+    }
+
+
       })
       .catch(err => console.error('❌ Lỗi tải tỉnh:', err));
-  }, []);
+  }, [provinceName]);
 
   const handleSelectProvince = async (province) => {
     setSelectedProvince(province);
@@ -143,7 +167,7 @@ export default function SelectProvinceDistrictModal({
   return (
     <AppModal isVisible={isVisible} onClose={() => { onClose(); resetState(); }} heightPercent={0.8}>
       <AppView flex={1} gap={8}>
-        {step === 'province' && (
+        {step === 'province' && !provinceName && (
           <>
             <AppText bold fontSize={18}>Chọn Tỉnh / Thành phố</AppText>
             <AppInput

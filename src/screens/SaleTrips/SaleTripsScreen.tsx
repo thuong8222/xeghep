@@ -21,21 +21,23 @@ import { useDispatch, useSelector } from 'react-redux'
 import { createTrip, CreateTripPayload, fetchTrips } from '../../redux/slices/tripsSlice'
 import moment from 'moment'
 import { useAppContext } from '../../context/AppContext'
+import IconWarning from '../../assets/icons/IconWarning'
 
 interface Props {
   route: any;
   navigation: any;
 }
 export default function SaleTripsScreen({ route, navigation }: Props) {
+  console.log('man hinh ban chuyen')
   const { id_area } = route.params;
   const insets = useSafeAreaInsets();
 
   const dispatch = useDispatch();
-  const { setUpdateTrips } = useAppContext()
+  const { setUpdateTrips, currentArea } = useAppContext()
   const [selectedDirection, setSelectedDirection] = useState(1);
   const [isCommuneWard, setIsCommuneWard] = useState(false);
   const [isCommuneWardTo, setIsCommuneWardTo] = useState(false);
-
+  console.log('currentArea: ', currentArea)
   const [placeStart, setPlaceStart] = useState('');
   const [placeEnd, setPlaceEnd] = useState('');
   const [communeWard, setCommuneWard] = useState('');
@@ -141,15 +143,42 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
   const handleSelectCommuneWardEnd = () => {
     setIsCommuneWard(true);
   };
+  const handleChangeDirection = (direction: number) => {
 
+    if (direction === selectedDirection) return;
+
+    // nếu chọn chiều về thì đảo
+    if (direction === 0) {
+
+      setPlaceStart(placeEnd);
+      setPlaceEnd(placeStart);
+
+      setCommuneWardTo(communeWard);
+      setCommuneWard(communeWardTo);
+
+    }
+
+    // nếu chọn lại chiều đi thì đảo lại
+    if (direction === 1) {
+
+      setPlaceStart(placeEnd);
+      setPlaceEnd(placeStart);
+
+      setCommuneWardTo(communeWard);
+      setCommuneWard(communeWardTo);
+
+    }
+
+    setSelectedDirection(direction);
+  };
   return (
-    <AppView 
-      flex={1} 
-      backgroundColor='#fff' 
-      paddingHorizontal={16} 
-      paddingTop={16} 
-      gap={18} 
-      paddingBottom={Platform.OS === 'ios' ? insets.bottom : 0} 
+    <AppView
+      flex={1}
+      backgroundColor='#fff'
+      paddingHorizontal={16}
+      paddingTop={16}
+      gap={18}
+      paddingBottom={Platform.OS === 'ios' ? insets.bottom : 0}
       position='relative'
     >
       {loading && (
@@ -163,11 +192,11 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
 
       {/* Chọn chiều đi/về */}
       <AppView row gap={32}>
-        <AppButton onPress={() => setSelectedDirection(1)} row gap={8}>
+        <AppButton onPress={() => handleChangeDirection(1)} row gap={8}>
           <AppText>{'Chiều đi'}</AppText>
           {selectedDirection === 1 ? <IconTickCircle /> : <IconNoneTickCircle />}
         </AppButton>
-        <AppButton onPress={() => setSelectedDirection(0)} row gap={8}>
+        <AppButton onPress={() => handleChangeDirection(0)} row gap={8}>
           <AppText>{'Chiều về'}</AppText>
           {selectedDirection === 0 ? <IconTickCircle /> : <IconNoneTickCircle />}
         </AppButton>
@@ -184,20 +213,28 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
                     label={placeStart ? 'Điểm đón' : ''}
                     value={placeStart}
                     onChangeText={setPlaceStart}
-                    placeholder="Nhập điểm đón"
+                    placeholder="Nhập chi tiết điểm đón"
                   />
                 </AppView>
-                <AppButton 
-                  onPress={handleSelectCommuneWardStart} 
-                  borderWidth={1} 
-                  padding={7} 
-                  radius={6} 
+                <AppButton
+                  onPress={handleSelectCommuneWardStart}
+                  borderWidth={1}
+                  padding={7}
+                  radius={6}
                   borderColor={ColorsGlobal.borderColor}
                 >
                   <IconDotHorizonal />
                 </AppButton>
               </AppView>
-
+              <AppView alignItems='center' row gap={4}>
+                <IconWarning size={20} />
+                <AppText
+                  title={`Điểm xuất phát khu vực ${selectedDirection === 1
+                    ? currentArea?.place_start
+                    : currentArea?.place_end}`}
+                  color="#999" fontSize={12}
+                />
+              </AppView>
               {/* Hiển thị input xã/phường nếu đã chọn */}
               {communeWardTo && (
                 <AppView>
@@ -219,19 +256,29 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
                     label={placeEnd ? 'Điểm trả' : ''}
                     value={placeEnd}
                     onChangeText={setPlaceEnd}
-                    placeholder="Nhập điểm trả"
+                    placeholder="Nhập chi tiết điểm trả "
                   />
                 </AppView>
-                <AppButton 
-                  onPress={handleSelectCommuneWardEnd} 
-                  borderWidth={1} 
-                  padding={7} 
-                  radius={6} 
+                <AppButton
+                  onPress={handleSelectCommuneWardEnd}
+                  borderWidth={1}
+                  padding={7}
+                  radius={6}
                   borderColor={ColorsGlobal.borderColor}
                 >
                   <IconDotHorizonal />
                 </AppButton>
               </AppView>
+              <AppView alignItems='center' row gap={4}>
+                <IconWarning size={20} />
+                <AppText
+                  title={`Điểm đến khu vực ${selectedDirection === 1
+                    ? currentArea?.place_end
+                    : currentArea?.place_start}`}
+                  color="#999" fontSize={12}
+                />
+              </AppView>
+
 
               {/* Hiển thị input xã/phường nếu đã chọn */}
               {communeWard && (
@@ -253,9 +300,47 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
       </ScrollView>
 
       <ButtonSubmit title='Đăng bán' onPress={handleCreateTrip} />
-
-      {/* Modal chọn tỉnh/huyện cho ĐIỂM TRẢ */}
       <SelectProvinceDistrictModal
+        multiSelect={false}
+        isVisible={isCommuneWardTo}
+        provinceName={
+          selectedDirection === 1
+            ? currentArea?.place_start
+            : currentArea?.place_end
+        }
+        onClose={() => {
+          setIsCommuneWardTo(false); // ✅ đúng
+        }}
+        onSelected={(value) => {
+
+          console.log('✅ Kết quả chọn điểm đón:', value);
+
+          setCommuneWardTo(
+            `${value.district.name}, ${value.province.name}`
+          );
+
+        }}
+      />
+      <SelectProvinceDistrictModal
+        multiSelect={false}
+        isVisible={isCommuneWard}
+        provinceName={
+          selectedDirection === 1
+            ? currentArea?.place_end
+            : currentArea?.place_start
+        }
+        onClose={() => {
+          setIsCommuneWard(false); // ✅ đúng
+        }}
+        onSelected={(value) => {
+          console.log('✅ Kết quả chọn điểm trả:', value);
+          setCommuneWard(
+            `${value.district.name}, ${value.province.name}`
+          );
+        }}
+      />
+      {/* Modal chọn tỉnh/huyện cho ĐIỂM TRẢ */}
+      {/* <SelectProvinceDistrictModal
         multiSelect={false}
         isVisible={isCommuneWard}
         onClose={() => {
@@ -265,10 +350,10 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
           console.log('✅ Kết quả chọn điểm trả:', value);
           setCommuneWard(`${value.province.name} - ${value.district.name}`);
         }}
-      />
+      /> */}
 
       {/* Modal chọn tỉnh/huyện cho ĐIỂM ĐÓN */}
-      <SelectProvinceDistrictModal
+      {/* <SelectProvinceDistrictModal
         multiSelect={false}
         isVisible={isCommuneWardTo}
         onClose={() => {
@@ -278,7 +363,8 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
           console.log('✅ Kết quả chọn điểm đón:', value);
           setCommuneWardTo(`${value.province.name} - ${value.district.name}`);
         }}
-      />
+      /> */}
+
     </AppView>
   )
 }

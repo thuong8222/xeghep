@@ -173,7 +173,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
     };
 
     const SaleTrips = () => {
-        navigation.navigate('SaleTrip', { id_area: id_area })
+        navigation.navigate('SaleTrip', { id_area: id_area,})
     }
 
     const renderHiddenItem = (data, rowMap) => {
@@ -212,11 +212,6 @@ export default function BuyTripScreen({ navigation, route }: Props) {
             area_id: id_area
         };
 
-        
-        
-        
-        
-        
         if (dateFilter) {
             model.start_date = dateFilter.start_date;
             model.end_date = dateFilter.end_date;

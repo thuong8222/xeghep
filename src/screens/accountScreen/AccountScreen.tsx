@@ -92,21 +92,14 @@ export default function AccountScreen({ navigation }: Props) {
   const DeleteAccount = () => {
     const handleDelete = async () => {
       try {
-
         const result = await dispatch(deleteAccount()).unwrap();
-
-
         await AsyncStorage.removeItem('token');
         await AsyncStorage.removeItem('driver');
-
         setCurrentDriver('');
-
         navigation.reset({
           index: 0,
           routes: [{ name: 'Auth', state: { routes: [{ name: 'LoginScreen' }] } }],
         });
-
-
       } catch (error) {
         console.error('Lỗi xoá tài khoản:', error);
       }
@@ -126,7 +119,7 @@ const gotoBankStatementBuySalePoint = () => {
   navigation.navigate('RootNavigator', {
     screen: 'BottomTabs',      
     params: {
-      screen: 'AccountTabs',       
+      screen: 'AccountTabs',
       params: {
         screen: 'BankStatementBuySalePoint'
       }

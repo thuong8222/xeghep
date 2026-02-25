@@ -16,6 +16,7 @@ import { useAreaApi } from '../../redux/hooks/useAreaApi';
 import { getNameByCode } from '../../utils/province';
 import Container from '../../components/common/Container';
 import { useFocusEffect } from '@react-navigation/native';
+import { useAppContext } from '../../context/AppContext';
 
 type GroupAreaNavProp = NativeStackNavigationProp<BuyTripStackParamList, "BuyTrip">;
 
@@ -23,6 +24,7 @@ interface Props {
   navigation: GroupAreaNavProp;
 }
 export default function GroupAreaScreen({ navigation }: Props) {
+  const { setCurrentArea } = useAppContext();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isViewList, setIsViewList] = useState(true);
   const { groups, loading, error, getAreas, clear } = useAreaApi();
@@ -80,6 +82,7 @@ export default function GroupAreaScreen({ navigation }: Props) {
 
 
   const gotoDetailArea = (props) => {
+    setCurrentArea(props)
     const namegroup =
       props.name +
       (props.province_code ? ' - ' + getNameByCode(props.province_code) : '');
