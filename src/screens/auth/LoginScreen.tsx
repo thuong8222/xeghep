@@ -146,7 +146,7 @@ const {setCurrentDriver } = useAppContext();
               </AppText>
               <AppText
                 style={StyleGlobal.textNormal}>
-                {'Chào mừng bạn đến với Xe ghép'}
+                {'Chào mừng bạn đến với Xe ghép_test2801'}
               </AppText>
             </AppView>
 

@@ -36,7 +36,7 @@ export default function GroupAreaScreen({ navigation }: Props) {
       }
     }, [groups, fetchGroups])
   );
-  
+
 
   const fetchGroups = useCallback(async () => {
     try {
@@ -80,8 +80,10 @@ export default function GroupAreaScreen({ navigation }: Props) {
 
 
   const gotoDetailArea = (props) => {
-
-    navigation.navigate('BuyTrip', { nameGroup: props.name + ' - ' + getNameByCode(props.province_code), countMember: props.members_count || 0, id_area: props.id, isJoin: props.is_member })
+    const namegroup =
+      props.name +
+      (props.province_code ? ' - ' + getNameByCode(props.province_code) : '');
+    navigation.navigate('BuyTrip', { nameGroup: namegroup, countMember: props.members_count || 0, id_area: props.id, isJoin: props.is_member })
   }
   const renderItem_groupArea = ({ item, index }) => {
     return (<>
