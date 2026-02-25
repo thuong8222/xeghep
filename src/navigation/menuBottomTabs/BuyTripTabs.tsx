@@ -1,19 +1,20 @@
 import React, { useState } from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { EventEmitter } from 'events'
-import GroupAreaScreen from '../../screens/buyTrip/GroupAreaScreen'
+
 import BuyTripScreen from '../../screens/buyTrip/BuyTripScreen'
 import SaleTripsScreen from '../../screens/SaleTrips/SaleTripsScreen'
 import AppButton from '../../components/common/AppButton'
 import IconSort from '../../assets/icons/IconSort'
 import ModalBuyTrip from '../../components/component/modals/ModalBuyTrip'
-import InfoGroupScreen from '../../screens/buyTrip/InfoGroupScreen'
+import InfoGroupScreen from '../../screens/AreaGroup/InfoGroupScreen'
 
-import MemberGroupScreen from '../../screens/buyTrip/MemberGroupScreen'
-import GroupRulesScreen from '../../screens/buyTrip/GroupRulesScreen'
+import MemberGroupScreen from '../../screens/AreaGroup/MemberGroupScreen'
+import GroupRulesScreen from '../../screens/AreaGroup/GroupRulesScreen'
 import NotificationScreen from './NotificationScreen'
 import { HeaderBackButton } from '@react-navigation/elements'
 import { useNavigation } from '@react-navigation/native'
+import GroupAreaScreen from '../../screens/AreaGroup/GroupAreaScreen'
 
 export type BuyTripStackParamList = {
   GroupArea: undefined

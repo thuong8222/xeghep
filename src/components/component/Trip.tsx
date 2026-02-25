@@ -68,13 +68,15 @@ export default function Trip(props) {
                 </AppView>
                 <AppView row gap={8} >
                     <AppView borderBottomColor={'#E4E4E4'} borderBottomWidth={1} paddingVertical={8} flex={1}>
-                        <AppText fontSize={14} lineHeight={20}>{props.data.place_start.split(',')[0].trim()}</AppText>
+                        <AppText fontSize={14} lineHeight={20} numberOfLines={1}>{props.data.place_start.split(',')[0].trim()}</AppText>
+                         {/* <AppText fontSize={14} lineHeight={20} numberOfLines={1}>{props.data.place_start}</AppText> */}
                     </AppView>
                     <AppView alignItems='center' justifyContent='center'  >
                         <ArrowRight />
                     </AppView>
                     <AppView borderBottomColor={'#E4E4E4'} borderBottomWidth={1} paddingVertical={8} flex={1}>
-                        <AppText fontSize={14} lineHeight={20}>{props.data.place_end.split(',')[0].trim()}</AppText>
+                        <AppText fontSize={14} lineHeight={20} numberOfLines={1}>{props.data.place_end.split(',')[0].trim()}</AppText>
+                         {/* <AppText fontSize={14} lineHeight={20} numberOfLines={1}>{props.data.place_end}</AppText> */}
                     </AppView>
                 </AppView>
                 <AppView row justifyContent={'space-between'}>

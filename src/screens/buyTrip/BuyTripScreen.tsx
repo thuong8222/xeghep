@@ -1,7 +1,7 @@
 import { Alert, StyleSheet, Text, View } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import AppView from '../../components/common/AppView'
-import { listTrips } from '../../dataDemoJson'
+
 import AppButton from '../../components/common/AppButton'
 import AppText from '../../components/common/AppText'
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal'
