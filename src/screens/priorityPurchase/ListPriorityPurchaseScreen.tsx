@@ -1,4 +1,4 @@
-import { FlatList, TouchableOpacity, RefreshControl, Alert } from 'react-native';
+import { FlatList, TouchableOpacity, RefreshControl, Alert, Text } from 'react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import Container from '../../components/common/Container';
 import AppText from '../../components/common/AppText';
@@ -18,6 +18,8 @@ import { useSelector } from 'react-redux';
 import moment from 'moment';
 import { CONSTANT, NumberFormat } from '../../utils/Helper';
 import IconClose from '../../assets/icons/IconClose';
+import IconChevronLeftDouble from '../../assets/icons/IconChevronLeftDouble';
+import IconMapPin from '../../assets/icons/IconMapPin';
 
 export default function ListPriorityPurchaseScreen() {
     const navigation = useNavigation();
@@ -162,8 +164,8 @@ export default function ListPriorityPurchaseScreen() {
                                 <AppButton onPress={() => goToEdit(item)}>
                                     <IconPencil size={18} color={ColorsGlobal.main} />
                                 </AppButton>
-                                <AppButton onPress={() => confirmCancel(item)} backgroundColor={ColorsGlobal.borderColor} radius={99}>
-                                    <IconClose size={28} color="#C0392B" />
+                                <AppButton onPress={() => confirmCancel(item)} backgroundColor={ColorsGlobal.borderColor} radius={99} height={32} width={32} justifyContent='center' alignItems='center'>
+                                    <IconClose size={22} color="#C0392B" />
                                 </AppButton>
                             </AppView>
                         )}
@@ -171,23 +173,26 @@ export default function ListPriorityPurchaseScreen() {
 
                     {/* ===== BODY: LOCATION ===== */}
                     <AppView marginTop={10} gap={6}>
-                        <AppView row gap={6}>
-                            <IconLocation />
-                            <AppText fontSize={14} bold>
+                        <Text>
+                            <IconMapPin size={17}/>
+                           
+                            <AppText title={' '} />
+                            <AppText fontSize={14} bold  >
                                 {Array.isArray(item.pickup_location)
                                     ? item.pickup_location.join(', ')
                                     : item.pickup_location}
                             </AppText>
-                        </AppView>
+                        </Text>
 
-                        <AppView row gap={6} paddingLeft={4}>
-                            <IconArrowDown rotate={-90} />
+                         <Text>
+                             <IconLocation size={14}/>
+                            <AppText title={' '} />
                             <AppText fontSize={14}>
                                 {Array.isArray(item.dropoff_location)
                                     ? item.dropoff_location.join(', ')
                                     : item.dropoff_location}
                             </AppText>
-                        </AppView>
+                         </Text>
                     </AppView>
 
       
@@ -229,7 +234,7 @@ export default function ListPriorityPurchaseScreen() {
 
 
     return (
-        <Container style={{ position: 'relative' }} padding={0} ignoreBottomInset>
+        <Container style={{ position: 'relative' }} padding={16} ignoreBottomInset>
             <AppText textAlign='center' color={ColorsGlobal.main2} fontWeight={600}>
                 [Danh sách yêu cầu mua chuyến tự động]
             </AppText>
@@ -243,7 +248,7 @@ export default function ListPriorityPurchaseScreen() {
                     data={list}
                     renderItem={renderItem}
                     keyExtractor={(item) => item.id.toString()}
-                    contentContainerStyle={{ gap: 16, padding: 16 }}
+                    contentContainerStyle={{ gap: 16, }}
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}

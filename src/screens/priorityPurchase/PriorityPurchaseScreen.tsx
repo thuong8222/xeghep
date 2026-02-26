@@ -19,7 +19,7 @@ import IconDotHorizonal from '../../assets/icons/IconDotHorizonal';
 export default function PriorityPurchaseScreen() {
     const route = useRoute();
     const { editData } = route?.params ?? {};
-
+    console.log('editData: ', editData)
 
     const dispatch = useAppDispatch();
     const navigation = useNavigation();
@@ -35,6 +35,10 @@ export default function PriorityPurchaseScreen() {
     const [price, setPrice] = useState('');
     const [selectedDirection, setSelectedDirection] = useState(1);
     const [submitting, setSubmitting] = useState(false);
+    const [provinceNameSelected, setProvinceNameSelected] = useState();
+    const [selectedDistricts, setSelectedDistricts] = useState([]);
+    const [provinceNameFrom, setProvinceNameFrom] = useState();
+    const [selectedDistrictsFrom, setSelectedDistrictsFrom] = useState([]);
 
     useEffect(() => {
         if (editData) {
@@ -50,8 +54,14 @@ export default function PriorityPurchaseScreen() {
                     ? new Date(editData.time_receive_end)
                     : null
             );
+
+
             setPoint(editData.maximum_point?.toString() || '');
-            setPrice(editData.desired_price?.toString() || '');
+            setPrice(
+                editData.desired_price
+                    ? Number(editData.desired_price).toString()
+                    : ''
+            );
             setSelectedDirection(editData.direction === 'round_trip' ? 0 : 1);
         }
     }, [editData]);
@@ -117,24 +127,45 @@ export default function PriorityPurchaseScreen() {
                 );
             }
         } catch (err: any) {
+            console.log('mua uu tien error: ', err);    
             Alert.alert(
                 "Lỗi",
                 err?.message || (editData ? "Cập nhật thất bại" : "Gửi yêu cầu thất bại")
             );
         } finally {
-            setSubmitting(false); 
+            setSubmitting(false);
         }
     };
+    const handleChangeDirection = (direction) => {
 
+        if (direction !== selectedDirection) {
+
+            // đảo place
+            setPlaceFrom(placeTo);
+            setPlaceTo(placeFrom);
+
+            // đảo province
+            setProvinceNameFrom(provinceNameSelected);
+            setProvinceNameSelected(provinceNameFrom);
+
+            // đảo districts
+            setSelectedDistrictsFrom(selectedDistricts);
+            setSelectedDistricts(selectedDistrictsFrom);
+
+            setSelectedDirection(direction);
+
+        }
+
+    };
     return (
         <ScrollView style={{ flex: 1, gap: 8, backgroundColor: "#fff" }} contentContainerStyle={{ flex: 1 }}>
             <AppView flex={1} backgroundColor="#fff" padding={16} gap={24}>
                 <AppView row gap={32}>
-                    <AppButton onPress={() => setSelectedDirection(1)} row gap={8}>
+                    <AppButton onPress={() => handleChangeDirection(1)} row gap={8}>
                         <AppText>{'Chiều đi'}</AppText>
                         {selectedDirection === 1 ? <IconTickCircle /> : <IconNoneTickCircle />}
                     </AppButton>
-                    <AppButton onPress={() => setSelectedDirection(0)} row gap={8}>
+                    <AppButton onPress={() => handleChangeDirection(0)} row gap={8}>
                         <AppText>{'Chiều về'}</AppText>
                         {selectedDirection === 0 ? <IconTickCircle /> : <IconNoneTickCircle />}
                     </AppButton>
@@ -151,19 +182,24 @@ export default function PriorityPurchaseScreen() {
                     </AppButton>
                 </AppButton>
 
+                <AppView>
 
+                    <AppText bold marginBottom={4}>Điểm trả</AppText>
+                    <AppButton onPress={() => setIsCommuneWardTo(true)} radius={8} row gap={8}>
 
-                <AppButton onPress={() => setIsCommuneWardTo(true)} radius={8} row gap={8}>
-                    <TextInput value={placeTo} multiline onChangeText={(text) => setPlaceTo(text)} placeholder='Nhấn để chọn địa chỉ' style={{ color: "#666", borderWidth: 1, borderRadius: 10, borderColor: ColorsGlobal.borderColor, flex: 1, paddingLeft: 10 }} />
-                    <AppButton onPress={() => setIsCommuneWardTo(true)} borderColor={ColorsGlobal.borderColor} borderWidth={1} radius={10} alignItems='center' justifyContent='center' paddingHorizontal={10}>
-                        <IconDotHorizonal />
+                        <TextInput value={placeTo} multiline onChangeText={(text) => setPlaceTo(text)} placeholder='Nhấn để chọn địa chỉ' style={{ color: "#666", borderWidth: 1, borderRadius: 10, borderColor: ColorsGlobal.borderColor, flex: 1, paddingLeft: 10 }} />
+                        <AppButton onPress={() => setIsCommuneWardTo(true)} borderColor={ColorsGlobal.borderColor} borderWidth={1} radius={10} alignItems='center' justifyContent='center' paddingHorizontal={10}>
+                            <IconDotHorizonal />
+                        </AppButton>
                     </AppButton>
-                </AppButton>
-
+                </AppView>
 
                 <AppView row justifyContent={'space-between'} alignItems='center' gap={24}>
                     <AppView flex={1}>
-                        <AppInput value={(parseInt(price))} onChangeText={setPrice} label="Giá tối thiểu" placeholder="...K/chuyến" keyboardType='numeric' />
+                        <AppInput value={price}
+                            onChangeText={setPrice}
+                            keyboardType="numeric"
+                            label="Giá tối thiểu" placeholder="... K/chuyến" />
                     </AppView>
                 </AppView>
                 <AppInput value={point} onChangeText={setPoint} label="Điểm trừ tối đa" placeholder="Nhập điểm trừ tối đa" keyboardType='numeric' />
@@ -207,20 +243,34 @@ export default function PriorityPurchaseScreen() {
                 <SelectProvinceDistrictModal
                     multiSelect={true}
                     isVisible={isCommuneWard}
+                    provinceName={provinceNameFrom}
+                    districtCodes={selectedDistrictsFrom.map(d => d.code)}
                     onClose={() => setIsCommuneWard(false)}
                     onSelected={(value) => {
 
-                        const list = value.districts.map(d => `${value.province.name} - ${d.name}`).join(' | ');
+                        setProvinceNameFrom(value.province.name);
+
+                        setSelectedDistrictsFrom(value.districts);
+
+                        const list = value.districts
+                            .map(d => `${value.province.name} - ${d.name}`)
+                            .join(' | ');
+
                         setPlaceFrom(list);
+
                         setIsCommuneWard(false);
+
                     }}
                 />
                 <SelectProvinceDistrictModal
                     multiSelect={true}
                     isVisible={isCommuneWardTo}
+                    provinceName={provinceNameSelected}
+                    districtCodes={selectedDistricts.map(d => d.code)}
                     onClose={() => setIsCommuneWardTo(false)}
                     onSelected={(value) => {
-
+                        setProvinceNameSelected(value.province.name);
+                        setSelectedDistricts(value.districts);
                         const list = value.districts.map(d => `${value.province.name} - ${d.name}`).join(' | ');
                         setPlaceTo(list);
                         setIsCommuneWardTo(false);

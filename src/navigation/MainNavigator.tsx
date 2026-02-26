@@ -47,32 +47,36 @@ export default function MainNavigator() {
     socket.emit("register_user", currentDriver.id);
   }, [socket, isConnected, currentDriver?.id]);
 
-
+  console.log('driver MainNavigator: ', driver)
 
   // ✅ Listen cả 2 loại thông báo (vì user có thể vừa là buyer vừa là seller)
   useSellerNotifications(currentDriver?.id || driver?.id);
   useBuyerNotifications(currentDriver?.id || driver?.id);
   usePointsListRealtime();                          // Cập nhật danh sách điểm
-  useTransactionHistoryRealtime(currentDriver?.id);
+  useTransactionHistoryRealtime(currentDriver?.id || driver?.id);
   // ✅ Kích hoạt tất cả hooks real-time
-  useTripSellerNotifications(currentDriver?.id || undefined); // Nhận thông báo khi có người mua chuyến của mình
-  useTripBuyerNotifications(currentDriver?.id || undefined);  // Nhận thông báo khi mua chuyến thành công
+  useTripSellerNotifications(currentDriver?.id || driver?.id || undefined); // Nhận thông báo khi có người mua chuyến của mình
+  useTripBuyerNotifications(currentDriver?.id || driver?.id || undefined);  // Nhận thông báo khi mua chuyến thành công
   useTripsListRealtime();                          // Auto update danh sách chuyến
-  useReceivedTripsRealtime(currentDriver?.id || undefined);   // Auto update danh sách chuyến đã nhận
+  useReceivedTripsRealtime(currentDriver?.id || driver?.id || undefined);   // Auto update danh sách chuyến đã nhận
   // ✅ Kích hoạt notification system
-  useNotificationsRealtime(currentDriver?.id);
+  useNotificationsRealtime(currentDriver?.id || driver?.id);
   // ===== ✅ AUTO BUY TRIPS Notifications =====
-  useAllAutoBuyNotifications(currentDriver?.id);          // Tất cả thông báo auto buy
-  useAutoBuyRealtimeUpdates(currentDriver?.id);           // Cập nhật danh sách realtime
-  useAutoBuyListUpdates(currentDriver?.id);
+  useAllAutoBuyNotifications(currentDriver?.id || driver?.id);          // Tất cả thông báo auto buy
+  useAutoBuyRealtimeUpdates(currentDriver?.id || driver?.id);           // Cập nhật danh sách realtime
+  useAutoBuyListUpdates(currentDriver?.id || driver?.id);
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       {!isSplashDone ? (
         <CustomSplash onFinish={() => setIsSplashDone(true)} />
       ) : (
-        <Stack.Navigator initialRouteName="Auth" screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Auth" component={AuthNavigator} />
-          <Stack.Screen name="RootNavigator" component={RootNavigator} />
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          {currentDriver?.id || driver?.id ? (
+            <Stack.Screen name="RootNavigator" component={RootNavigator} />
+          ) : (
+            <Stack.Screen name="Auth" component={AuthNavigator} />
+          )}
+
         </Stack.Navigator>
       )}
     </GestureHandlerRootView>

@@ -32,7 +32,7 @@ export default function AccountScreen({ navigation }: Props) {
   const dispatch = useDispatch<AppDispatch>();
   const { driver, loading, error, successMessage, getDriver, clear } = useDriverApi();
   const { setCurrentDriver } = useAppContext();
- 
+
   const { isConnected } = useSocket();
   const [isModalChangePw, setIsModalChangePw] = useState(false);
 
@@ -58,15 +58,12 @@ export default function AccountScreen({ navigation }: Props) {
       try {
 
         const result = await dispatch(logoutAccount()).unwrap();
-
+        console.log('handleLogout result: ', result)
         await AsyncStorage.removeItem('token');
         await AsyncStorage.removeItem("driver")
 
-        setCurrentDriver('');
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Auth', state: { routes: [{ name: 'LoginScreen' }] } }],
-        });
+        setCurrentDriver(null);
+       
 
 
       } catch (error) {
@@ -84,7 +81,7 @@ export default function AccountScreen({ navigation }: Props) {
         },
         {
           text: 'Đăng xuất',
-          onPress: handleLogout, 
+          onPress: handleLogout,
         },
       ]
     );
@@ -98,7 +95,7 @@ export default function AccountScreen({ navigation }: Props) {
         setCurrentDriver('');
         navigation.reset({
           index: 0,
-          routes: [{ name: 'Auth', state: { routes: [{ name: 'LoginScreen' }] } }],
+          routes: [{ name: 'LoginScreen' }],
         });
       } catch (error) {
         console.error('Lỗi xoá tài khoản:', error);
@@ -114,25 +111,25 @@ export default function AccountScreen({ navigation }: Props) {
       ]
     );
   };
-//gotoBankStatementBuySalePoint
-const gotoBankStatementBuySalePoint = () => {
-  navigation.navigate('RootNavigator', {
-    screen: 'BottomTabs',      
-    params: {
-      screen: 'AccountTabs',
+  //gotoBankStatementBuySalePoint
+  const gotoBankStatementBuySalePoint = () => {
+    navigation.navigate('RootNavigator', {
+      screen: 'BottomTabs',
       params: {
-        screen: 'BankStatementBuySalePoint'
+        screen: 'AccountTabs',
+        params: {
+          screen: 'BankStatementBuySalePoint'
+        }
       }
-    }
-  });
+    });
 
-}
+  }
   const gotoHistoryBuySalePoint = () => {
 
     navigation.navigate('RootNavigator', {
-      screen: 'BottomTabs',      
+      screen: 'BottomTabs',
       params: {
-        screen: 'AccountTabs',       
+        screen: 'AccountTabs',
         params: {
           screen: 'BankStatementBuySalePoint'
         }
@@ -142,13 +139,13 @@ const gotoBankStatementBuySalePoint = () => {
   }
   const gotoInfoAccount = () => {
     navigation.navigate('RootNavigator', {
-      screen: 'BottomTabs',       
+      screen: 'BottomTabs',
       params: {
-        screen: 'AccountTabs',    
+        screen: 'AccountTabs',
         params: {
-          screen: 'AccountInfoScreen',  
+          screen: 'AccountInfoScreen',
           params: {
-            data: driver,              
+            data: driver,
           },
         },
       },
@@ -156,13 +153,13 @@ const gotoBankStatementBuySalePoint = () => {
   }
   const gotoInfoCar = () => {
     navigation.navigate('RootNavigator', {
-      screen: 'BottomTabs',      
+      screen: 'BottomTabs',
       params: {
-        screen: 'AccountTabs',       
+        screen: 'AccountTabs',
         params: {
           screen: 'CarInfoScreen',
           params: {
-            data: driver,              
+            data: driver,
           },
         }
       }
@@ -227,7 +224,7 @@ const gotoBankStatementBuySalePoint = () => {
           <FunctionSection label='Thông tin cá nhân' onPress={gotoInfoAccount} data={driver} />
           <FunctionSection label='Thông tin xe' onPress={gotoInfoCar} />
         </AppView>
-       
+
 
         <AppView gap={6} >
           <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Tính năng'}</AppText>

@@ -22,13 +22,14 @@ import { createTrip, CreateTripPayload, fetchTrips } from '../../redux/slices/tr
 import moment from 'moment'
 import { useAppContext } from '../../context/AppContext'
 import IconWarning from '../../assets/icons/IconWarning'
+import IconLocation from '../../assets/icons/iconLocation'
 
 interface Props {
   route: any;
   navigation: any;
 }
 export default function SaleTripsScreen({ route, navigation }: Props) {
-  console.log('man hinh ban chuyen')
+
   const { id_area } = route.params;
   const insets = useSafeAreaInsets();
 
@@ -43,7 +44,8 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
   const [communeWard, setCommuneWard] = useState('');
   const [communeWardTo, setCommuneWardTo] = useState('');
   const { loading } = useSelector((state: any) => state.trips);
-
+  const [districtCode, setDistrictCode] = useState('');
+  const [districtCodeTo, setDistrictCodeTo] = useState('');
   const [tripOptions, setTripOptions] = useState({
     numGuests: 1,
     price: '250',
@@ -171,6 +173,7 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
 
     setSelectedDirection(direction);
   };
+
   return (
     <AppView
       flex={1}
@@ -227,7 +230,7 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
                 </AppButton>
               </AppView>
               <AppView alignItems='center' row gap={4}>
-                <IconWarning size={20} />
+                <IconLocation size={13} />
                 <AppText
                   title={`Điểm xuất phát khu vực ${selectedDirection === 1
                     ? currentArea?.place_start
@@ -269,8 +272,8 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
                   <IconDotHorizonal />
                 </AppButton>
               </AppView>
-              <AppView alignItems='center' row gap={4}>
-                <IconWarning size={20} />
+              <AppView alignItems='center' row gap={4} >
+                <IconLocation size={13} />
                 <AppText
                   title={`Điểm đến khu vực ${selectedDirection === 1
                     ? currentArea?.place_end
@@ -308,11 +311,12 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
             ? currentArea?.place_start
             : currentArea?.place_end
         }
+        districtCode={districtCodeTo}
         onClose={() => {
           setIsCommuneWardTo(false); // ✅ đúng
         }}
         onSelected={(value) => {
-
+          setDistrictCodeTo(value?.code)
           console.log('✅ Kết quả chọn điểm đón:', value);
 
           setCommuneWardTo(
@@ -329,10 +333,12 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
             ? currentArea?.place_end
             : currentArea?.place_start
         }
+        districtCode={districtCode}
         onClose={() => {
           setIsCommuneWard(false); // ✅ đúng
         }}
         onSelected={(value) => {
+          setDistrictCode(value?.code)
           console.log('✅ Kết quả chọn điểm trả:', value);
           setCommuneWard(
             `${value.district.name}, ${value.province.name}`

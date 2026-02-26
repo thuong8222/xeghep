@@ -1,5 +1,5 @@
 import { Linking, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import AppView from '../../components/common/AppView';
 import AppText from '../../components/common/AppText';
 import IconUser from '../../assets/icons/IconUser';
@@ -11,12 +11,21 @@ import IconPhone from '../../assets/icons/iconPhone';
 import moment from 'moment';
 import IconComment from '../../assets/icons/iconComment';
 import { useAppContext } from '../../context/AppContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function DetailTripHistorySreen({ route, navigation }) {
     const data = route?.params?.data;
     // console.log('data DetailTripHistorySreen: ', data)
+   const [driver, setDriver] = useState<any>(null);
+  useEffect(() => {
+    const fetchDriver = async () => {
+      const driverString = await AsyncStorage.getItem("driver");
+      if (driverString) setDriver(JSON.parse(driverString));
+    };
+    fetchDriver();
+  }, []);
     const { currentDriver } = useAppContext();
-    const isSeller = currentDriver?.id === data?.id_driver_sell;
+    const isSeller = (currentDriver?.id || driver?.id) === data?.id_driver_sell;
     // console.log('isSeller: ', isSeller)
     const driverSell = data?.driver_sell || {};
     const driverReceive = data?.driver_receive;

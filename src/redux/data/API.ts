@@ -37,6 +37,7 @@ export const api_hastoken = axios.create({
 // Thêm interceptor
 api_hastoken.interceptors.request.use(async (config) => {
   const token = await AsyncStorage.getItem('token');
+  console.log('token in api_hastoken:', token);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

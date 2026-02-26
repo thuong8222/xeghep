@@ -70,7 +70,7 @@ const {setCurrentDriver } = useAppContext();
 
     try {
       await login({ phone: phoneNumber, password });
-     navigation.navigate('RootNavigator');
+   
       setCurrentDriver(JSON.parse((await AsyncStorage.getItem("driver")) || 'null'));
     } catch (err: any) {
       Alert.alert('Đăng nhập thất bại', err || 'Có lỗi xảy ra');
@@ -146,7 +146,7 @@ const {setCurrentDriver } = useAppContext();
               </AppText>
               <AppText
                 style={StyleGlobal.textNormal}>
-                {'Chào mừng bạn đến với Xe ghép_test2801'}
+                {'Chào mừng bạn đến với Xe ghép'}
               </AppText>
             </AppView>
 

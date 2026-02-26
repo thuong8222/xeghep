@@ -1,0 +1,28 @@
+import React from 'react';
+import Svg, { Path } from 'react-native-svg';
+
+interface IconLocationProps {
+  size?: number;
+  color?: string;
+}
+
+const IconLocationn: React.FC<IconLocationProps> = ({
+  size = 24,
+  color = '#000',
+}) => {
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 640 640"
+      fill="none"
+    >
+      <Path
+        d="M128 252.6C128 148.4 214 64 320 64C426 64 512 148.4 512 252.6C512 371.9 391.8 514.9 341.6 569.4C329.8 582.2 310.1 582.2 298.3 569.4C248.1 514.9 127.9 371.9 127.9 252.6zM320 320C355.3 320 384 291.3 384 256C384 220.7 355.3 192 320 192C284.7 192 256 220.7 256 256C256 291.3 284.7 320 320 320z"
+        fill={color}
+      />
+    </Svg>
+  );
+};
+
+export default IconLocationn;
