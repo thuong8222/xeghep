@@ -138,7 +138,7 @@ export const historyPoint = createAsyncThunk<
   try {
     // const response = await api.get('api/points');
     const response = await historyPointAPI();
-    console.log('historyPoint: ', response.data.data);
+  
     if (response.data.status === 1) {
       return response.data.data;
     } else {

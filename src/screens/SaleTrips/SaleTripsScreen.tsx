@@ -145,34 +145,35 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
   const handleSelectCommuneWardEnd = () => {
     setIsCommuneWard(true);
   };
-  const handleChangeDirection = (direction: number) => {
+const handleChangeDirection = (direction: number) => {
 
-    if (direction === selectedDirection) return;
+  if (direction === selectedDirection) return;
 
-    // nếu chọn chiều về thì đảo
-    if (direction === 0) {
+  // swap place
+  const newPlaceStart = placeEnd;
+  const newPlaceEnd = placeStart;
 
-      setPlaceStart(placeEnd);
-      setPlaceEnd(placeStart);
+  // swap commune
+  const newCommuneStart = communeWard;
+  const newCommuneEnd = communeWardTo;
 
-      setCommuneWardTo(communeWard);
-      setCommuneWard(communeWardTo);
+  // swap districtCode
+  const newDistrictStart = districtCode;
+  const newDistrictEnd = districtCodeTo;
 
-    }
 
-    // nếu chọn lại chiều đi thì đảo lại
-    if (direction === 1) {
+  setPlaceStart(newPlaceStart);
+  setPlaceEnd(newPlaceEnd);
 
-      setPlaceStart(placeEnd);
-      setPlaceEnd(placeStart);
+  setCommuneWardTo(newCommuneStart);
+  setCommuneWard(newCommuneEnd);
 
-      setCommuneWardTo(communeWard);
-      setCommuneWard(communeWardTo);
+  setDistrictCodeTo(newDistrictStart);
+  setDistrictCode(newDistrictEnd);
 
-    }
 
-    setSelectedDirection(direction);
-  };
+  setSelectedDirection(direction);
+};
 
   return (
     <AppView

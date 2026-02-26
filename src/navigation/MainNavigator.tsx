@@ -32,9 +32,11 @@ export default function MainNavigator() {
   const { socket, isConnected } = useSocket();
   const [isSplashDone, setIsSplashDone] = useState(false);
   const [driver, setDriver] = useState<any>(null);
+
   useEffect(() => {
     const fetchDriver = async () => {
       const driverString = await AsyncStorage.getItem("driver");
+
       if (driverString) setDriver(JSON.parse(driverString));
     };
     fetchDriver();
@@ -47,7 +49,7 @@ export default function MainNavigator() {
     socket.emit("register_user", currentDriver.id);
   }, [socket, isConnected, currentDriver?.id]);
 
-  console.log('driver MainNavigator: ', driver)
+
 
   // ✅ Listen cả 2 loại thông báo (vì user có thể vừa là buyer vừa là seller)
   useSellerNotifications(currentDriver?.id || driver?.id);

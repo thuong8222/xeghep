@@ -8,7 +8,7 @@ import AppText from '../../components/common/AppText';
 import { FlatList } from 'react-native-gesture-handler';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
-import PointHistory from '../../components/component/PointHistory';
+
 import Container from '../../components/common/Container';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/data/store';
@@ -17,9 +17,9 @@ import { useTransactionHistoryRealtime } from '../../hooks/useTransactionHistory
 import { useAppContext } from '../../context/AppContext';
 import { useAppDispatch } from '../../redux/hooks/useAppDispatch';
 import moment from 'moment';
-import TypeFilterBar from '../../components/component/TypeFilterBar';
-import Point from '../../components/component/Point';
+
 import PointHis from '../../components/component/PointHis';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HistoryBuySalePoint() {
   const dispatch = useAppDispatch()
@@ -33,14 +33,20 @@ export default function HistoryBuySalePoint() {
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
-
-  console.log('history: ', history)
-
-  // ✅ Kích hoạt real-time updates
-  useTransactionHistoryRealtime(currentDriver?.id);
+const [driver, setDriver] = useState<any>(null);
 
   useEffect(() => {
-    if (!currentDriver?.id) return;
+    const fetchDriver = async () => {
+      const driverString = await AsyncStorage.getItem("driver");
+      if (driverString) setDriver(JSON.parse(driverString));
+    };
+    fetchDriver();
+  }, []);
+  
+  useTransactionHistoryRealtime(driver?.id);
+
+  useEffect(() => {
+    if (!driver?.id) return;
 
     const start_date = fromDate ? dateToTimestamp(fromDate, false) : undefined;
     const end_date = toDate ? dateToTimestamp(toDate, true) : undefined;
@@ -53,14 +59,14 @@ export default function HistoryBuySalePoint() {
     dispatch(historyPoint(params));
   }, [selectedType, fromDate, toDate, currentDriver?.id]);
 
-  // ✅ Hàm chuyển dd/mm/yyyy thành timestamp (startOfDay)
+  
   const dateToTimestamp = useCallback((dateString: string, endOfDay = false): number | null => {
     if (!dateString) return null;
     const momentDate = moment(dateString, 'DD/MM/YYYY');
     return endOfDay ? momentDate.endOf('day').unix() : momentDate.startOf('day').unix();
   }, []);
 
-  // ✅ Hàm format Date thành dd/mm/yyyy
+  
   const formatDate = useCallback((date: Date) => {
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -68,7 +74,7 @@ export default function HistoryBuySalePoint() {
     return `${day}/${month}/${year}`;
   }, []);
 
-  // ✅ Hàm chuyển đổi dd/mm/yyyy sang Date object
+  
   const parseDate = useCallback((dateString: string): Date | null => {
     if (!dateString) return null;
     const [day, month, year] = dateString.split('/');
@@ -78,13 +84,13 @@ export default function HistoryBuySalePoint() {
 
 
 
-  // ✅ Xử lý khi chọn ngày
+  
   const handleConfirmDate = useCallback(
     (selectedDate: Date) => {
-      const vnDate = moment(selectedDate).utcOffset(7); // ➜ ép về giờ VN
+      const vnDate = moment(selectedDate).utcOffset(7); 
 
       const formattedDate = vnDate.format("DD/MM/YYYY");
-      // const formattedDate = formatDate(selectedDate);
+      
       const selectedMoment = moment(selectedDate);
 
       if (selectedDateType === 'from') {
@@ -116,7 +122,7 @@ export default function HistoryBuySalePoint() {
       setIsDatePickerVisible(false);
       setSelectedDateType(null);
 
-      // ✅ Gọi filter ngay sau khi chọn ngày
+      
       setTimeout(() => {
         const start = selectedDateType === 'from'
           ? moment(selectedDate).startOf('day').unix()
@@ -150,7 +156,7 @@ export default function HistoryBuySalePoint() {
     setIsDatePickerVisible(true);
   }
 
-  // ✅ LoadMore với timestamp
+  
   const loadMore = () => {
     if (page >= lastPage || loading) return;
 

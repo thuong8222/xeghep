@@ -1,5 +1,7 @@
 const baseUrl = 'https://app.xeghepnd.com/';
-  const SOCKET_URL = "http://15.235.167.241:5000"
+  // const SOCKET_URL = "http://15.235.167.241:5000"
+  const SOCKET_URL = "https://node.xeghepnd.com"
+  
 const AppConfig = {
   BASE_URL: baseUrl,
   SOCKET_URL: SOCKET_URL,

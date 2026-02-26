@@ -131,7 +131,7 @@ export default function AccountScreen({ navigation }: Props) {
       params: {
         screen: 'AccountTabs',
         params: {
-          screen: 'BankStatementBuySalePoint'
+          screen: 'HistoryBuySalePoint'
         }
       }
     });
