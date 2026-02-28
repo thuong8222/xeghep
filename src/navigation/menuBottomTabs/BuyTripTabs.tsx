@@ -26,7 +26,7 @@ export type BuyTripStackParamList = {
   }
   SaleTrip: {
     id_area: string;
-    ereaData?:string;
+    ereaData?: string;
   };
   InfoGroup: {
     nameGroup: string;
@@ -72,14 +72,18 @@ export default function BuyTripTabs() {
           <Stack.Screen
             name="GroupArea"
             component={GroupAreaScreen}
-            options={{ headerTitle: 'Nhóm khu vực' }}
+
+            options={{
+              headerTitle: 'Nhóm khu vực',
+              headerTitleAlign: 'center',
+            }}
           />
           <Stack.Screen
             name="BuyTrip"
             component={BuyTripScreen}
             options={{
               headerTitleAlign: 'left',
-              headerBackTitle: '',
+              // headerBackTitle: '',
 
             }}
           />
@@ -87,7 +91,7 @@ export default function BuyTripTabs() {
             name="InfoGroup"
             component={InfoGroupScreen}
             options={{
-              headerBackTitle: '',
+              // headerBackTitle: '',
               headerTitle: 'Thông tin nhóm',
               headerTitleAlign: 'center',
               headerLeft: () => (

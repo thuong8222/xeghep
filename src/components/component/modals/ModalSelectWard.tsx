@@ -35,25 +35,25 @@ export default function SelectProvinceDistrictModal({
   const [searchText, setSearchText] = useState('');
   const [selectedDistricts, setSelectedDistricts] = useState<any[]>([]);
   const [selectedDistrict, setSelectedDistrict] = useState(null);
-  console.log('provinceName: ',provinceName)
-  console.log('districtCodes: ',districtCodes)
-useEffect(() => {
+  console.log('provinceName: ', provinceName)
+  console.log('districtCodes: ', districtCodes)
+  useEffect(() => {
 
-  if (
-    multiSelect &&
-    districtCodes?.length > 0 &&
-    districts.length > 0
-  ) {
+    if (
+      multiSelect &&
+      districtCodes?.length > 0 &&
+      districts.length > 0
+    ) {
 
-    const newSelected = districts.filter(d =>
-      districtCodes.includes(d.code)
-    );
+      const newSelected = districts.filter(d =>
+        districtCodes.includes(d.code)
+      );
 
-    setSelectedDistricts(newSelected);
+      setSelectedDistricts(newSelected);
 
-  }
+    }
 
-}, [districtCodes, districts, multiSelect]);
+  }, [districtCodes, districts, multiSelect]);
   useEffect(() => {
     fetch('https://production.cas.so/address-kit/2025-07-01/provinces', {
       headers: { Accept: 'application/json' },
@@ -69,25 +69,25 @@ useEffect(() => {
 
         if (provinceName) {
 
-  const found = list.find(
-    p => removeVietnameseTones(p.name)
-      .includes(removeVietnameseTones(provinceName))
-  );
+          const found = list.find(
+            p => removeVietnameseTones(p.name)
+              .includes(removeVietnameseTones(provinceName))
+          );
 
-  if (found) {
+          if (found) {
 
-    setSelectedProvince(found);
+            setSelectedProvince(found);
 
-    // ⭐ single select auto vào district
-    if (!multiSelect) {
+            // ⭐ single select auto vào district
+            if (!multiSelect) {
 
-      handleSelectProvince(found);
+              handleSelectProvince(found);
 
-    }
+            }
 
-  }
+          }
 
-}
+        }
 
 
       })
@@ -126,44 +126,31 @@ useEffect(() => {
       }
 
       // ⭐ MULTI SELECT highlight
-    // ⭐ MULTI SELECT highlight từ props
-if (multiSelect && districtCodes?.length > 0) {
+      // ⭐ MULTI SELECT highlight từ props
+      if (multiSelect && districtCodes?.length > 0) {
 
-  const newSelected = data.communes.filter(d =>
-    districtCodes.includes(d.code)
-  );
-
-  setSelectedDistricts(newSelected);
-
-}
-
+        const newSelected = data.communes.filter(d =>
+          districtCodes.includes(d.code)
+        );
+        setSelectedDistricts(newSelected);
+      }
     } catch (err) {
-
       console.error(err);
-
     }
-
   };
 
   // ⭐ Xử lý chọn district
   const handleSelectDistrict = (district) => {
-
     if (multiSelect) {
-
       toggleSelectDistrict(district);
-
     } else {
-
       setSelectedDistrict(district); // ⭐ highlight
-
       onSelected({
         province: selectedProvince,
         district,
       });
-
       onClose();
       resetState();
-
     }
 
   };
@@ -182,40 +169,27 @@ if (multiSelect && districtCodes?.length > 0) {
   // Confirm cho multi select
   const handleConfirm = () => {
     if (!selectedProvince || selectedDistricts.length === 0) return;
-
     onSelected({
       province: selectedProvince,
       districts: selectedDistricts,
-    });
-
+    })
     onClose();
     resetState();
   };
 
   // Reset state khi đóng modal
-const resetState = () => {
-
-  setSearchText('');
-
-  if (multiSelect) {
-
-    setStep('province');
-
-  } else {
-
-    if (provinceName) {
-
-      setStep('district');
-
-    } else {
-
+  const resetState = () => {
+    setSearchText('')
+    if (multiSelect) {
       setStep('province');
-
+    } else {
+      if (provinceName) {
+        setStep('district');
+      } else {
+        setStep('province');
+      }
     }
-
-  }
-
-};
+  };
 
   const filteredProvinces = provinces.filter((item) =>
     removeVietnameseTones(item.name).includes(removeVietnameseTones(searchText))
@@ -226,17 +200,13 @@ const resetState = () => {
   );
 
   const renderProvince = ({ item }) => {
-
     const isSelected =
       selectedProvince?.code === item.code;
-
     return (
-
       <AppButton
         onPress={() => handleSelectProvince(item)}
         padding={12}
       >
-
         <AppText
           color={
             isSelected
@@ -246,60 +216,45 @@ const resetState = () => {
         >
           {item.name}
         </AppText>
-
       </AppButton>
-
     );
-
   };
 
- const renderDistrict = ({ item }) => {
+  const renderDistrict = ({ item }) => {
+    let isSelected = false;
+    if (multiSelect) {
+      isSelected =
+        selectedDistricts.some(
+          d => d.code === item.code
+        );
+    } else {
+      isSelected =
+        selectedDistrict?.code === item.code;
+    }
 
-  let isSelected = false;
-
-  if (multiSelect) {
-
-    isSelected =
-      selectedDistricts.some(
-        d => d.code === item.code
-      );
-
-  } else {
-    isSelected =
-      selectedDistrict?.code === item.code;
-
+    return (
+      <AppButton
+        onPress={() => handleSelectDistrict(item)}
+        padding={12}
+        row
+        justifyContent="space-between"
+      >
+        <AppText
+          color={
+            isSelected
+              ? ColorsGlobal.main
+              : "#000"
+          }
+        >
+          {item.name}
+        </AppText>
+        {isSelected &&
+          <IconTickCircle />
+        }
+      </AppButton>
+    );
   }
 
-  return (
-
-    <AppButton
-      onPress={() => handleSelectDistrict(item)}
-      padding={12}
-      row
-      justifyContent="space-between"
-    >
-
-      <AppText
-        color={
-          isSelected
-            ? ColorsGlobal.main
-            : "#000"
-        }
-      >
-        {item.name}
-      </AppText>
-
-      {isSelected &&
-        <IconTickCircle />
-      }
-
-    </AppButton>
-
-  );
-
-};
-
-  
   return (
     <AppModal isVisible={isVisible} onClose={() => { onClose(); resetState(); }} heightPercent={0.8}>
       <AppView flex={1} gap={8}>

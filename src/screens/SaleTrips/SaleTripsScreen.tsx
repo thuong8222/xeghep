@@ -8,21 +8,19 @@ import IconNoneTickCircle from '../../assets/icons/IconNoneTickCircle'
 import AppInput from '../../components/common/AppInput'
 import IconDotHorizonal from '../../assets/icons/IconDotHorizonal'
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal'
-import IconPlus from '../../assets/icons/IconPlus'
-import IconArowDown from '../../assets/icons/IconArowDown'
-import IconMinus from '../../assets/icons/IconMinus'
+
 import ButtonSubmit from '../../components/common/ButtonSubmit'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import NoteInputSection from '../../components/component/NoteInputSection'
 
-import SelectProvinceDistrictModal from '../../components/component/modals/ModalSelectWard'
+
 import TripOptionsSection from '../../components/component/TripOptionsSection'
 import { useDispatch, useSelector } from 'react-redux'
 import { createTrip, CreateTripPayload, fetchTrips } from '../../redux/slices/tripsSlice'
 import moment from 'moment'
 import { useAppContext } from '../../context/AppContext'
-import IconWarning from '../../assets/icons/IconWarning'
-import IconLocation from '../../assets/icons/iconLocation'
+
+import ModalSelectLocationByArea from '../../components/component/modals/ModalSelectLocationByArea'
 
 interface Props {
   route: any;
@@ -38,7 +36,7 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
   const [selectedDirection, setSelectedDirection] = useState(1);
   const [isCommuneWard, setIsCommuneWard] = useState(false);
   const [isCommuneWardTo, setIsCommuneWardTo] = useState(false);
-  console.log('currentArea: ', currentArea)
+
   const [placeStart, setPlaceStart] = useState('');
   const [placeEnd, setPlaceEnd] = useState('');
   const [communeWard, setCommuneWard] = useState('');
@@ -46,6 +44,8 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
   const { loading } = useSelector((state: any) => state.trips);
   const [districtCode, setDistrictCode] = useState('');
   const [districtCodeTo, setDistrictCodeTo] = useState('');
+  const [selectedStartLocation, setSelectedStartLocation] = useState<any[]>([]);
+  const [selectedEndLocation, setSelectedEndLocation] = useState<any[]>([]);
   const [tripOptions, setTripOptions] = useState({
     numGuests: 1,
     price: '250',
@@ -64,14 +64,6 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
     timeStart?: number | null,
     typeCar?: { type: string; name: string } | null
   ) => {
-    console.log('📊 Trip options changed:', {
-      numGuests,
-      price,
-      points,
-      guestType,
-      timeStart,
-      typeCar
-    });
 
     setTripOptions(prev => ({
       numGuests: numGuests ?? prev.numGuests,
@@ -88,29 +80,35 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
   };
 
   const handleCreateTrip = async () => {
-    if (!placeStart || !placeEnd) {
-      Alert.alert('Điểm đi/ Điểm đến không được để trống!')
+    const place_start = [placeStart,
+      selectedStartLocation[0]?.name
+    ].filter(Boolean).join(', ')
+
+    const place_end = [placeEnd,
+      selectedEndLocation[0]?.name
+    ].filter(Boolean).join(', ')
+    if (!place_start || !place_end) {
+      Alert.alert('Thông báo', 'Điểm đi/Điểm đến không được để trống!')
       return;
     }
-
+    const defaultTimeStart = Math.floor(Date.now() / 1000) + 15 * 60;
     const payload: CreateTripPayload = {
       area_id: id_area,
       direction: selectedDirection,
       guests: tripOptions?.numGuests || 1,
-      time_start: tripOptions?.timeStart || (Math.floor(Date.now() / 1000)),
+      time_start: tripOptions?.timeStart || defaultTimeStart,
       price_sell: Number(tripOptions.price) || 250,
-      place_start: communeWardTo ? `${placeStart}, ${communeWardTo}` : placeStart,
-      place_end: communeWard ? `${placeEnd}, ${communeWard}` : placeEnd,
+      place_start: place_start,
+      place_end: place_end,
       point: Number(tripOptions?.points),
       note: noteOptions || '',
       type_car: tripOptions?.guestType,
       cover_car: tripOptions.guestType === 'normal' ? 0 : 1,
     };
+    console.log('payload: ', payload)
 
     try {
-      const res = await dispatch(createTrip(payload)).unwrap();
-      await fetchTrips(id_area);
-
+      await dispatch(createTrip(payload)).unwrap();
       setUpdateTrips(moment().unix());
       setSelectedDirection(1);
       setPlaceStart("");
@@ -145,43 +143,49 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
   const handleSelectCommuneWardEnd = () => {
     setIsCommuneWard(true);
   };
-const handleChangeDirection = (direction: number) => {
+  const handleChangeDirection = (direction: number) => {
 
-  if (direction === selectedDirection) return;
+    if (direction === selectedDirection) return;
+    // swap place
+    const newPlaceStart = placeEnd;
+    const newPlaceEnd = placeStart;
+    // swap commune
+    const newCommuneStart = communeWard;
+    const newCommuneEnd = communeWardTo;
+    // swap districtCode
+    const newDistrictStart = districtCode;
+    const newDistrictEnd = districtCodeTo;
 
-  // swap place
-  const newPlaceStart = placeEnd;
-  const newPlaceEnd = placeStart;
+    setPlaceStart(newPlaceStart);
+    setPlaceEnd(newPlaceEnd);
 
-  // swap commune
-  const newCommuneStart = communeWard;
-  const newCommuneEnd = communeWardTo;
+    setCommuneWardTo(newCommuneStart);
+    setCommuneWard(newCommuneEnd);
 
-  // swap districtCode
-  const newDistrictStart = districtCode;
-  const newDistrictEnd = districtCodeTo;
+    setDistrictCodeTo(newDistrictStart);
+    setDistrictCode(newDistrictEnd);
+    setSelectedDirection(direction);
+  };
+  const areaLevel1Names =
+    selectedDirection === 1
+      ? currentArea?.level1_pickup_names
+      : currentArea?.level1_dropoff_names;
 
+  const labelText = `Điểm xuất phát khu vực ${areaLevel1Names?.length ? areaLevel1Names.join(', ') : ''
+    }`;
+  const areaLevel1NamesTo =
+    selectedDirection === 1
+      ? currentArea?.level1_dropoff_names
+      : currentArea?.level1_pickup_names;
 
-  setPlaceStart(newPlaceStart);
-  setPlaceEnd(newPlaceEnd);
-
-  setCommuneWardTo(newCommuneStart);
-  setCommuneWard(newCommuneEnd);
-
-  setDistrictCodeTo(newDistrictStart);
-  setDistrictCode(newDistrictEnd);
-
-
-  setSelectedDirection(direction);
-};
-
+  const labelTextTo = `Điểm đến khu vực ${areaLevel1NamesTo?.length ? areaLevel1NamesTo.join(', ') : ''}`;
   return (
     <AppView
       flex={1}
       backgroundColor='#fff'
       paddingHorizontal={16}
       paddingTop={16}
-      gap={18}
+
       paddingBottom={Platform.OS === 'ios' ? insets.bottom : 0}
       position='relative'
     >
@@ -195,18 +199,23 @@ const handleChangeDirection = (direction: number) => {
       )}
 
       {/* Chọn chiều đi/về */}
-      <AppView row gap={32}>
-        <AppButton onPress={() => handleChangeDirection(1)} row gap={8}>
+      <AppView row gap={32} marginBottom={16} >
+        <AppButton onPress={() => handleChangeDirection(1)} row gap={8} height={40} alignItems='center' flex={1}>
           <AppText>{'Chiều đi'}</AppText>
           {selectedDirection === 1 ? <IconTickCircle /> : <IconNoneTickCircle />}
         </AppButton>
-        <AppButton onPress={() => handleChangeDirection(0)} row gap={8}>
+        <AppButton onPress={() => handleChangeDirection(0)} row gap={8} height={40} alignItems='center' flex={1}>
           <AppText>{'Chiều về'}</AppText>
           {selectedDirection === 0 ? <IconTickCircle /> : <IconNoneTickCircle />}
         </AppButton>
       </AppView>
 
-      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingBottom: 20 }}
+      >
         <AppView gap={18}>
           <AppView gap={12}>
             {/* ĐIỂM ĐÓN */}
@@ -214,15 +223,16 @@ const handleChangeDirection = (direction: number) => {
               <AppView row gap={8} alignItems='flex-end'>
                 <AppView flex={1}>
                   <AppInput
-                    label={placeStart ? 'Điểm đón' : ''}
-                    value={placeStart}
+                    label={labelText}
+                    value={[placeStart,
+                      selectedStartLocation[0]?.name
+                    ].filter(Boolean).join(', ')}
                     onChangeText={setPlaceStart}
                     placeholder="Nhập chi tiết điểm đón"
                   />
                 </AppView>
                 <AppButton
                   onPress={handleSelectCommuneWardStart}
-                  borderWidth={1}
                   padding={7}
                   radius={6}
                   borderColor={ColorsGlobal.borderColor}
@@ -230,7 +240,7 @@ const handleChangeDirection = (direction: number) => {
                   <IconDotHorizonal />
                 </AppButton>
               </AppView>
-              <AppView alignItems='center' row gap={4}>
+              {/* <AppView alignItems='center' row gap={4}>
                 <IconLocation size={13} />
                 <AppText
                   title={`Điểm xuất phát khu vực ${selectedDirection === 1
@@ -238,18 +248,8 @@ const handleChangeDirection = (direction: number) => {
                     : currentArea?.place_end}`}
                   color="#999" fontSize={12}
                 />
-              </AppView>
-              {/* Hiển thị input xã/phường nếu đã chọn */}
-              {communeWardTo && (
-                <AppView>
-                  <AppInput
-                    label="Xã/Phường"
-                    value={communeWardTo}
-                    editable={false}
-                    placeholder="Chưa chọn"
-                  />
-                </AppView>
-              )}
+              </AppView> */}
+
             </AppView>
 
             {/* ĐIỂM TRẢ */}
@@ -257,15 +257,16 @@ const handleChangeDirection = (direction: number) => {
               <AppView row gap={8} alignItems='flex-end'>
                 <AppView flex={1}>
                   <AppInput
-                    label={placeEnd ? 'Điểm trả' : ''}
-                    value={placeEnd}
+                    label={labelTextTo}
+                    value={[placeEnd,
+                      selectedEndLocation[0]?.name
+                    ].filter(Boolean).join(', ')}
                     onChangeText={setPlaceEnd}
-                    placeholder="Nhập chi tiết điểm trả "
+                    placeholder="Nhập chi tiết điểm trả"
                   />
                 </AppView>
                 <AppButton
                   onPress={handleSelectCommuneWardEnd}
-                  borderWidth={1}
                   padding={7}
                   radius={6}
                   borderColor={ColorsGlobal.borderColor}
@@ -273,7 +274,7 @@ const handleChangeDirection = (direction: number) => {
                   <IconDotHorizonal />
                 </AppButton>
               </AppView>
-              <AppView alignItems='center' row gap={4} >
+              {/* <AppView alignItems='center' row gap={4} >
                 <IconLocation size={13} />
                 <AppText
                   title={`Điểm đến khu vực ${selectedDirection === 1
@@ -281,11 +282,11 @@ const handleChangeDirection = (direction: number) => {
                     : currentArea?.place_start}`}
                   color="#999" fontSize={12}
                 />
-              </AppView>
+              </AppView> */}
 
 
               {/* Hiển thị input xã/phường nếu đã chọn */}
-              {communeWard && (
+              {/* {communeWard && (
                 <AppView>
                   <AppInput
                     label="Xã/Phường"
@@ -294,7 +295,7 @@ const handleChangeDirection = (direction: number) => {
                     placeholder="Chưa chọn"
                   />
                 </AppView>
-              )}
+              )} */}
             </AppView>
           </AppView>
 
@@ -304,7 +305,18 @@ const handleChangeDirection = (direction: number) => {
       </ScrollView>
 
       <ButtonSubmit title='Đăng bán' onPress={handleCreateTrip} />
-      <SelectProvinceDistrictModal
+      <ModalSelectLocationByArea
+        multiSelect={false}
+        isVisible={isCommuneWardTo}
+        locationType={selectedDirection === 1 ? 'pickup' : 'dropoff'}
+        areaId={id_area}
+        defaultSelected={selectedStartLocation}
+        onClose={() => setIsCommuneWardTo(false)}
+        onSelected={(value) => {
+          setSelectedStartLocation([value]);
+        }}
+      />
+      {/* <SelectProvinceDistrictModal
         multiSelect={false}
         isVisible={isCommuneWardTo}
         provinceName={
@@ -319,14 +331,17 @@ const handleChangeDirection = (direction: number) => {
         onSelected={(value) => {
           setDistrictCodeTo(value?.code)
           console.log('✅ Kết quả chọn điểm đón:', value);
-
-          setCommuneWardTo(
-            `${value.district.name}, ${value.province.name}`
-          );
+          const areaText = `${value.district.name}, ${value.province.name}`
+          setCommuneWardTo(areaText)
+          // setPlaceStart(`${value.district.name}, ${value.province.name}`)
+          // setCommuneWardTo(
+          //   `${value.district.name}, ${value.province.name}`
+          // );
 
         }}
-      />
-      <SelectProvinceDistrictModal
+      /> */}
+
+      {/* <SelectProvinceDistrictModal
         multiSelect={false}
         isVisible={isCommuneWard}
         provinceName={
@@ -341,9 +356,22 @@ const handleChangeDirection = (direction: number) => {
         onSelected={(value) => {
           setDistrictCode(value?.code)
           console.log('✅ Kết quả chọn điểm trả:', value);
-          setCommuneWard(
-            `${value.district.name}, ${value.province.name}`
-          );
+          // setCommuneWard(
+          //   `${value.district.name}, ${value.province.name}`
+          // );
+          const areaText = `${value.district.name}, ${value.province.name}`
+          setCommuneWard(areaText)
+        }}
+      /> */}
+      <ModalSelectLocationByArea
+        multiSelect={false}
+        isVisible={isCommuneWard}
+        locationType={selectedDirection === 1 ? 'dropoff' : 'pickup'}
+        areaId={id_area}
+        defaultSelected={selectedEndLocation}
+        onClose={() => setIsCommuneWard(false)}
+        onSelected={(value) => {
+          setSelectedEndLocation([value]);
         }}
       />
       {/* Modal chọn tỉnh/huyện cho ĐIỂM TRẢ */}

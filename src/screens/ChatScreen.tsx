@@ -21,9 +21,10 @@ import { useAppContext } from "../context/AppContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import IconPhone from "../assets/icons/iconPhone";
 import ModalUploadCarImage from "../components/component/modals/ModalUploadCarImage";
+import AppConfig from "../services/config";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// ⚠️ CẤU HÌNH IP SERVER
-const API_BASE_URL = 'http://15.235.167.241:5000'; // ⭐ Server IP của bạn
+
 
 type ChatRouteProp = RouteProp<RootStackParamList, 'ChatScreen'>;
 
@@ -36,9 +37,17 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
   const { socket } = useSocket();
   const dispatch = useDispatch<AppDispatch>();
   const { data } = route?.params;
-  const { currentDriver } = useAppContext();
+  const { currentDriver, setCurrentDriver } = useAppContext();
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
+  useEffect(() => {
+    const fetchDriver = async () => {
+      const driverString = await AsyncStorage.getItem("driver");
+
+      if (driverString) setCurrentDriver(JSON.parse(driverString));
+    };
+    fetchDriver();
+  }, []);
   const currentUserId = currentDriver?.id;
   const buyer_id = data?.buyer_id || data?.id_driver_receive || data?.driver_receive?.id;
   const seller_id = data?.seller_id || data?.id_driver_sell || data?.driver_sell?.id_driver;
@@ -169,7 +178,11 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
       Alert.alert("Lỗi", "Chưa kết nối tới server");
       return;
     }
-
+    console.log("📤 DEBUG DATA:");
+    console.log("currentUserId:", currentUserId);
+    console.log("chatWith:", chatWith);
+    console.log("message:", message);
+    console.log("selectedImage:", selectedImage);
     // ⭐ Kiểm tra: phải có ít nhất text hoặc image
     if (!message.trim() && !selectedImage) {
       return;
@@ -226,10 +239,10 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
         name: `chat_${Date.now()}.jpg`,
       } as any);
 
-      console.log("📤 Uploading image to:", `${API_BASE_URL}/api/upload/chat-image`);
+      console.log("📤 Uploading image to:", `${AppConfig.SOCKET_URL}/api/upload/chat-image`);
       console.log("📦 Image URI:", imageUri);
 
-      const uploadResponse = await fetch(`${API_BASE_URL}/api/upload/chat-image`, {
+      const uploadResponse = await fetch(`${AppConfig.SOCKET_URL}/api/upload/chat-image`, {
         method: 'POST',
         body: formData,
         headers: {
@@ -298,7 +311,7 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
             isMine ? styles.myBubble : styles.otherBubble,
           ]}
         >
-        
+
           {/* 🖼️ Hiển thị ảnh nếu có */}
           {item.image_url && (
             <TouchableOpacity onPress={() => setPreviewImage(item?.image_url)}>
@@ -420,13 +433,13 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
 
 
       <Container padding={0}>
-    {isOnwer &&  <ListHeaderComponent />} 
+        {isOnwer && <ListHeaderComponent />}
         <FlatList
           data={messages}
           keyExtractor={(item, i) => item.id || i.toString()}
           renderItem={renderItem}
-          contentContainerStyle={{padding:8}}
-          // ListHeaderComponent={isOnwer ? ListHeaderComponent : undefined}
+          contentContainerStyle={{ padding: 8 }}
+        // ListHeaderComponent={isOnwer ? ListHeaderComponent : undefined}
         />
 
         {/* 🖼️ Preview ảnh đã chọn */}

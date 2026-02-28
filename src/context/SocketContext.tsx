@@ -1,113 +1,72 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-  ReactNode,
-} from "react";
-import { useSelector } from "react-redux";
+import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { io, Socket } from "socket.io-client";
-import { RootState } from "../redux/data/store";
 import AppConfig from "../services/config";
 
-// ⚠️ IP server của bạn
-
-
-
-// Type cho Context
 interface SocketContextType {
   socket: Socket | null;
   isConnected: boolean;
-
 }
 
-// Tạo Context
 const SocketContext = createContext<SocketContextType>({
   socket: null,
   isConnected: false,
 });
 
-// Hook dùng nhanh trong màn hình
 export const useSocket = () => useContext(SocketContext);
 
-// Provider bọc App
 export const SocketProvider = ({ children }: { children: ReactNode }) => {
-  const socketRef = useRef<Socket | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  ;
 
   useEffect(() => {
-    socketRef.current = io(AppConfig.SOCKET_URL, {
-      // transports: ["polling", "websocket"],
-      transports: ["websocket", "polling"], // thử websocket trực tiếp, polling nếu cần
+    const newSocket = io(AppConfig.SOCKET_URL, {
+      transports: ["websocket"], // chỉ websocket cho ổn định
       reconnection: true,
+      reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      reconnectionAttempts: 10,
       timeout: 20000,
-      forceNew: true,
     });
 
-    const socket = socketRef.current;
+    setSocket(newSocket);
 
     const registerUser = async () => {
       try {
         const driverString = await AsyncStorage.getItem("driver");
         if (!driverString) return;
 
-        const driver_ = JSON.parse(driverString);
-        if (!driver_?.id) return;
+        const driver = JSON.parse(driverString);
+        if (!driver?.id) return;
 
-        console.log('registerUser driver id in socket context', driver_.id)
-
-        socket.emit("register_user", driver_.id);
-        console.log("📌 Register user online socket context:", driver_.id);
+        console.log("📌 Register user:", driver.id);
+        newSocket.emit("register_user", driver.id);
       } catch (error) {
-        console.log("❌ Error register user socket context:", error);
+        console.log("❌ Register error:", error);
       }
     };
 
-    socket.on("connect", () => {
-      console.log("🟢 Socket connected:", socket.id);
-      console.log("🔌 Transport:", socket.io.engine.transport.name);
+    newSocket.on("connect", () => {
+      console.log("🟢 Socket connected:", newSocket.id);
       setIsConnected(true);
-
-      // Emit user ngay khi socket connect
       registerUser();
     });
 
-    socket.on("connect_error", (err) => {
-      console.log("🔴 Socket connection error:", err.message);
-      console.log("🔴 Trying transport:", socket.io.engine.transport.name);
-    });
-
-    socket.io.on("error", (error) => { 
-      console.log("❌ Socket.IO error:", error);
-    });
-
-    socket.on("disconnect", (reason) => {
-      console.log("⚪️ Socket disconnected:", reason);
+    newSocket.on("disconnect", (reason) => {
+      console.log("🔴 Socket disconnected:", reason);
       setIsConnected(false);
+    });
 
-      if (reason === "io server disconnect") {
-        // Server chủ động ngắt, cần reconnect thủ công
-        socket.connect();
-      }
+    newSocket.on("connect_error", (err) => {
+      console.log("❌ Connect error:", err.message);
     });
 
     return () => {
-      socket.disconnect();
+      newSocket.disconnect();
     };
   }, []);
 
   return (
-    <SocketContext.Provider
-      value={{
-        socket: socketRef.current, isConnected,
-      }}
-    >
+    <SocketContext.Provider value={{ socket, isConnected }}>
       {children}
     </SocketContext.Provider>
   );

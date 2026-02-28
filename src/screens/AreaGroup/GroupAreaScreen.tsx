@@ -1,54 +1,60 @@
-import { FlatList, RefreshControl, StyleSheet } from 'react-native'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react';
+import { FlatList, RefreshControl } from 'react-native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 
 import AppView from '../../components/common/AppView';
-import { scale } from '../../utils/Helper';
 import AppText from '../../components/common/AppText';
-import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal';
 import AppButton from '../../components/common/AppButton';
-import { BuyTripStackParamList } from '../../navigation/menuBottomTabs/BuyTripTabs';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-
-import IconSort from '../../assets/icons/IconSort';
+import Container from '../../components/common/Container';
 import ModalBuyTrip from '../../components/component/modals/ModalBuyTrip';
 
+import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal';
+import { scale } from '../../utils/Helper';
+import { BuyTripStackParamList } from '../../navigation/menuBottomTabs/BuyTripTabs';
 import { useAreaApi } from '../../redux/hooks/useAreaApi';
-import { getNameByCode } from '../../utils/province';
-import Container from '../../components/common/Container';
-import { useFocusEffect } from '@react-navigation/native';
 import { useAppContext } from '../../context/AppContext';
 
-type GroupAreaNavProp = NativeStackNavigationProp<BuyTripStackParamList, "BuyTrip">;
+type GroupAreaNavProp = NativeStackNavigationProp<
+  BuyTripStackParamList,
+  'BuyTrip'
+>;
 
 interface Props {
   navigation: GroupAreaNavProp;
 }
+
 export default function GroupAreaScreen({ navigation }: Props) {
   const { setCurrentArea } = useAppContext();
+
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isViewList, setIsViewList] = useState(true);
-  const { groups, loading, error, getAreas, clear } = useAreaApi();
   const [refreshing, setRefreshing] = useState(false);
 
-  // Lấy danh sách khi mount
-  useFocusEffect(
-    useCallback(() => {
-      if (!groups || groups.length === 0) {
-        fetchGroups();
-      }
-    }, [groups, fetchGroups])
-  );
+  const { groups, loading, getAreas } = useAreaApi();
 
-
+  /**
+   * Fetch data
+   */
   const fetchGroups = useCallback(async () => {
     try {
       await getAreas();
-
     } catch (err) {
       console.log('Lỗi fetch groups:', err);
     }
   }, [getAreas]);
 
+  /**
+   * Khi focus màn hình
+   */
+  useFocusEffect(
+    useCallback(() => {
+      fetchGroups();
+    }, [fetchGroups])
+  );
+
+  /**
+   * Pull to refresh
+   */
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
@@ -58,77 +64,127 @@ export default function GroupAreaScreen({ navigation }: Props) {
     }
   }, [getAreas]);
 
-  const HeaderRightButton = () => (
-    <AppView row>
-      <AppButton onPress={() => setIsModalVisible(true)} paddingLeft={30}>
-        <IconSort />
-      </AppButton>
+  /**
+   * Navigate detail
+   */
+  const gotoDetailArea = useCallback(
+    (area: any) => {
+      if (!area?.is_member) return;
 
-    </AppView>
-  )
+      setCurrentArea(area);
 
-  React.useEffect(() => {
+      navigation.navigate('BuyTrip', {
+        nameGroup: area.name,
+        countMember: area.members_count || 0,
+        id_area: area.id,
+        isJoin: area.is_member,
+      });
+    },
+    [navigation, setCurrentArea]
+  );
 
-    navigation.setOptions({
-      headerTitle: () => (
-        <AppView justifyContent={'center'} alignItems={'center'}>
-          <AppText fontWeight={700}>{'Nhóm khu vực'}</AppText>
+  /**
+   * Render item
+   */
+  const renderItem = ({ item }: any) => (
+    <Area
+      data={item}
+      gotoDetailAreaPress={() => gotoDetailArea(item)}
+    />
+  );
 
-        </AppView>
-      ),
-      // headerRight: HeaderRightButton,
-    });
-  }, [navigation]);
-
-
-  const gotoDetailArea = (props) => {
-    setCurrentArea(props)
-    const namegroup =
-      props.name +
-      (props.province_code ? ' - ' + getNameByCode(props.province_code) : '');
-    navigation.navigate('BuyTrip', { nameGroup: namegroup, countMember: props.members_count || 0, id_area: props.id, isJoin: props.is_member })
-  }
-  const renderItem_groupArea = ({ item, index }) => {
-    return (<>
-      <Area data={item} gotoDetailAreaPress={() => gotoDetailArea(item)} />
-    </>
-    )
-  }
   return (
-    <Container loading={loading} >
+    <Container loading={loading}>
       <FlatList
-        data={groups}
-        renderItem={renderItem_groupArea}
-        numColumns={1}
-        ItemSeparatorComponent={<AppView height={1} backgroundColor={ColorsGlobal.borderColor} />}
+        data={groups || []}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderItem}
+        ItemSeparatorComponent={() => (
+          <AppView height={1} backgroundColor={ColorsGlobal.borderColor} />
+        )}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          !loading && <AppView alignItems='center'><AppText>Không có khu vực nào</AppText></AppView>
+          !loading ? (
+            <AppView alignItems="center" padding={20}>
+              <AppText>Không có khu vực nào</AppText>
+            </AppView>
+          ) : null
         }
       />
-      <ModalBuyTrip visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)} />
 
+      <ModalBuyTrip
+        visible={isModalVisible}
+        onRequestClose={() => setIsModalVisible(false)}
+      />
     </Container>
-  )
+  );
 }
-const Area = (props) => {
-  const detailArea = () => {
-    props.gotoDetailAreaPress(props.data)
-  }
-  const isJoinArea = props.data?.is_member
+
+/**
+ * Area Item Component
+ */
+const Area = React.memo(({ data, gotoDetailAreaPress }: any) => {
+  const isJoinArea = data?.is_member;
+
   return (
-    <AppButton onPress={detailArea} gap={8} paddingVertical={16} paddingLeft={12} flex={1} row opacity={isJoinArea ? 1 : .5}>
-      <AppView height={45} width={45} radius={9999} backgroundColor={ColorsGlobal.backgroundLight} alignItems='center' justifyContent='center' padding={4} >
-        <AppText fontSize={scale(18)} lineHeight={scale(26)} fontWeight={700} textAlign='center'>{props.data.members_count > 99 ? '99+' : props.data.members_count}</AppText>
+    <AppButton
+      onPress={() => {
+        gotoDetailAreaPress();
+      }}
+      gap={8}
+      paddingVertical={16}
+      paddingLeft={12}
+      flex={1}
+      row
+      opacity={isJoinArea ? 1 : 0.5}
+      disabled={!isJoinArea}
+    >
+      <AppView
+        height={45}
+        width={45}
+        radius={9999}
+        backgroundColor={ColorsGlobal.backgroundLight}
+        alignItems="center"
+        justifyContent="center"
+        padding={4}
+      >
+        <AppText
+          fontSize={scale(18)}
+          lineHeight={scale(26)}
+          fontWeight={700}
+          textAlign="center"
+        >
+          {data?.members_count > 99 ? '99+' : data?.members_count}
+        </AppText>
       </AppView>
-      <AppView >
-        <AppText color={props.data.is_read ? ColorsGlobal.textLight : ColorsGlobal.main} fontSize={16} fontWeight={700}>{props.data.name}</AppText>
-        <AppText color={props.data.is_read ? ColorsGlobal.textLight : ColorsGlobal.main} fontSize={12}>{'Khu vực ' + props?.data?.description}</AppText>
+
+      <AppView>
+        <AppText
+          color={
+            data?.is_read
+              ? ColorsGlobal.textLight
+              : ColorsGlobal.main
+          }
+          fontSize={16}
+          fontWeight={700}
+        >
+          {data?.name}
+        </AppText>
+
+        <AppText
+          color={
+            data?.is_read
+              ? ColorsGlobal.textLight
+              : ColorsGlobal.main
+          }
+          fontSize={12}
+        >
+          {'Khu vực ' + data?.description}
+        </AppText>
       </AppView>
     </AppButton>
-  )
-}
+  );
+});

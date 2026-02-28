@@ -106,19 +106,21 @@ export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionPro
             onTimeChange?.(Math.floor(date.getTime() / 1000));
         }
     };
-
+    const formattedTime = React.useMemo(() => {
+        return moment(selectedTime).format('DD/MM/YYYY HH:mm');
+    }, [selectedTime]);
     return (
         <AppView row justifyContent="space-between" alignItems="center" paddingVertical={9}>
             <AppText>Thời gian :</AppText>
 
-            <AppView gap={8} alignItems="center" row>
+            <AppView alignItems="center" row>
                 {/* Dropdown */}
                 <AppView>
-                    <AppButton row gap={4} onPress={() => setShowDropdown(p => !p)} paddingHorizontal={10}>
+                    <AppButton row gap={4} onPress={() => setShowDropdown(p => !p)} paddingHorizontal={10} paddingVertical={10}>
                         <AppText fontWeight={700}>
                             {isInstant
                                 ? 'Đi ngay'
-                                : moment(selectedTime).format('DD/MM/YYYY HH:mm')}
+                                : formattedTime}
                         </AppText>
                         <IconArrowDown color={ColorsGlobal.colorIconNoActive} />
                     </AppButton>
@@ -126,7 +128,7 @@ export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionPro
                     {showDropdown && (
                         <AppView
                             position="absolute"
-                            top={25}
+                            top={36}
                             right={0}
                             backgroundColor="white"
                             borderWidth={1}
@@ -137,7 +139,7 @@ export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionPro
                             zIndex={10}
                         >
                             {['Đi ngay', 'Chọn thời gian'].map((item, i) => (
-                                <AppButton key={i} onPress={() => handleSelectOption(item)}>
+                                <AppButton key={i} onPress={() => handleSelectOption(item)} paddingVertical={8} paddingHorizontal={10}>
                                     <AppText
                                         color={item === (isInstant ? 'Đi ngay' : 'Chọn thời gian')
                                             ? ColorsGlobal.main

@@ -63,7 +63,7 @@ export default function AccountScreen({ navigation }: Props) {
         await AsyncStorage.removeItem("driver")
 
         setCurrentDriver(null);
-       
+
 
 
       } catch (error) {
@@ -198,7 +198,7 @@ export default function AccountScreen({ navigation }: Props) {
           {/* } */}
           <AppView alignItems='center' gap={10}>
             <AppView>
-              <AppText bold color={ColorsGlobal.main}>{driver?.full_name}</AppText>
+              <AppText textAlign='center' bold color={ColorsGlobal.main}>{driver?.full_name}</AppText>
               <AppText textAlign='center' fontSize={14} color={ColorsGlobal.main2}>{isConnected ? 'Đang hoạt động' : 'Offline'}</AppText>
             </AppView>
 

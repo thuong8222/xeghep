@@ -1,4 +1,4 @@
-import { Alert, StyleSheet, Text, View } from 'react-native'
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import AppView from '../../components/common/AppView'
 
@@ -69,8 +69,8 @@ export default function BuyTripScreen({ navigation, route }: Props) {
         </AppView>
     )
     React.useEffect(() => {
-        
-        
+
+
         navigation.setOptions({
             headerBackTitleStyle: { fontSize: 0 },
             headerLeft: () => (
@@ -90,7 +90,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
     useEffect(() => {
         const listener = (newFilters: any) => {
             console.log('Filters changed:', newFilters)
-    
+
         }
 
         buyTripEmitter.on('onFilterChanged', listener)
@@ -173,7 +173,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
     };
 
     const SaleTrips = () => {
-        navigation.navigate('SaleTrip', { id_area: id_area,})
+        navigation.navigate('SaleTrip', { id_area: id_area, })
     }
 
     const renderHiddenItem = (data, rowMap) => {
@@ -217,12 +217,12 @@ export default function BuyTripScreen({ navigation, route }: Props) {
             model.end_date = dateFilter.end_date;
         }
 
-        
+
         if (filters.direction !== undefined) {
             model.direction = filters.direction;
         }
 
-        
+
         if (filters.place_start) model.place_start = filters.place_start;
         if (filters.place_end) model.place_end = filters.place_end;
 
@@ -250,12 +250,44 @@ export default function BuyTripScreen({ navigation, route }: Props) {
                 friction={8}
                 tension={50}
                 onRefresh={onRefresh}
+                ListEmptyComponent={() => (
+                    <AppView alignItems='center' justifyContent='center'>
+                        <AppText title={'Chưa có chuyến nào trong khu vực này'} />
+                    </AppView>
+                )}
+
+                // ✅ Thêm các props này để fix touch conflict
+                useNativeDriver={false}
+                stopLeftSwipe={0}
+                closeOnRowPress={true}          // đóng row khi bấm vào item
+                closeOnScroll={true}            // đóng row khi scroll
+                closeOnRowBeginSwipe={true}
+                disableHiddenLayoutCalculation={true}
                 onRowDidOpen={rowKey => console.log(`Hàng ${rowKey} đã mở`)}
-                ListEmptyComponent={() => <AppView alignItems='center' justifyContent='center'><AppText title={'Chưa có chuyến nào trong khu vực này'}/></AppView>}
             />
-            <AppButton onPress={SaleTrips} position={'absolute'} right={36} bottom={34} width={48} height={48} radius={999} backgroundColor={ColorsGlobal.main} justifyContent='center' alignItems='center'>
+            <TouchableOpacity
+                onPress={SaleTrips}
+                activeOpacity={0.8}
+                style={{
+                    position: 'absolute',
+                    right: 36,
+                    bottom: 34,
+                    width: 48,
+                    height: 48,
+                    borderRadius: 999,
+                    backgroundColor: ColorsGlobal.main,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 999,        // ✅ đảm bảo nằm trên SwipeListView
+                    elevation: 10,      // ✅ Android
+                    shadowColor: '#000', // ✅ iOS
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 4,
+                }}
+            >
                 <IconPlus size={20} />
-            </AppButton>
+            </TouchableOpacity>
             <ModalBuyTrip
                 visible={isModalVisible}
                 onRequestClose={() => setIsModalVisible(false)}

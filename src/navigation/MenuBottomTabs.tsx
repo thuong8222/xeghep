@@ -46,7 +46,7 @@ export default function MenuBottomTabs() {
         tabBarIcon: ({ color, size, focused }) => <IconReceiveHistory color={color} />
       }} />
       <Tabs.Screen name="PriorityPurchaseTabs" component={PriorityPurchaseTabs} options={{
-        tabBarLabel: 'Mua ưu tiên',
+        tabBarLabel: 'Mua tự động',
         tabBarIcon: ({ color, size, focused }) => <IconReceiveHistory color={color} />
       }} />
 
