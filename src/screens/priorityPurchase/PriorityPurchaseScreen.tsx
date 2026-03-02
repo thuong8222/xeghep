@@ -185,7 +185,7 @@ export default function PriorityPurchaseScreen() {
 
         setIsOpenModalSelectArea(false);
     }, []);
-    console.log('selectedArea: ', selectedArea);
+
     return (
         <ScrollView style={{ flex: 1, gap: 8, backgroundColor: "#fff" }} contentContainerStyle={{ flex: 1 }}>
             <AppView flex={1} backgroundColor="#fff" padding={16}>

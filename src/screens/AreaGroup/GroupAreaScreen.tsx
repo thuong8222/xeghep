@@ -5,12 +5,12 @@ import { useFocusEffect } from '@react-navigation/native';
 
 import AppView from '../../components/common/AppView';
 import AppText from '../../components/common/AppText';
-import AppButton from '../../components/common/AppButton';
+
 import Container from '../../components/common/Container';
 import ModalBuyTrip from '../../components/component/modals/ModalBuyTrip';
 
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal';
-import { scale } from '../../utils/Helper';
+
 import { BuyTripStackParamList } from '../../navigation/menuBottomTabs/BuyTripTabs';
 import { useAreaApi } from '../../redux/hooks/useAreaApi';
 import { useAppContext } from '../../context/AppContext';

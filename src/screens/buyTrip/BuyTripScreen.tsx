@@ -138,8 +138,6 @@ export default function BuyTripScreen({ navigation, route }: Props) {
         }
     };
     const PressBuyTrip = (rowMap: any, rowKey: string, data: any) => {
-
-
         dispatch(buyTrip({ tripId: data.item.id }))
             .unwrap()
             .then((res) => {

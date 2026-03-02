@@ -21,7 +21,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const newSocket = io(AppConfig.SOCKET_URL, {
-      transports: ["websocket"], // chỉ websocket cho ổn định
+      transports: ["polling", "websocket"],
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
