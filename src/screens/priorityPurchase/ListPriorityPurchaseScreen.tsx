@@ -198,14 +198,14 @@ export default function ListPriorityPurchaseScreen() {
     // ✅ Section header - tên nhóm/khu vực
     const renderSectionHeader = ({ section }: { section: { title: string } }) => (
         <AppView
-            backgroundColor={ColorsGlobal.main + '15'}
+            backgroundColor={ColorsGlobal.main2}
             paddingHorizontal={12}
             paddingVertical={8}
             marginBottom={8} gap={4} alignItems='center'
             radius={8} row
         >
             <IconGroup size={16} color={ColorsGlobal.main} />
-            <AppText bold fontSize={14} color={ColorsGlobal.main}>
+            <AppText bold fontSize={14} color={ColorsGlobal.backgroundLight}>
                 {section.title}
             </AppText>
         </AppView>
@@ -229,6 +229,7 @@ export default function ListPriorityPurchaseScreen() {
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={renderItem}
                     renderSectionHeader={renderSectionHeader}
+                    stickySectionHeadersEnabled={true}
                     // ✅ Khoảng cách giữa các item trong section
                     ItemSeparatorComponent={() => <AppView height={12} />}
                     // ✅ Khoảng cách giữa các section

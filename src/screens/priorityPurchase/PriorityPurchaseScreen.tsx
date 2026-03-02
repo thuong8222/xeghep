@@ -213,7 +213,7 @@ export default function PriorityPurchaseScreen() {
                     <AppButton onPress={() => setIsCommuneWard(true)} radius={8} row gap={8}>
                         <TextInput
                             value={placeFrom}
-                            multiline
+                            multiline editable={false}
                             onChangeText={(text) => {
                                 setPlaceFrom(text);
                                 setPickupManualText(text); // nếu bạn tách manual
@@ -232,7 +232,7 @@ export default function PriorityPurchaseScreen() {
 
                         <TextInput
                             value={placeTo}
-                            multiline
+                            multiline editable={false}
                             onChangeText={(text) => {
                                 setPlaceTo(text);
                                 setDropoffManualText(text); // nếu bạn tách manual

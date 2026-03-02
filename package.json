@@ -70,9 +70,9 @@
   "engines": {
     "node": ">=20"
   },
- "codegenConfig": {
-  "name": "AppSpec",
-  "type": "all",
-  "jsSrcsDir": "src"
-}
+  "codegenConfig": {
+    "name": "AppSpec",
+    "type": "all",
+    "jsSrcsDir": "src"
+  }
 }
