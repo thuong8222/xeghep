@@ -1,4 +1,4 @@
-import { FlatList, TouchableOpacity, RefreshControl, Alert, Text } from 'react-native';
+import { SectionList, TouchableOpacity, RefreshControl, Alert, Text } from 'react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import Container from '../../components/common/Container';
 import AppText from '../../components/common/AppText';
@@ -8,38 +8,46 @@ import IconPlus from '../../assets/icons/IconPlus';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import AppView from '../../components/common/AppView';
 import IconPencil from '../../assets/icons/iconPencil';
-import IconArrowDown from '../../assets/icons/IconArowDown';
-import IconClock from '../../assets/icons/IconClock';
 import IconLocation from '../../assets/icons/iconLocation';
-import IconMinus from '../../assets/icons/IconMinus';
 import { cancelAutoBuyTrip, fetchAutoBuyList } from '../../redux/slices/requestAutoBuyTrip';
 import { useAppDispatch } from '../../redux/hooks/useAppDispatch';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
 import { CONSTANT, NumberFormat } from '../../utils/Helper';
 import IconClose from '../../assets/icons/IconClose';
-import IconChevronLeftDouble from '../../assets/icons/IconChevronLeftDouble';
 import IconMapPin from '../../assets/icons/IconMapPin';
+import IconGroup from '../../assets/icons/IconGroup';
+
+// ✅ Group flat list → SectionList sections
+const buildSections = (data: any[]) => {
+    const grouped: Record<string, any[]> = {};
+    data.forEach(item => {
+        const key = item.area_name || 'Nhóm khác';
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(item);
+    });
+    return Object.entries(grouped).map(([title, data]) => ({ title, data }));
+};
 
 export default function ListPriorityPurchaseScreen() {
     const navigation = useNavigation();
     const route = useRoute();
     const dispatch = useAppDispatch();
-    const { list, loading, lastUpdate } = useSelector((state) => state.requestAutoBuyTrip);
+    const { list, loading, lastUpdate } = useSelector((state: any) => state.requestAutoBuyTrip);
     const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
         dispatch(fetchAutoBuyList());
     }, []);
+
     useFocusEffect(
         useCallback(() => {
             if (route?.params?.refresh) {
-                console.log('🔄 Refresh auto buy list');
-                fetchAutoBuyList(); 
+                dispatch(fetchAutoBuyList());
             }
         }, [route?.params?.refresh])
     );
-    
+
     useEffect(() => {
         if (lastUpdate) {
             console.log('📋 Auto buy list updated:', lastUpdate);
@@ -53,86 +61,45 @@ export default function ListPriorityPurchaseScreen() {
     };
 
     const addNewTripAuto = () => {
-        navigation.navigate("PriorityPurchaseScreen"); 
+        navigation.navigate("PriorityPurchaseScreen");
     };
 
-    const goToDetail = (item) => {
+    const goToDetail = (item: any) => {
         navigation.navigate("AutoBuyDetailScreen", { id: item.id });
     };
 
-    const goToEdit = (item) => {
-        
+    const goToEdit = (item: any) => {
         if (item.status !== 0) {
             Alert.alert('Không thể sửa yêu cầu đã hoàn thành hoặc đã hủy');
             return;
         }
-        console.log('goToEdit: item ', item)
-        navigation.navigate("PriorityPurchaseScreen", {
-            id: item.id,
-            editData: item
-        });
+        navigation.navigate("PriorityPurchaseScreen", { id: item.id, editData: item });
     };
 
-    
-    const getStatusBadge = (status: number) => {
-        switch (status) {
-            case 0:
-                return {
-                    text: '⏳ Đang chờ',
-                    color: ColorsGlobal.warning,
-                    bgColor: '#FFF3CD'
-                };
-            case 1:
-                return {
-                    text: '✅ Đã mua',
-                    color: ColorsGlobal.success,
-                    bgColor: '#D1F2EB'
-                };
-            case 2:
-                return {
-                    text: '❌ Đã hủy',
-                    color: ColorsGlobal.error,
-                    bgColor: '#F8D7DA'
-                };
-            default:
-                return {
-                    text: '❓ Không xác định',
-                    color: ColorsGlobal.textLight,
-                    bgColor: '#E9ECEF'
-                };
-        }
-    };
-    const confirmCancel = (item) => {
+    const confirmCancel = (item: any) => {
         Alert.alert(
-          'Huỷ yêu cầu',
-          'Bạn có chắc muốn huỷ yêu cầu mua chuyến này?',
-          [
-            { text: 'Không', style: 'cancel' },
-            {
-              text: 'Huỷ',
-              style: 'destructive',
-              onPress: async () => {
-                try {
-                  await dispatch(cancelAutoBuyTrip({ id: item.id })).unwrap();
-      
-                  
-                  Alert.alert('Thành công', 'Đã huỷ yêu cầu mua chuyến này');
-                } catch (err: any) {
-                  
-                  Alert.alert(
-                    'Thất bại',
-                    err?.message || 'Huỷ yêu cầu không thành công, vui lòng thử lại',
-                  );
-                }
-              },
-            },
-          ],
+            'Huỷ yêu cầu',
+            'Bạn có chắc muốn huỷ yêu cầu mua chuyến này?',
+            [
+                { text: 'Không', style: 'cancel' },
+                {
+                    text: 'Huỷ',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await dispatch(cancelAutoBuyTrip({ id: item.id })).unwrap();
+                            Alert.alert('Thành công', 'Đã huỷ yêu cầu mua chuyến này');
+                        } catch (err: any) {
+                            Alert.alert('Thất bại', err?.message || 'Huỷ yêu cầu không thành công, vui lòng thử lại');
+                        }
+                    },
+                },
+            ]
         );
-      };
-      
+    };
 
-    const renderItem = ({ item }) => {
-        const status = CONSTANT.STATUS_STYLE[item.status] || CONSTANT.STATUS_STYLE[0];
+    const renderItem = ({ item }: { item: any }) => {
+        const status = CONSTANT?.STATUS_STYLE[item?.status] || CONSTANT.STATUS_STYLE[0];
 
         return (
             <TouchableOpacity activeOpacity={0.9} onPress={() => goToDetail(item)}>
@@ -146,7 +113,7 @@ export default function ListPriorityPurchaseScreen() {
                         opacity: item.status === 2 ? 0.6 : 1,
                     }}
                 >
-           
+                    {/* ===== HEADER: STATUS + ACTIONS ===== */}
                     <AppView row justifyContent="space-between" alignItems="center">
                         <AppView
                             backgroundColor={status.bg}
@@ -164,7 +131,15 @@ export default function ListPriorityPurchaseScreen() {
                                 <AppButton onPress={() => goToEdit(item)}>
                                     <IconPencil size={18} color={ColorsGlobal.main} />
                                 </AppButton>
-                                <AppButton onPress={() => confirmCancel(item)} backgroundColor={ColorsGlobal.borderColor} radius={99} height={32} width={32} justifyContent='center' alignItems='center'>
+                                <AppButton
+                                    onPress={() => confirmCancel(item)}
+                                    backgroundColor={ColorsGlobal.borderColor}
+                                    radius={99}
+                                    height={32}
+                                    width={32}
+                                    justifyContent='center'
+                                    alignItems='center'
+                                >
                                     <IconClose size={22} color="#C0392B" />
                                 </AppButton>
                             </AppView>
@@ -174,51 +149,39 @@ export default function ListPriorityPurchaseScreen() {
                     {/* ===== BODY: LOCATION ===== */}
                     <AppView marginTop={10} gap={6}>
                         <Text>
-                            <IconMapPin size={17}/>
-                           
+                            <IconMapPin size={17} />
                             <AppText title={' '} />
-                            <AppText fontSize={14} bold  >
-                                {Array.isArray(item.pickup_location)
-                                    ? item.pickup_location.join(', ')
-                                    : item.pickup_location}
+                            <AppText fontSize={14} bold>
+                                {Array.isArray(item.pickup_location_names) && item.pickup_location_names.length > 0
+                                    ? item.pickup_location_names.join(', ')
+                                    : item.pickup_location_manual || item.pickup_location}
                             </AppText>
                         </Text>
 
-                         <Text>
-                             <IconLocation size={14}/>
+                        <Text>
+                            <IconLocation size={14} />
                             <AppText title={' '} />
                             <AppText fontSize={14}>
-                                {Array.isArray(item.dropoff_location)
-                                    ? item.dropoff_location.join(', ')
-                                    : item.dropoff_location}
+                                {Array.isArray(item.dropoff_location_names) && item.dropoff_location_names.length > 0
+                                    ? item.dropoff_location_names.join(', ')
+                                    : item.dropoff_location_manual || item.dropoff_location}
                             </AppText>
-                         </Text>
+                        </Text>
                     </AppView>
 
-      
-                    <AppView
-                        row
-                        justifyContent="space-between"
-                        alignItems="center"
-                        marginTop={12}
-                    >
+                    {/* ===== FOOTER: TIME + POINT/PRICE ===== */}
+                    <AppView row justifyContent="space-between" alignItems="center" marginTop={12}>
                         <AppText fontSize={13} color={ColorsGlobal.textLight}>
-                            ⏰ {moment(item.time_receive_start).format('HH:mm DD/MM')} — {' '}
-                            {moment(item.time_receive_end).format('HH:mm DD/MM')}
+                            ⏰ {moment(item.time_receive_start).format('HH:mm DD/MM')} — {moment(item.time_receive_end).format('HH:mm DD/MM')}
                         </AppText>
-
                         <AppText bold color={ColorsGlobal.main}>
                             [{item.maximum_point} điểm — {NumberFormat(parseInt(item.desired_price))}K]
                         </AppText>
                     </AppView>
 
+                    {/* ===== PURCHASED TRIP ===== */}
                     {item.status === 1 && item.trip && (
-                        <AppView
-                            backgroundColor="#F0FDF4"
-                            padding={8}
-                            radius={8}
-                            marginTop={10}
-                        >
+                        <AppView backgroundColor="#F0FDF4" padding={8} radius={8} marginTop={10}>
                             <AppText fontSize={12} color="#27AE60">
                                 ✅ Đã mua: {item.trip.place_start} → {item.trip.place_end}
                             </AppText>
@@ -232,6 +195,23 @@ export default function ListPriorityPurchaseScreen() {
         );
     };
 
+    // ✅ Section header - tên nhóm/khu vực
+    const renderSectionHeader = ({ section }: { section: { title: string } }) => (
+        <AppView
+            backgroundColor={ColorsGlobal.main + '15'}
+            paddingHorizontal={12}
+            paddingVertical={8}
+            marginBottom={8} gap={4} alignItems='center'
+            radius={8} row
+        >
+            <IconGroup size={16} color={ColorsGlobal.main} />
+            <AppText bold fontSize={14} color={ColorsGlobal.main}>
+                {section.title}
+            </AppText>
+        </AppView>
+    );
+
+    const sections = buildSections(list || []);
 
     return (
         <Container style={{ position: 'relative' }} padding={16} ignoreBottomInset>
@@ -239,16 +219,21 @@ export default function ListPriorityPurchaseScreen() {
                 [Danh sách yêu cầu mua chuyến tự động]
             </AppText>
 
-            <AppView flex={1} paddingTop={20} gap={16}>
+            <AppView flex={1} paddingTop={20}>
                 {loading && !refreshing && (
                     <AppText textAlign="center">Đang tải...</AppText>
                 )}
 
-                <FlatList
-                    data={list}
-                    renderItem={renderItem}
+                <SectionList
+                    sections={sections}
                     keyExtractor={(item) => item.id.toString()}
-                    contentContainerStyle={{ gap: 16, }}
+                    renderItem={renderItem}
+                    renderSectionHeader={renderSectionHeader}
+                    // ✅ Khoảng cách giữa các item trong section
+                    ItemSeparatorComponent={() => <AppView height={12} />}
+                    // ✅ Khoảng cách giữa các section
+                    SectionSeparatorComponent={() => <AppView height={16} />}
+                    contentContainerStyle={{ paddingBottom: 80 }}
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}
@@ -257,23 +242,18 @@ export default function ListPriorityPurchaseScreen() {
                         />
                     }
                     ListEmptyComponent={
-                        !loading && (
+                        !loading ? (
                             <AppView padding={32} alignItems="center">
-                                <AppText
-                                    fontSize={16}
-                                    color={ColorsGlobal.textLight}
-                                    textAlign="center"
-                                >
-                                    Chưa có yêu cầu nào.{'\n'}
-                                    Nhấn nút + để tạo mới.
+                                <AppText fontSize={16} color={ColorsGlobal.textLight} textAlign="center">
+                                    Chưa có yêu cầu nào.{'\n'}Nhấn nút + để tạo mới.
                                 </AppText>
                             </AppView>
-                        )
+                        ) : null
                     }
                 />
             </AppView>
 
-         
+            {/* ===== FAB BUTTON ===== */}
             <AppButton
                 onPress={addNewTripAuto}
                 position={'absolute'}

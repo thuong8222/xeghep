@@ -23,7 +23,8 @@ export default function AutoBuyDetailScreen() {
     useEffect(() => {
         dispatch(fetchAutoBuyDetail(id));
     }, [id]);
-console.log('detail: ', detail)
+
+
     if (loading || !detail) {
         return (
             <AppView flex={1} justifyContent="center" alignItems="center">
@@ -33,30 +34,30 @@ console.log('detail: ', detail)
     }
 
     return (
-        <Container   padding={16}style={{gap:16}} >
-            <AppText  bold>Mã yêu cầu: {detail.id}</AppText>
+        <Container padding={16} style={{ gap: 16 }} >
+            <AppText bold>Mã yêu cầu: {detail.id}</AppText>
 
             {/* Địa điểm */}
             <AppView backgroundColor={ColorsGlobal.backgroundLight} padding={8} radius={8} gap={16}>
-            <AppView row alignItems="center" gap={4} flexWrap='wrap'>
-                <IconLocation />
-                <AppText fontSize={14} >
-                    {Array.isArray(detail.pickup_location)
-                        ? detail.pickup_location.join(", ")
-                        : detail.pickup_location || "Chưa có địa điểm"}
-                </AppText>
+                <AppView row alignItems="center" gap={4} flexWrap='wrap'>
+                    <IconLocation />
+                    <AppText fontSize={14} >
+                        {Array.isArray(detail.pickup_location_names)
+                            ? detail.pickup_location_names.join(", ")
+                            : detail.pickup_location || "Chưa có địa điểm"}
+                    </AppText>
+                </AppView>
+
+                <AppView row gap={4} flexWrap='wrap' >
+                    <IconLocation />
+                    <AppText fontSize={14} >
+                        {Array.isArray(detail.dropoff_location_names)
+                            ? detail.dropoff_location_names.join(", ")
+                            : detail.dropoff_location || "Chưa có địa điểm"}
+                    </AppText>
+                </AppView>
             </AppView>
 
-            <AppView row gap={4}flexWrap='wrap' >
-                <IconLocation />
-                <AppText fontSize={14} >
-                    {Array.isArray(detail.dropoff_location)
-                        ? detail.dropoff_location.join(", ")
-                        : detail.dropoff_location || "Chưa có địa điểm"}
-                </AppText>
-            </AppView>
-            </AppView>
-           
 
             {/* Điểm & giá */}
             <AppView row justifyContent="space-between" alignItems="center" backgroundColor={ColorsGlobal.backgroundLight} padding={8} radius={8}>

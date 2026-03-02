@@ -10,6 +10,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppContext } from '../../../context/AppContext';
 import { compatibilityFlags } from 'react-native-screens';
+import { ColorsGlobal } from '../../base/Colors/ColorsGlobal';
 
 interface Props {
   isVisible: boolean;
@@ -34,6 +35,7 @@ export default function ModalSelectLocationByArea({
   const [selected, setSelected] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const { currentArea } = useAppContext();
+
   useEffect(() => {
     if (isVisible) {
       setSelected(defaultSelected || []);
@@ -65,7 +67,7 @@ export default function ModalSelectLocationByArea({
       if (locationType) {
         params.location_type = locationType;
       }
-      console.log('params fetchLocations: ', params)
+
       const res = await axios.get(
         `https://app.xeghepnd.com/api/areas/${areaId}/locations`,
         {
@@ -76,7 +78,7 @@ export default function ModalSelectLocationByArea({
           params,
         }
       );
-      console.log('res locations: ', res);
+
       setLocations(res.data.data || []);
 
     } catch (error) {
@@ -106,11 +108,11 @@ export default function ModalSelectLocationByArea({
       } else {
         setSelected(prev => [...prev, item]);
       }
+
     } else {
       onSelected(item);
-      setTimeout(() => {
-        onClose();
-      }, 100);
+      onClose();
+
     }
   };
 
@@ -118,7 +120,7 @@ export default function ModalSelectLocationByArea({
     const isSelected = selected.find(i => i.id === item.id);
     return (
       <AppView key={item.id} style={{ marginLeft: level * 16, marginBottom: 10 }}>
-        <AppButton height={40}
+        <AppButton height={40} backgroundColor={isSelected ? ColorsGlobal.main + '20' : ColorsGlobal.backgroundLight} paddingHorizontal={12} radius={8} alignItems='center'
           onPress={() => toggleSelect(item)}
           style={{ flexDirection: 'row', justifyContent: 'space-between' }}
         >
@@ -145,14 +147,26 @@ export default function ModalSelectLocationByArea({
         {loading && <ActivityIndicator />}
 
         {!loading && (
-          <>
+          <AppView style={{ flex: 1 }} >
+            {multiSelect && (
+              <AppButton
+                onPress={() => {
+                  onSelected(selected);   // ✅ Trả mảng đã chọn
+                  onClose();              // ✅ Đóng modal
+                }}
+                justifyContent='center' alignItems='center' backgroundColor={ColorsGlobal.main} paddingVertical={8} radius={8}
+              >
+                <AppText color='#fff'>Xác nhận</AppText>
+              </AppButton>
+            )}
             {groupedData.pickup.length > 0 && (
-              <>
+              <AppView marginTop={16}>
+
                 <AppText style={{ fontWeight: 'bold', marginBottom: 10 }}>
                   Điểm đón
                 </AppText>
                 {groupedData.pickup.map(item => renderItemTree(item))}
-              </>
+              </AppView>
             )}
 
             {groupedData.dropoff.length > 0 && (
@@ -163,19 +177,11 @@ export default function ModalSelectLocationByArea({
                 {groupedData.dropoff.map(item => renderItemTree(item))}
               </>
             )}
-          </>
+          </AppView>
         )}
 
-        {multiSelect && (
-          <AppButton
-            title="Xác nhận"
-            onPress={() => {
-              onSelected(selected);
-              onClose();
-            }}
-          />
-        )}
+
       </AppView>
-    </AppModal>
+    </AppModal >
   );
 }

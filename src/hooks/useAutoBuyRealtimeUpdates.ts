@@ -21,19 +21,11 @@ export const useAutoBuyRealtimeUpdates = (userId?: string) => {
 
   useEffect(() => {
     if (!socket || !isConnected || !userId) {
-      console.log('⚠️ Auto Buy Realtime not ready:', {
-        socket: !!socket,
-        isConnected,
-        userId,
-      });
       return;
     }
 
-    console.log('🔄 Setting up auto buy realtime updates for:', userId);
     // ✅ Listen event từ server
     const handleListUpdated = (data: any) => {
-      console.log('🔄 AUTO BUY LIST UPDATED:', data);
-
       const { action, auto_request } = data;
 
       // Refresh list
@@ -112,7 +104,6 @@ export const useAutoBuyRealtimeUpdates = (userId?: string) => {
     // socket.on("auto_buy_failed", handleAutoBuyFailed);
 
     return () => {
-      console.log('🔕 Removing auto buy realtime listeners');
       // socket.off("auto_buy_success", handleAutoBuySuccess);
       // socket.off("auto_buy_created", handleAutoBuyCreated);
       // socket.off("auto_buy_updated", handleAutoBuyUpdated);

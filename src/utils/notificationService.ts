@@ -11,16 +11,13 @@ import { CommonActions } from '@react-navigation/native';
  * Yêu cầu quyền notification từ user
  */
 export async function requestUserPermission() {
-  console.log('requestUserPermission');
   const authStatus = await messaging().requestPermission();
-  console.log('authStatus: ', authStatus);
 
   const enabled =
     authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
     authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
   if (enabled) {
-    console.log('Authorization status:', authStatus);
     await getFcmToken();
 
     // 2️⃣ Xin quyền local notification (cho Notifee)
@@ -45,10 +42,9 @@ export async function requestUserPermission() {
  * Lấy FCM token và log ra console
  */
 export async function getFcmToken() {
-  console.log('durring getFcmToken');
   try {
     const token = await messaging().getToken();
-    console.log('✅ FCM Token:', token);
+    // console.log('✅ FCM Token:', token);
     return token;
   } catch (error) {
     console.log('❌ Error getting FCM token:', error);
@@ -60,13 +56,14 @@ export async function getFcmToken() {
  * messaging().onMessage
  */
 export function listenForForegroundMessages() {
-  console.log('notification khi app đang foreground');
   messaging().onMessage(async remoteMessage => {
     console.log('📩 Foreground message received:', remoteMessage);
     await displayNotification(
       remoteMessage?.notification?.title || remoteMessage?.data?.title,
       remoteMessage.notification?.body || remoteMessage.data?.body,
-      remoteMessage.data?.navData ? JSON.parse(remoteMessage.data.navData) : undefined
+      remoteMessage.data?.navData
+        ? JSON.parse(remoteMessage.data.navData)
+        : undefined,
     );
   });
 }
@@ -77,11 +74,12 @@ export function listenForForegroundMessages() {
  */
 export function registerBackgroundHandler() {
   messaging().setBackgroundMessageHandler(async remoteMessage => {
-    console.log('📩 Background message received:', remoteMessage);
     await displayNotification(
       remoteMessage.notification?.title || remoteMessage.data?.title,
       remoteMessage.notification?.body || remoteMessage.data?.body,
-      remoteMessage.data?.navData ? JSON.parse(remoteMessage.data.navData) : undefined
+      remoteMessage.data?.navData
+        ? JSON.parse(remoteMessage.data.navData)
+        : undefined,
     );
   });
 }
@@ -148,8 +146,8 @@ export function registerBackgroundHandler() {
 //   }
 
 //   try {
-//     const navData = typeof data.navData === 'string' 
-//       ? JSON.parse(data.navData) 
+//     const navData = typeof data.navData === 'string'
+//       ? JSON.parse(data.navData)
 //       : data.navData;
 
 //     const { screen, params } = navData;
@@ -168,7 +166,10 @@ export function handleNotificationNavigation(data: any) {
   if (!data?.navData) return;
 
   try {
-    const navData = typeof data.navData === 'string' ? JSON.parse(data.navData) : data.navData;
+    const navData =
+      typeof data.navData === 'string'
+        ? JSON.parse(data.navData)
+        : data.navData;
 
     if (!navData.screen) return;
 
@@ -177,15 +178,14 @@ export function handleNotificationNavigation(data: any) {
     // Dùng navigationRef để navigate qua nested navigator
     navigationRef.dispatch(
       CommonActions.navigate({
-        name: navData.screen,  // RootNavigator
+        name: navData.screen, // RootNavigator
         params: navData.params, // params: { screen: 'BottomTabs', params: { ... } }
-      })
+      }),
     );
   } catch (error) {
     console.error('❌ Error parsing navigation data:', error);
   }
 }
-
 
 // Setup listener notification
 export function setupNotificationListeners() {
@@ -218,11 +218,13 @@ export function setupNotificationListeners() {
   });
 
   // FCM killed app
-  messaging().getInitialNotification().then(remoteMessage => {
-    if (remoteMessage?.data?.navData) {
-      handleNotificationNavigation({ navData: remoteMessage.data.navData });
-    }
-  });
+  messaging()
+    .getInitialNotification()
+    .then(remoteMessage => {
+      if (remoteMessage?.data?.navData) {
+        handleNotificationNavigation({ navData: remoteMessage.data.navData });
+      }
+    });
 }
 
 /**
@@ -249,7 +251,11 @@ export async function unsubscribeFromTopic(topic: string) {
 /**
  * Hiển thị notification bằng Notifee
  */
-export async function displayNotification(title?: string, body?: string,  navData?: { screen: string; params?: any }) {
+export async function displayNotification(
+  title?: string,
+  body?: string,
+  navData?: { screen: string; params?: any },
+) {
   if (Platform.OS === 'android') {
     await notifee.createChannel({
       id: 'default',
@@ -267,7 +273,7 @@ export async function displayNotification(title?: string, body?: string,  navDat
       channelId: 'default',
       importance: AndroidImportance.HIGH,
       sound: 'default',
-      pressAction: { id: 'default' },// ⭐ quan trọng để bắt được event
+      pressAction: { id: 'default' }, // ⭐ quan trọng để bắt được event
       smallIcon: 'ic_launcher',
     },
     ios: {

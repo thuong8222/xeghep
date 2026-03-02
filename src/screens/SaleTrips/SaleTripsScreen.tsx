@@ -105,7 +105,7 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
       type_car: tripOptions?.guestType,
       cover_car: tripOptions.guestType === 'normal' ? 0 : 1,
     };
-    console.log('payload: ', payload)
+
 
     try {
       await dispatch(createTrip(payload)).unwrap();
@@ -235,20 +235,12 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
                   onPress={handleSelectCommuneWardStart}
                   padding={7}
                   radius={6}
-                  borderColor={ColorsGlobal.borderColor}
+                  borderColor={ColorsGlobal.borderColor} borderWidth={1}
                 >
                   <IconDotHorizonal />
                 </AppButton>
               </AppView>
-              {/* <AppView alignItems='center' row gap={4}>
-                <IconLocation size={13} />
-                <AppText
-                  title={`Điểm xuất phát khu vực ${selectedDirection === 1
-                    ? currentArea?.place_start
-                    : currentArea?.place_end}`}
-                  color="#999" fontSize={12}
-                />
-              </AppView> */}
+
 
             </AppView>
 
@@ -269,33 +261,12 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
                   onPress={handleSelectCommuneWardEnd}
                   padding={7}
                   radius={6}
-                  borderColor={ColorsGlobal.borderColor}
+                  borderColor={ColorsGlobal.borderColor} borderWidth={1}
                 >
                   <IconDotHorizonal />
                 </AppButton>
               </AppView>
-              {/* <AppView alignItems='center' row gap={4} >
-                <IconLocation size={13} />
-                <AppText
-                  title={`Điểm đến khu vực ${selectedDirection === 1
-                    ? currentArea?.place_end
-                    : currentArea?.place_start}`}
-                  color="#999" fontSize={12}
-                />
-              </AppView> */}
 
-
-              {/* Hiển thị input xã/phường nếu đã chọn */}
-              {/* {communeWard && (
-                <AppView>
-                  <AppInput
-                    label="Xã/Phường"
-                    value={communeWard}
-                    editable={false}
-                    placeholder="Chưa chọn"
-                  />
-                </AppView>
-              )} */}
             </AppView>
           </AppView>
 
@@ -316,53 +287,7 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
           setSelectedStartLocation([value]);
         }}
       />
-      {/* <SelectProvinceDistrictModal
-        multiSelect={false}
-        isVisible={isCommuneWardTo}
-        provinceName={
-          selectedDirection === 1
-            ? currentArea?.place_start
-            : currentArea?.place_end
-        }
-        districtCode={districtCodeTo}
-        onClose={() => {
-          setIsCommuneWardTo(false); // ✅ đúng
-        }}
-        onSelected={(value) => {
-          setDistrictCodeTo(value?.code)
-          console.log('✅ Kết quả chọn điểm đón:', value);
-          const areaText = `${value.district.name}, ${value.province.name}`
-          setCommuneWardTo(areaText)
-          // setPlaceStart(`${value.district.name}, ${value.province.name}`)
-          // setCommuneWardTo(
-          //   `${value.district.name}, ${value.province.name}`
-          // );
 
-        }}
-      /> */}
-
-      {/* <SelectProvinceDistrictModal
-        multiSelect={false}
-        isVisible={isCommuneWard}
-        provinceName={
-          selectedDirection === 1
-            ? currentArea?.place_end
-            : currentArea?.place_start
-        }
-        districtCode={districtCode}
-        onClose={() => {
-          setIsCommuneWard(false); // ✅ đúng
-        }}
-        onSelected={(value) => {
-          setDistrictCode(value?.code)
-          console.log('✅ Kết quả chọn điểm trả:', value);
-          // setCommuneWard(
-          //   `${value.district.name}, ${value.province.name}`
-          // );
-          const areaText = `${value.district.name}, ${value.province.name}`
-          setCommuneWard(areaText)
-        }}
-      /> */}
       <ModalSelectLocationByArea
         multiSelect={false}
         isVisible={isCommuneWard}
@@ -374,31 +299,7 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
           setSelectedEndLocation([value]);
         }}
       />
-      {/* Modal chọn tỉnh/huyện cho ĐIỂM TRẢ */}
-      {/* <SelectProvinceDistrictModal
-        multiSelect={false}
-        isVisible={isCommuneWard}
-        onClose={() => {
-          setIsCommuneWard(false);
-        }}
-        onSelected={(value) => {
-          console.log('✅ Kết quả chọn điểm trả:', value);
-          setCommuneWard(`${value.province.name} - ${value.district.name}`);
-        }}
-      /> */}
 
-      {/* Modal chọn tỉnh/huyện cho ĐIỂM ĐÓN */}
-      {/* <SelectProvinceDistrictModal
-        multiSelect={false}
-        isVisible={isCommuneWardTo}
-        onClose={() => {
-          setIsCommuneWardTo(false);
-        }}
-        onSelected={(value) => {
-          console.log('✅ Kết quả chọn điểm đón:', value);
-          setCommuneWardTo(`${value.province.name} - ${value.district.name}`);
-        }}
-      /> */}
 
     </AppView>
   )

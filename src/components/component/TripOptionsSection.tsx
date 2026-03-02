@@ -117,7 +117,7 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
                             />
                         )}
                         <AppView>
-                            <AppButton row gap={4} onPress={() => setShowGuestModal(true)} borderWidth={1} paddingHorizontal={4} paddingVertical={8}>
+                            <AppButton row gap={4} onPress={() => setShowGuestModal(true)} paddingHorizontal={4} paddingVertical={8}>
                                 <AppText fontWeight={700}>
                                     {guestTypeNameMap[guestType] || `${numGuests} khách`}
                                 </AppText>

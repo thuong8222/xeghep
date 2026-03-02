@@ -9,9 +9,10 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 interface AppModalProps {
   isVisible: boolean;
   onClose: () => void;
-  enableAutomaticScroll?:boolean;
+  enableAutomaticScroll?: boolean;
   heightPercent?: number; // cho phép custom chiều cao
   children?: React.ReactNode; // ✅ phần nội dung tuỳ ý
+  renderDirectChildren?: React.ReactNode; // ✅ render trực tiếp children mà không cần scroll
 }
 
 export default function AppModal({
@@ -19,7 +20,8 @@ export default function AppModal({
   onClose,
   heightPercent = 0.8,
   children,
-  enableAutomaticScroll=true
+  enableAutomaticScroll = true,
+  renderDirectChildren,        // ✅
 }: AppModalProps) {
   const insets = useSafeAreaInsets();
   return (
@@ -29,34 +31,29 @@ export default function AppModal({
       swipeDirection="down"
       onSwipeComplete={onClose}
       propagateSwipe
-      style={[styles.modal]}
+      style={styles.modal}
     >
-
-      <View
-        style={[
-          styles.modalContent,
-          {
-            height: '100%',
-            maxHeight: _screen_height * heightPercent,
-            paddingBottom: insets.bottom
-          },
-        ]}
-      >
+      <View style={[styles.modalContent, { height: '100%', maxHeight: _screen_height * heightPercent, paddingBottom: insets.bottom }]}>
         <View style={styles.handleBar} />
-        <KeyboardAwareScrollView
-          style={{ flex: 1, }}
-          viewIsInsideTabBar={true}
-          enableAutomaticScroll={enableAutomaticScroll}
-          contentContainerStyle={{ flexGrow: 1 }}
-          enableOnAndroid={true}
-          extraScrollHeight={0}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          {children}
-        </KeyboardAwareScrollView>
-      </View>
 
+        {/* ✅ Nếu có renderDirectChildren thì render thẳng (FlatList, SectionList...) */}
+        {renderDirectChildren ? (
+          renderDirectChildren
+        ) : (
+          <KeyboardAwareScrollView
+            style={{ flex: 1 }}
+            viewIsInsideTabBar={true}
+            enableAutomaticScroll={enableAutomaticScroll}
+            contentContainerStyle={{ flexGrow: 1 }}
+            enableOnAndroid={true}
+            extraScrollHeight={0}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            {children}
+          </KeyboardAwareScrollView>
+        )}
+      </View>
     </Modal>
   );
 }

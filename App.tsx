@@ -25,7 +25,7 @@ const App = () => {
 
   useEffect(() => {
     const initNotifications = async () => {
-      console.log('App.tsx useEffect - initNotifications');
+
 
       // 1️⃣ Tạo channel Android
       await createAndroidChannel();
@@ -33,7 +33,7 @@ const App = () => {
       // 2️⃣ Xin quyền notification
       await requestUserPermission();
 
-   
+
 
       // 4️⃣ Lắng nghe notification khi app đang foreground
       listenForForegroundMessages();
