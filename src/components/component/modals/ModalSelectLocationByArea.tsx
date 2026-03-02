@@ -142,12 +142,12 @@ export default function ModalSelectLocationByArea({
       onClose={onClose}
       heightPercent={0.8}
     >
-      <AppView style={{ padding: 16, flex: 1 }}>
+      <AppView style={{ flex: 1 }}>
 
         {loading && <ActivityIndicator />}
 
         {!loading && (
-          <AppView style={{ flex: 1 }} >
+          <>
             {multiSelect && (
               <AppButton
                 onPress={() => {
@@ -160,7 +160,7 @@ export default function ModalSelectLocationByArea({
               </AppButton>
             )}
             {groupedData.pickup.length > 0 && (
-              <AppView marginTop={16}>
+              <AppView marginTop={multiSelect ? 16 : 0}>
 
                 <AppText style={{ fontWeight: 'bold', marginBottom: 10 }}>
                   Điểm đón
@@ -177,7 +177,7 @@ export default function ModalSelectLocationByArea({
                 {groupedData.dropoff.map(item => renderItemTree(item))}
               </>
             )}
-          </AppView>
+          </>
         )}
 
 

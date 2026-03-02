@@ -84,6 +84,7 @@ export default function BuyTripTabs() {
             options={{
               headerTitleAlign: 'left',
               // headerBackTitle: '',
+              headerBackVisible: false,
 
             }}
           />
