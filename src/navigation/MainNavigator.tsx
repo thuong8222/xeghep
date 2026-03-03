@@ -28,67 +28,65 @@ import { useAutoBuyRealtimeUpdates } from '../hooks/useAutoBuyRealtimeUpdates';
 import { useAutoBuyListUpdates } from '../hooks/useAutoBuyListUpdates';
 const Stack = createNativeStackNavigator<RootParamList>();
 export default function MainNavigator() {
-  // const { currentDriver } = useAppContext();
-  // const { socket, isConnected } = useSocket();
-  // const [isSplashDone, setIsSplashDone] = useState(true);
-  // const [driver, setDriver] = useState<any>(null);
+  const { currentDriver } = useAppContext();
+  const { socket, isConnected } = useSocket();
+  const [isSplashDone, setIsSplashDone] = useState(true);
+  const [driver, setDriver] = useState<any>(null);
 
-  // useEffect(() => {
-  //   const fetchDriver = async () => {
-  //     const driverString = await AsyncStorage.getItem("driver");
-  //     if (driverString) {
-  //       setDriver(JSON.parse(driverString));
-  //     } else {
-  //       setDriver(null); // ✅ reset khi logout
-  //     }
-  //   };
-  //   fetchDriver();
-  // }, [currentDriver]); // ✅ chạy lại khi currentDriver thay đổi
-  // console.log('driver in MainNavigator: ', driver)
-  // console.log('currentDriver?.id || driver?.id: ', currentDriver?.id || driver?.id)
-  // useEffect(() => {
-  //   if (!socket || !isConnected || !currentDriver?.id || !driver?.id) return;
-
-
-  //   socket.emit("register_user", currentDriver.id);
-  // }, [socket, isConnected, currentDriver?.id]);
+  useEffect(() => {
+    const fetchDriver = async () => {
+      const driverString = await AsyncStorage.getItem("driver");
+      if (driverString) {
+        setDriver(JSON.parse(driverString));
+      } else {
+        setDriver(null); // ✅ reset khi logout
+      }
+    };
+    fetchDriver();
+  }, [currentDriver]); // ✅ chạy lại khi currentDriver thay đổi
+  console.log('driver in MainNavigator: ', driver)
+  console.log('currentDriver?.id || driver?.id: ', currentDriver?.id || driver?.id)
+  useEffect(() => {
+    if (!socket || !isConnected || !currentDriver?.id || !driver?.id) return;
 
 
+    socket.emit("register_user", currentDriver.id);
+  }, [socket, isConnected, currentDriver?.id]);
 
-  // // ✅ Listen cả 2 loại thông báo (vì user có thể vừa là buyer vừa là seller)
-  // useSellerNotifications(currentDriver?.id || driver?.id);
-  // useBuyerNotifications(currentDriver?.id || driver?.id);
-  // usePointsListRealtime();                          // Cập nhật danh sách điểm
-  // useTransactionHistoryRealtime(driver?.id || currentDriver?.id);
-  // // ✅ Kích hoạt tất cả hooks real-time
-  // useTripSellerNotifications(currentDriver?.id || driver?.id || undefined); // Nhận thông báo khi có người mua chuyến của mình
-  // useTripBuyerNotifications(currentDriver?.id || driver?.id || undefined);  // Nhận thông báo khi mua chuyến thành công
-  // useTripsListRealtime();                          // Auto update danh sách chuyến
-  // useReceivedTripsRealtime(currentDriver?.id || driver?.id || undefined);   // Auto update danh sách chuyến đã nhận
-  // // ✅ Kích hoạt notification system
-  // useNotificationsRealtime(currentDriver?.id || driver?.id);
-  // // ===== ✅ AUTO BUY TRIPS Notifications =====
-  // useAllAutoBuyNotifications(currentDriver?.id || driver?.id);          // Tất cả thông báo auto buy
-  // useAutoBuyRealtimeUpdates(currentDriver?.id || driver?.id);           // Cập nhật danh sách realtime
-  // useAutoBuyListUpdates(currentDriver?.id || driver?.id);
+
+
+  // ✅ Listen cả 2 loại thông báo (vì user có thể vừa là buyer vừa là seller)
+  useSellerNotifications(currentDriver?.id || driver?.id);
+  useBuyerNotifications(currentDriver?.id || driver?.id);
+  usePointsListRealtime();                          // Cập nhật danh sách điểm
+  useTransactionHistoryRealtime(driver?.id || currentDriver?.id);
+  // ✅ Kích hoạt tất cả hooks real-time
+  useTripSellerNotifications(currentDriver?.id || driver?.id || undefined); // Nhận thông báo khi có người mua chuyến của mình
+  useTripBuyerNotifications(currentDriver?.id || driver?.id || undefined);  // Nhận thông báo khi mua chuyến thành công
+  useTripsListRealtime();                          // Auto update danh sách chuyến
+  useReceivedTripsRealtime(currentDriver?.id || driver?.id || undefined);   // Auto update danh sách chuyến đã nhận
+  // ✅ Kích hoạt notification system
+  useNotificationsRealtime(currentDriver?.id || driver?.id);
+  // ===== ✅ AUTO BUY TRIPS Notifications =====
+  useAllAutoBuyNotifications(currentDriver?.id || driver?.id);          // Tất cả thông báo auto buy
+  useAutoBuyRealtimeUpdates(currentDriver?.id || driver?.id);           // Cập nhật danh sách realtime
+  useAutoBuyListUpdates(currentDriver?.id || driver?.id);
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <Text>MAIN OK</Text>
-    </GestureHandlerRootView>
-    // <GestureHandlerRootView style={{ flex: 1 }}>
-    //   {!isSplashDone ? (
-    //     <CustomSplash onFinish={() => setIsSplashDone(true)} />
-    //   ) : (
-    //     <Stack.Navigator screenOptions={{ headerShown: false }}>
-    //       {currentDriver?.id || driver?.id ? (
-    //         <Stack.Screen name="RootNavigator" component={RootNavigator} />
-    //       ) : (
-    //         <Stack.Screen name="Auth" component={AuthNavigator} />
-    //       )}
 
-    //     </Stack.Navigator>
-    //   )}
-    // </GestureHandlerRootView>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      {!isSplashDone ? (
+        <CustomSplash onFinish={() => setIsSplashDone(true)} />
+      ) : (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          {currentDriver?.id || driver?.id ? (
+            <Stack.Screen name="RootNavigator" component={RootNavigator} />
+          ) : (
+            <Stack.Screen name="Auth" component={AuthNavigator} />
+          )}
+
+        </Stack.Navigator>
+      )}
+    </GestureHandlerRootView>
   );
 
 }
