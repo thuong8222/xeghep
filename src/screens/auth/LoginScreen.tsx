@@ -4,7 +4,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AppButton from "../../components/common/AppButton";
 import AppInput from "../../components/common/AppInput";
 import ButtonSubmit from "../../components/common/ButtonSubmit";
-
+import * as Keychain from 'react-native-keychain';
 import AppView from "../../components/common/AppView";
 import FastImage from "react-native-fast-image";
 import AppText from "../../components/common/AppText";
@@ -24,6 +24,7 @@ import Container from "../../components/common/Container";
 import { useSocket } from "../../context/SocketContext";
 import { useAppContext } from "../../context/AppContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getBiometricCredentials, saveBiometricCredentials } from "../../utils/storage";
 
 type LoginParamList = NativeStackNavigationProp<RootParamList>;
 
@@ -37,7 +38,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [password, setPassword] = useState("Admin123456@");
   const [phoneNumberError, setPhoneNumberError] = useState('');
   const [passwordError, setPasswordError] = useState('');
-const {setCurrentDriver } = useAppContext();
+  const { setCurrentDriver } = useAppContext();
 
   const [isOpenModal, setIsOpenModal] = useState(false);
 
@@ -50,7 +51,7 @@ const {setCurrentDriver } = useAppContext();
           text: 'OK',
           onPress: () => {
             clear();
-             navigation.navigate('RootNavigator');
+            navigation.navigate('RootNavigator');
 
           },
         },
@@ -63,17 +64,48 @@ const {setCurrentDriver } = useAppContext();
   }, [successMessage, error]);
 
   const handleLogin = async () => {
-    if (phoneNumberError || passwordError || !phoneNumber || !password) {
-      Alert.alert('Thông báo', 'Vui lòng nhập đầy đủ thông tin hợp lệ');
-      return;
-    }
-
     try {
       await login({ phone: phoneNumber, password });
-   
       setCurrentDriver(JSON.parse((await AsyncStorage.getItem("driver")) || 'null'));
+
+      // ✅ Thay Keychain bằng AsyncStorage
+      await saveBiometricCredentials(phoneNumber, password);
     } catch (err: any) {
-      Alert.alert('Đăng nhập thất bại', err || 'Có lỗi xảy ra');
+      const msg = typeof err === 'string' ? err : err?.message || 'Có lỗi xảy ra';
+      Alert.alert('Đăng nhập thất bại', msg);
+    }
+  };
+
+  const handleLoginWithBiometric = async () => {
+    try {
+      // ✅ Thay Keychain bằng AsyncStorage
+      const savedCredentials = await getBiometricCredentials();
+      if (!savedCredentials) {
+        Alert.alert('Thông báo', 'Vui lòng đăng nhập bằng mật khẩu lần đầu để kích hoạt tính năng này');
+        return;
+      }
+
+      const { available } = await rnBiometrics.isSensorAvailable();
+      if (!available) {
+        Alert.alert('Không hỗ trợ biometric trên thiết bị này');
+        return;
+      }
+
+      const { success } = await rnBiometrics.simplePrompt({
+        promptMessage: 'Xác thực để đăng nhập',
+      });
+
+      if (success) {
+        await login({
+          phone: savedCredentials.username,
+          password: savedCredentials.password
+        });
+        setCurrentDriver(JSON.parse((await AsyncStorage.getItem("driver")) || 'null'));
+      } else {
+        Alert.alert('Xác thực thất bại hoặc bị hủy');
+      }
+    } catch (e: any) {
+      Alert.alert('Lỗi khi xác thực biometric', e?.message || String(e));
     }
   };
 
@@ -101,33 +133,7 @@ const {setCurrentDriver } = useAppContext();
 
   }
 
-  const handleLoginWithBiometric = async () => {
-    try {
-      // kiểm tra thiết bị có hỗ trợ biometrics không
-      const { available, biometryType } = await rnBiometrics.isSensorAvailable();
-      if (!available) {
-        Alert.alert('Không hỗ trợ biometric trên thiết bị này');
-        return;
-      }
 
-      // hiện prompt
-      const { success, error } = await rnBiometrics.simplePrompt({
-        promptMessage: 'Xác thực để đăng nhập',
-      });
-
-      if (success) {
-        // authenticated locally — bạn có thể set local session/token
-        Alert.alert('Xác thực thành công — đăng nhập!');
-        handleLogin()
-        // gọi API backend để lấy token nếu cần, hoặc unlock local data
-      } else {
-        Alert.alert('Xác thực thất bại hoặc bị hủy');
-      }
-    } catch (e) {
-      console.warn(e);
-      Alert.alert('Lỗi khi xác thực biometric', e?.message || String(e));
-    }
-  };
   const insets = useSafeAreaInsets()
   // const { isConnected } = useSocket();
   return (
@@ -137,7 +143,7 @@ const {setCurrentDriver } = useAppContext();
         <AppView flex={1} justifyContent="center" >
 
           <AppView justifyContent="center" alignItems="center" marginBottom={20} gap={16}>
-          {/* <AppText>Socket status: {isConnected ? "✅ Connected" : "❌ Disconnected"}</AppText> */}
+            {/* <AppText>Socket status: {isConnected ? "✅ Connected" : "❌ Disconnected"}</AppText> */}
             <Image source={logo} style={styles.logo} resizeMode="contain" />
             <AppView gap={6}>
               <AppText

@@ -53,38 +53,21 @@ export default function AccountScreen({ navigation }: Props) {
   }, [error, successMessage]);
 
 
-  const Logout = () => {
-    const handleLogout = async () => {
-      try {
-
-        const result = await dispatch(logoutAccount()).unwrap();
-        console.log('handleLogout result: ', result)
-        await AsyncStorage.removeItem('token');
-        await AsyncStorage.removeItem("driver")
-
-        setCurrentDriver(null);
-
-
-
-      } catch (error) {
-        console.error('❌ Lỗi khi đăng xuất:', error);
-      }
-    };
-
-    Alert.alert(
-      'Xeghep',
-      'Bạn có muốn đăng xuất?',
-      [
-        {
-          text: 'Hủy',
-          style: 'cancel',
-        },
-        {
-          text: 'Đăng xuất',
-          onPress: handleLogout,
-        },
-      ]
-    );
+  const handleLogout = async () => {
+    try {
+      const result = await dispatch(logoutAccount()).unwrap();
+      await AsyncStorage.removeItem('token');
+      await AsyncStorage.removeItem("driver");
+      setCurrentDriver(null); // ✅ thêm lại
+    } catch (error) {
+      console.error('❌ Lỗi khi đăng xuất:', error);
+      // ✅ Dù lỗi API vẫn xoá local và chuyển màn hình
+      await AsyncStorage.removeItem('token');
+      await AsyncStorage.removeItem("driver");
+      await AsyncStorage.removeItem('biometric_phone');   // ✅
+      await AsyncStorage.removeItem('biometric_password'); // ✅
+      setCurrentDriver(null);
+    }
   };
   const DeleteAccount = () => {
     const handleDelete = async () => {
@@ -235,7 +218,7 @@ export default function AccountScreen({ navigation }: Props) {
             <FunctionSection label='Thông báo hệ thống' onPress={gotoNotification} />
 
             {/* <FunctionSection label='Xoá tài khoản' onPress={DeleteAccount} /> */}
-            <FunctionSection label='Đăng xuất' onPress={Logout} />
+            <FunctionSection label='Đăng xuất' onPress={handleLogout} />
           </AppView>
 
         </AppView>
