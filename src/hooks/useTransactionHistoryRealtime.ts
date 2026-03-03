@@ -8,10 +8,10 @@ import { addTransaction } from '../redux/slices/pointSlice';
 export const useTransactionHistoryRealtime = (userId?: string) => {
   const { socket, isConnected } = useSocket();
   const dispatch = useDispatch<AppDispatch>();
+  useEffect(() => {
+    console.log('🔥 Transaction Hook Render - userId:', userId);
+  }, [userId]);
 
-  // console.log('🔍 Transaction hook - userId:', userId);
-  // console.log('🔍 Transaction hook - socket:', !!socket);
-  // console.log('🔍 Transaction hook - isConnected:', isConnected);
   useEffect(() => {
     if (!socket || !isConnected || !userId) {
       console.log('⚠️ Transaction history realtime not ready:', {
@@ -21,22 +21,10 @@ export const useTransactionHistoryRealtime = (userId?: string) => {
       });
       return;
     }
-
-    // console.log('🔔 Setting up transaction history listener for:', userId);
-    // console.log('📡 Socket ID:', socket.id);
-
     const handleTransactionUpdate = async (data: any) => {
-      // console.log('📜 New transaction:', data);
-
       const { transaction } = data.transaction;
-
       if (transaction) {
-        // console.log('➕ Adding transaction:', transaction.id);
-        // ✅ Thêm giao dịch mới vào state.history
         dispatch(addTransaction(transaction));
-        // console.log('✅ Added new transaction to history');
-        // console.log('first transaction: ', transaction);
-        // Hiển thị notification
         try {
           const isReceive = transaction.type === 'buy_points';
           await displayNotification(
@@ -48,11 +36,8 @@ export const useTransactionHistoryRealtime = (userId?: string) => {
         }
       }
     };
-
     socket.on('transaction_updated', handleTransactionUpdate);
- 
     return () => {
-
       socket.off('transaction_updated', handleTransactionUpdate);
     };
   }, [socket, isConnected, userId, dispatch]);

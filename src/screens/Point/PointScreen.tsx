@@ -27,7 +27,7 @@ interface Props {
 export default function PointScreen({ navigation }: Props) {
     const dispatch = useDispatch<AppDispatch>();
     const { currentDriver } = useAppContext();
-    const { socket } = useSocket();
+
     const [openModalTranferMoney, setOpenModalTranferMoney] = useState(false);
     const [pointSelected, setPointSelected] = useState({});
     const { points, loading, error } = useSelector((state: RootState) => state.point);
@@ -65,7 +65,7 @@ export default function PointScreen({ navigation }: Props) {
                         {
                             text: 'OK',
                             onPress: () => {
-                                console.log('result: ', result)
+
                                 setPointSelected(data.item);
                                 closeRow && closeRow(rowMap, rowKey);
                                 navigation.navigate('ChatScreen', { data: result.data })
@@ -94,12 +94,12 @@ export default function PointScreen({ navigation }: Props) {
                                 Alert.alert(
                                     'Thành công',
                                     'Bạn vừa huỷ bán điểm thành công')
-                                console.log('result: ', result)
+
                                 setPointSelected(data.item);
                                 closeRow && closeRow(rowMap, rowKey);
                             })
                             .catch(msg => {
-                                console.log('msg:  ', msg)
+                                console.log('msg cancelSalePointPress:  ', msg)
                                 Alert.alert('Lỗi', msg || 'Huỷ bấn điểm thất bại');
                             });
                     },
@@ -176,7 +176,6 @@ export default function PointScreen({ navigation }: Props) {
                 <View >
                     <ActivityIndicator size="large" color={ColorsGlobal.main} />
                 </View>
-
             }
 
             <SwipeListView

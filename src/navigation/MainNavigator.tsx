@@ -36,12 +36,13 @@ export default function MainNavigator() {
   useEffect(() => {
     const fetchDriver = async () => {
       const driverString = await AsyncStorage.getItem("driver");
-
+      console.log('driverString: ', driverString);
       if (driverString) setDriver(JSON.parse(driverString));
     };
     fetchDriver();
   }, []);
-
+  console.log('driver in MainNavigator: ', driver)
+  console.log('currentDriver?.id || driver?.id: ', currentDriver?.id || driver?.id)
   useEffect(() => {
     if (!socket || !isConnected || !currentDriver?.id || !driver?.id) return;
 
@@ -55,7 +56,7 @@ export default function MainNavigator() {
   useSellerNotifications(currentDriver?.id || driver?.id);
   useBuyerNotifications(currentDriver?.id || driver?.id);
   usePointsListRealtime();                          // Cập nhật danh sách điểm
-  useTransactionHistoryRealtime(currentDriver?.id || driver?.id);
+  useTransactionHistoryRealtime(driver?.id || currentDriver?.id);
   // ✅ Kích hoạt tất cả hooks real-time
   useTripSellerNotifications(currentDriver?.id || driver?.id || undefined); // Nhận thông báo khi có người mua chuyến của mình
   useTripBuyerNotifications(currentDriver?.id || driver?.id || undefined);  // Nhận thông báo khi mua chuyến thành công

@@ -16,14 +16,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function DetailTripHistorySreen({ route, navigation }) {
     const data = route?.params?.data;
     // console.log('data DetailTripHistorySreen: ', data)
-   const [driver, setDriver] = useState<any>(null);
-  useEffect(() => {
-    const fetchDriver = async () => {
-      const driverString = await AsyncStorage.getItem("driver");
-      if (driverString) setDriver(JSON.parse(driverString));
-    };
-    fetchDriver();
-  }, []);
+    const [driver, setDriver] = useState<any>(null);
+    useEffect(() => {
+        const fetchDriver = async () => {
+            const driverString = await AsyncStorage.getItem("driver");
+            if (driverString) setDriver(JSON.parse(driverString));
+        };
+        fetchDriver();
+    }, []);
     const { currentDriver } = useAppContext();
     const isSeller = (currentDriver?.id || driver?.id) === data?.id_driver_sell;
     // console.log('isSeller: ', isSeller)
@@ -53,7 +53,7 @@ export default function DetailTripHistorySreen({ route, navigation }) {
         return "--";
     };
     const gotoChat = () => {
-        navigation.navigate('ChatScreen', { data: data })
+        navigation.push('ChatScreen', { data: data })
     }
     let status_ = '';
 

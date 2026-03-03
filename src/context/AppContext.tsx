@@ -23,6 +23,8 @@ interface AppContextType {
   setCurrentDriver: (val: string) => void;
   currentArea: Area | null;
   setCurrentArea: (val: Area | null) => void;
+  currentAreaAutoTrip: Area | null;
+  setCurrentAreaAutoTrip: (val: Area | null) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -39,13 +41,15 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
   const [updateTrips, setUpdateTrips] = useState('');
   const [currentDriver, setCurrentDriver] = useState('');
   const [currentArea, setCurrentArea] = useState<Area | null>(null);
+  const [currentAreaAutoTrip, setCurrentAreaAutoTrip] = useState<Area | null>(null);
   return (
     <AppContext.Provider value={{
       idArea, setIdArea,
       updatePoints, setUpdatePoints,
       updateTrips, setUpdateTrips,
       currentDriver, setCurrentDriver,
-      currentArea, setCurrentArea
+      currentArea, setCurrentArea,
+      currentAreaAutoTrip, setCurrentAreaAutoTrip
     }}>
       {children}
     </AppContext.Provider>

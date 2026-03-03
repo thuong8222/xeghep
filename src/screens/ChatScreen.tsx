@@ -67,27 +67,27 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
   const nameChatWith = isOnwer ? name_buyer : name_seller;
   const phone_buyer = data?.buyer?.phone || data?.driver_receive?.phone;
   const phone_seller = data?.seller?.phone || data?.driver_sell?.phone;
-  const callToPhone = () => {
+
+
+  const callToPhone = async () => {
     const phoneNumber = isOnwer ? phone_buyer : phone_seller;
+
     if (!phoneNumber) {
       Alert.alert("Lỗi", "Không có số điện thoại");
       return;
     }
-    const phoneUrl = `tel:${phoneNumber}`;
-    Linking.canOpenURL(phoneUrl)
-      .then(supported => {
-        if (!supported) {
-          Alert.alert("Lỗi", "Không thể mở ứng dụng gọi điện");
-        } else {
-          Linking.openURL(phoneUrl);
-        }
-      })
-      .catch(err => console.error("Call error:", err));
+
+    try {
+      await Linking.openURL(`tel:${phoneNumber}`);
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể thực hiện cuộc gọi.");
+    }
   };
 
   useLayoutEffect(() => {
     navigation.setOptions({
       title: nameChatWith,
+      backTitle: "Trở về",
       headerRight: () => (
         <TouchableOpacity onPress={callToPhone} style={{ padding: 6, marginRight: 12 }}>
           <IconPhone width={24} height={24} rotate={0} />
@@ -178,10 +178,7 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
       Alert.alert("Lỗi", "Chưa kết nối tới server");
       return;
     }
-    console.log("📤 DEBUG DATA:");
-    console.log("currentUserId:", currentUserId);
-    console.log("chatWith:", chatWith);
-    console.log("message:", message);
+
     console.log("selectedImage:", selectedImage);
     // ⭐ Kiểm tra: phải có ít nhất text hoặc image
     if (!message.trim() && !selectedImage) {

@@ -8,14 +8,14 @@ import { CONSTANT, NumberFormat } from '../../utils/Helper';
 
 
 export default function PointHistory(props) {
-    
+
     const isBuy = props.data.related_type === 'point_buy' || props.data.related_type === 'trip_buy'
     const minus_points = props.data.related_type === 'point_sale' || props.data.related_type === 'trip_buy'
     const key_related = props.data.related_type;
     const name_related = CONSTANT.TRANSACTION_TYPE_BY_KEY[key_related];
     const key_reason = props.data.reason
     const reason_name = CONSTANT.TRANSACTION_TYPE_BY_KEY[key_reason];
-    console.log('props: ', props)
+
     return (
         <AppView radius={12} padding={12} gap={8} backgroundColor={ColorsGlobal.backgroundLight}  >
             <AppView row justifyContent={'space-between'}>
@@ -31,7 +31,7 @@ export default function PointHistory(props) {
                 </AppView>
 
                 <AppText color={minus_points ? ColorsGlobal.main : ColorsGlobal.main2} fontWeight={600}>
-                 
+
                     {NumberFormat(props?.data?.change) + ' điểm'}
                 </AppText>
             </AppView>

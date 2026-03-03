@@ -33,7 +33,7 @@ export default function HistoryBuySalePoint() {
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
-const [driver, setDriver] = useState<any>(null);
+  const [driver, setDriver] = useState<any>(null);
 
   useEffect(() => {
     const fetchDriver = async () => {
@@ -42,7 +42,7 @@ const [driver, setDriver] = useState<any>(null);
     };
     fetchDriver();
   }, []);
-  
+
   useTransactionHistoryRealtime(driver?.id);
 
   useEffect(() => {
@@ -57,16 +57,16 @@ const [driver, setDriver] = useState<any>(null);
     if (selectedType) params.related_type = selectedType;
 
     dispatch(historyPoint(params));
-  }, [selectedType, fromDate, toDate, currentDriver?.id]);
+  }, [selectedType, fromDate, toDate, driver?.id]);
 
-  
+
   const dateToTimestamp = useCallback((dateString: string, endOfDay = false): number | null => {
     if (!dateString) return null;
     const momentDate = moment(dateString, 'DD/MM/YYYY');
     return endOfDay ? momentDate.endOf('day').unix() : momentDate.startOf('day').unix();
   }, []);
 
-  
+
   const formatDate = useCallback((date: Date) => {
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -74,7 +74,7 @@ const [driver, setDriver] = useState<any>(null);
     return `${day}/${month}/${year}`;
   }, []);
 
-  
+
   const parseDate = useCallback((dateString: string): Date | null => {
     if (!dateString) return null;
     const [day, month, year] = dateString.split('/');
@@ -84,13 +84,13 @@ const [driver, setDriver] = useState<any>(null);
 
 
 
-  
+
   const handleConfirmDate = useCallback(
     (selectedDate: Date) => {
-      const vnDate = moment(selectedDate).utcOffset(7); 
+      const vnDate = moment(selectedDate).utcOffset(7);
 
       const formattedDate = vnDate.format("DD/MM/YYYY");
-      
+
       const selectedMoment = moment(selectedDate);
 
       if (selectedDateType === 'from') {
@@ -122,7 +122,7 @@ const [driver, setDriver] = useState<any>(null);
       setIsDatePickerVisible(false);
       setSelectedDateType(null);
 
-      
+
       setTimeout(() => {
         const start = selectedDateType === 'from'
           ? moment(selectedDate).startOf('day').unix()
@@ -156,7 +156,7 @@ const [driver, setDriver] = useState<any>(null);
     setIsDatePickerVisible(true);
   }
 
-  
+
   const loadMore = () => {
     if (page >= lastPage || loading) return;
 

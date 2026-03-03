@@ -17,6 +17,7 @@ import { CONSTANT, NumberFormat } from '../../utils/Helper';
 import IconClose from '../../assets/icons/IconClose';
 import IconMapPin from '../../assets/icons/IconMapPin';
 import IconGroup from '../../assets/icons/IconGroup';
+import { useAppContext } from '../../context/AppContext';
 
 // ✅ Group flat list → SectionList sections
 const buildSections = (data: any[]) => {
@@ -31,6 +32,7 @@ const buildSections = (data: any[]) => {
 
 export default function ListPriorityPurchaseScreen() {
     const navigation = useNavigation();
+    const { setCurrentAreaAutoTrip } = useAppContext();
     const route = useRoute();
     const dispatch = useAppDispatch();
     const { list, loading, lastUpdate } = useSelector((state: any) => state.requestAutoBuyTrip);
@@ -69,6 +71,8 @@ export default function ListPriorityPurchaseScreen() {
     };
 
     const goToEdit = (item: any) => {
+        console.log('goToEdit item: ', item)
+        setCurrentAreaAutoTrip(item)
         if (item.status !== 0) {
             Alert.alert('Không thể sửa yêu cầu đã hoàn thành hoặc đã hủy');
             return;
@@ -113,7 +117,7 @@ export default function ListPriorityPurchaseScreen() {
                         opacity: item.status === 2 ? 0.6 : 1,
                     }}
                 >
-                    {/* ===== HEADER: STATUS + ACTIONS ===== */}
+
                     <AppView row justifyContent="space-between" alignItems="center">
                         <AppView
                             backgroundColor={status.bg}
@@ -128,7 +132,9 @@ export default function ListPriorityPurchaseScreen() {
 
                         {item.status === 0 && (
                             <AppView row gap={10} alignItems='center'>
-                                <AppButton onPress={() => goToEdit(item)}>
+                                <AppButton onPress={() => goToEdit(item)} height={32}
+                                    width={32} justifyContent='center'
+                                    alignItems='center' >
                                     <IconPencil size={18} color={ColorsGlobal.main} />
                                 </AppButton>
                                 <AppButton

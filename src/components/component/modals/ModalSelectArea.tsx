@@ -13,7 +13,7 @@ export default function ModalSelectArea({ isVisible, onClose, onSelected }: any)
             data={item}
             gotoDetailAreaPress={() => {
                 onSelected(item);
-                onClose();
+
             }}
         />
     );

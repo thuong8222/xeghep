@@ -18,11 +18,12 @@ import { useAppContext } from '../../context/AppContext';
 import { useAppDispatch } from '../../redux/hooks/useAppDispatch';
 import moment from 'moment';
 import TypeFilterBar from '../../components/component/TypeFilterBar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function BankStatementBuySalePoint() {
   const dispatch = useAppDispatch()
   const { history, loading, error, types } = useSelector((state: RootState) => state.point);
-  const { currentDriver } = useAppContext();
+
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
@@ -31,14 +32,21 @@ export default function BankStatementBuySalePoint() {
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
-
-
-
-  // ✅ Kích hoạt real-time updates
-  useTransactionHistoryRealtime(currentDriver?.id);
+  const [driver, setDriver] = useState<any>(null);
 
   useEffect(() => {
-    if (!currentDriver?.id) return;
+    const fetchDriver = async () => {
+      const driverString = await AsyncStorage.getItem("driver");
+      if (driverString) setDriver(JSON.parse(driverString));
+    };
+    fetchDriver();
+  }, []);
+
+  // ✅ Kích hoạt real-time updates
+  useTransactionHistoryRealtime(driver?.id);
+
+  useEffect(() => {
+    if (!driver?.id) return;
 
     const start_date = fromDate ? dateToTimestamp(fromDate, false) : undefined;
     const end_date = toDate ? dateToTimestamp(toDate, true) : undefined;
@@ -49,7 +57,7 @@ export default function BankStatementBuySalePoint() {
     if (selectedType) params.related_type = selectedType;
 
     dispatch(fetchPointHistory(params));
-  }, [selectedType, fromDate, toDate, currentDriver?.id]);
+  }, [selectedType, fromDate, toDate, driver?.id]);
 
   // ✅ Hàm chuyển dd/mm/yyyy thành timestamp (startOfDay)
   const dateToTimestamp = useCallback((dateString: string, endOfDay = false): number | null => {

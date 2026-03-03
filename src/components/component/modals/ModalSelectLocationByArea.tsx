@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { TouchableOpacity, ActivityIndicator } from 'react-native';
+import { ActivityIndicator } from 'react-native';
 import AppModal from '../../common/AppModal';
 import AppText from '../../common/AppText';
 import AppButton from '../../common/AppButton';
@@ -9,7 +9,7 @@ import IconNoneTickCircle from '../../../assets/icons/IconNoneTickCircle';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppContext } from '../../../context/AppContext';
-import { compatibilityFlags } from 'react-native-screens';
+
 import { ColorsGlobal } from '../../base/Colors/ColorsGlobal';
 
 interface Props {
@@ -19,7 +19,9 @@ interface Props {
   multiSelect?: boolean;
   areaId: string;
   locationType?: string;
-  defaultSelected?: any[]; // ⭐ thêm dòng này
+  defaultSelected?: any[];
+  editData?: any;
+  parentIds?: string | string[] | null;
 }
 
 export default function ModalSelectLocationByArea({
@@ -28,32 +30,48 @@ export default function ModalSelectLocationByArea({
   onSelected,
   multiSelect = false,
   areaId,
-  locationType = null, defaultSelected
+  locationType = null, defaultSelected, editData, parentIds
 }: Props) {
+  console.log('defaultSelected', defaultSelected);
 
   const [locations, setLocations] = useState<any[]>([]);
   const [selected, setSelected] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const { currentArea } = useAppContext();
+  const { currentArea, currentAreaAutoTrip } = useAppContext();
 
   useEffect(() => {
     if (isVisible) {
       setSelected(defaultSelected || []);
     }
-  }, [isVisible]);
-  // 🔥 Fetch khi mở modal
+  }, [isVisible, defaultSelected]);
+
+
+  let parent_id = null;
+
+  if (editData) {
+    parent_id =
+      locationType === 'pickup'
+        ? editData?.pickup_level1_ids
+        : editData?.dropoff_level1_ids;
+  } else {
+    parent_id =
+      locationType === 'pickup'
+        ? currentArea?.level1_pickup_ids
+        : currentArea?.level1_dropoff_ids;
+  }
   useEffect(() => {
-    if (isVisible && areaId) {
-      const parentId = locationType === 'pickup' ? currentArea?.level1_pickup_ids : currentArea?.level1_dropoff_ids;
-      fetchLocations({ parentId: parentId, locationType: locationType });
+    if (isVisible && areaId && parentIds) {
+      fetchLocations(parentIds, locationType);
     }
-  }, [isVisible, areaId]);
+  }, [isVisible, areaId, parentIds, locationType]);
+
 
   const fetchLocations = async (
     parentIds?: string | string[] | null,
     locationType?: string | null
   ) => {
     try {
+
       setLoading(true);
 
       const token = await AsyncStorage.getItem('token');
@@ -61,13 +79,14 @@ export default function ModalSelectLocationByArea({
       const params: any = {};
 
       if (parentIds) {
-        params.parent_id = parentIds?.parentId; // có thể là string hoặc array
+        params.parent_id = parentIds;
       }
 
       if (locationType) {
         params.location_type = locationType;
       }
-
+      console.log('before fetch loation params: ', params)
+      console.log('before fetch areaId: ', areaId)
       const res = await axios.get(
         `https://app.xeghepnd.com/api/areas/${areaId}/locations`,
         {
@@ -88,7 +107,6 @@ export default function ModalSelectLocationByArea({
     }
   };
 
-  // Group pickup / dropoff
   const groupedData = useMemo(() => {
     const pickup = locations.filter(i => i.location_type === 'pickup');
     const dropoff = locations.filter(i => i.location_type === 'dropoff');
@@ -112,12 +130,12 @@ export default function ModalSelectLocationByArea({
     } else {
       onSelected(item);
       onClose();
-
     }
   };
 
   const renderItemTree = (item: any, level = 0) => {
-    const isSelected = selected.find(i => i.id === item.id);
+    const isSelected = selected.some(i => String(i.id) === String(item.id));
+
     return (
       <AppView key={item.id} style={{ marginLeft: level * 16, marginBottom: 10 }}>
         <AppButton height={40} backgroundColor={isSelected ? ColorsGlobal.main + '20' : ColorsGlobal.backgroundLight} paddingHorizontal={12} radius={8} alignItems='center'
@@ -128,7 +146,7 @@ export default function ModalSelectLocationByArea({
           {isSelected ? <IconTickCircle /> : <IconNoneTickCircle />}
         </AppButton>
 
-        {item.all_children?.length > 0 &&
+        {item?.all_children?.length > 0 &&
           item.all_children.map((child: any) =>
             renderItemTree(child, level + 1)
           )}
@@ -151,8 +169,8 @@ export default function ModalSelectLocationByArea({
             {multiSelect && (
               <AppButton
                 onPress={() => {
-                  onSelected(selected);   // ✅ Trả mảng đã chọn
-                  onClose();              // ✅ Đóng modal
+                  onSelected(selected);
+                  onClose();
                 }}
                 justifyContent='center' alignItems='center' backgroundColor={ColorsGlobal.main} paddingVertical={8} radius={8}
               >

@@ -28,10 +28,6 @@ export default function RootNavigator() {
       <Stack.Screen name="ChatScreen" component={ChatScreen} options={{
         headerShown: true,
         title: 'Chat',
-        headerLeft: () => (
-          <HeaderBackButton onPress={() => navigation.goBack()} />
-        ),
-
       }} />
     </Stack.Navigator>
   )

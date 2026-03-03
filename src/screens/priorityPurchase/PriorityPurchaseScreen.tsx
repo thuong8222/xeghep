@@ -6,14 +6,14 @@ import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal';
 import AppText from '../../components/common/AppText';
 import AppInput from '../../components/common/AppInput';
 import DateTimePicker from 'react-native-modal-datetime-picker';
-import SelectProvinceDistrictModal from '../../components/component/modals/ModalSelectWard';
+
 import IconTickCircle from '../../assets/icons/IconTickCircle';
 import IconNoneTickCircle from '../../assets/icons/IconNoneTickCircle';
-import Container from '../../components/common/Container';
+
 import { createAutoBuy, fetchAutoBuyList, updateAutoBuy } from '../../redux/slices/requestAutoBuyTrip';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAppDispatch } from '../../redux/hooks/useAppDispatch';
-import { NumberFormat } from '../../utils/Helper';
+
 import IconDotHorizonal from '../../assets/icons/IconDotHorizonal';
 import ModalSelectLocationByArea from '../../components/component/modals/ModalSelectLocationByArea';
 
@@ -37,40 +37,91 @@ export default function PriorityPurchaseScreen() {
     const [isCommuneWardTo, setIsCommuneWardTo] = useState(false);
     const [point, setPoint] = useState('');
     const [price, setPrice] = useState('');
+
     const [selectedDirection, setSelectedDirection] = useState(1);
     const [submitting, setSubmitting] = useState(false);
 
     const [selectedStartLocation, setSelectedStartLocation] = useState();
     const [selectedEndLocation, setSelectedEndLocation] = useState();
-    const [isOpenModalSelectArea, setIsOpenModalSelectArea] = useState(true);
+    const [isOpenModalSelectArea, setIsOpenModalSelectArea] = useState(!editData);
     const [selectedArea, setSelectedArea] = useState();
     const [pickupLocationIds, setPickupLocationIds] = useState<number[]>([]);
     const [pickupManualText, setPickupManualText] = useState('');
     const [dropoffManualText, setDropoffManualText] = useState('');
     const [dropoffLocationIds, setDropoffLocationIds] = useState<number[]>([]);
+    // Thêm 2 state này
+    const [pickupLevel1Name, setPickupLevel1Name] = useState('');
+    const [dropoffLevel1Name, setDropoffLevel1Name] = useState('');
+
+    const [pickupLocationType, setPickupLocationType] = useState<'pickup' | 'dropoff'>('pickup');
+    const [dropoffLocationType, setDropoffLocationType] = useState<'pickup' | 'dropoff'>('dropoff');
+    const [pickupParentIds, setPickupParentIds] = useState<any>(null);
+    const [dropoffParentIds, setDropoffParentIds] = useState<any>(null);
+    // Trong handleChangeDirection, thêm swap:
+
+    console.log('selectedDirection: ', selectedDirection)
+    const isReturn = selectedDirection === 1;
     useEffect(() => {
         if (editData) {
-            setPlaceFrom(Array.isArray(editData.pickup_location_names) ? editData.pickup_location_names.join(' | ') : editData.pickup_location || '');
-            setPlaceTo(Array.isArray(editData.dropoff_location_names) ? editData.dropoff_location_names.join(' | ') : editData.dropoff_location || '');
-            setStartTime(
-                editData?.time_receive_start
-                    ? new Date(editData.time_receive_start)
-                    : null
-            );
-            setEndTime(
-                editData?.time_receive_end
-                    ? new Date(editData.time_receive_end)
-                    : null
-            );
-
-
+            setPlaceFrom(Array.isArray(editData.pickup_location_names)
+                ? editData.pickup_location_names.join(' | ')
+                : editData.pickup_location || '');
+            setPlaceTo(Array.isArray(editData.dropoff_location_names)
+                ? editData.dropoff_location_names.join(' | ')
+                : editData.dropoff_location || '');
+            setStartTime(editData?.time_receive_start ? new Date(editData.time_receive_start) : null);
+            setEndTime(editData?.time_receive_end ? new Date(editData.time_receive_end) : null);
             setPoint(editData.maximum_point?.toString() || '');
-            setPrice(
-                editData.desired_price
-                    ? Number(editData.desired_price).toString()
-                    : ''
-            );
-            setSelectedDirection(editData.direction === 'round_trip' ? 0 : 1);
+            setPrice(editData.desired_price ? Number(editData.desired_price).toString() : '');
+            setSelectedDirection(editData.direction);
+
+            // ✅ THÊM: populate location IDs và selectedLocation từ editData
+            const pickupIds = Array.isArray(editData.pickup_location)
+                ? editData.pickup_location
+                : [];
+            const dropoffIds = Array.isArray(editData.dropoff_location)
+                ? editData.dropoff_location
+                : [];
+
+            setPickupLocationIds(pickupIds);
+            setDropoffLocationIds(dropoffIds);
+
+            // ✅ THÊM: map sang object {id, name} để dùng cho defaultSelected trong Modal
+            const pickupObjects = pickupIds.map((id: number, index: number) => ({
+                id,
+                name: editData.pickup_location_names?.[index] || '',
+            }));
+            const dropoffObjects = dropoffIds.map((id: number, index: number) => ({
+                id,
+                name: editData.dropoff_location_names?.[index] || '',
+            }));
+
+            setSelectedStartLocation(pickupObjects);
+            setSelectedEndLocation(dropoffObjects);
+            // ✅ THÊM VÀO ĐÂY
+            const pickupName = Array.isArray(editData.pickup_level1_names)
+                ? editData.pickup_level1_names.join(' | ')
+                : editData.pickup_level1_names || '';
+            const dropoffName = Array.isArray(editData.dropoff_level1_names)
+                ? editData.dropoff_level1_names.join(' | ')
+                : editData.dropoff_level1_names || '';
+
+            setPickupLevel1Name(pickupName);
+            setDropoffLevel1Name(dropoffName);
+            // Trong useEffect editData:
+            setPickupParentIds(editData?.pickup_level1_ids || null);
+            setDropoffParentIds(editData?.dropoff_level1_ids || null);
+
+            // ✅ locationType lấy theo chiều thực tế đã lưu
+            if (editData.direction === 1) {
+                // chiều đi: pickup đón SG (pickup trong DB), dropoff trả Huế (dropoff trong DB)
+                setPickupLocationType('pickup');
+                setDropoffLocationType('dropoff');
+            } else {
+                // chiều về: pickup đón Huế (nhưng Huế là dropoff trong DB), dropoff trả SG (pickup trong DB)
+                setPickupLocationType('dropoff');
+                setDropoffLocationType('pickup');
+            }
         }
     }, [editData]);
 
@@ -93,17 +144,18 @@ export default function PriorityPurchaseScreen() {
             Alert.alert("Thiếu thông tin", "Vui lòng nhập đầy đủ dữ liệu.");
             return;
         }
-        if (!selectedArea?.id) {
+        if (!selectedArea?.id && !editData?.area_id) {
             Alert.alert("Thiếu thông tin", "Vui lòng chọn khu vực.");
             return;
         }
 
+        // ✅ KHÔNG swap nữa — handleChangeDirection đã swap state rồi
         const payload = {
-            area_id: selectedArea?.id,
-            pickup_location: pickupLocationIds,        // ✅ đúng tên field backend nhận
-            pickup_location_manual: pickupManualText,
-            dropoff_location: dropoffLocationIds,      // ✅ đúng tên field backend nhận
-            dropoff_location_manual: dropoffManualText,
+            area_id: selectedArea?.id || editData?.area_id,
+            pickup_location: pickupLocationIds,           // ✅ gửi thẳng
+            pickup_location_manual: pickupManualText,     // ✅ gửi thẳng
+            dropoff_location: dropoffLocationIds,         // ✅ gửi thẳng
+            dropoff_location_manual: dropoffManualText,   // ✅ gửi thẳng
             time_receive_start: convertToTimestamp(startTime),
             time_receive_end: convertToTimestamp(endTime),
             desired_price: Number(price),
@@ -111,8 +163,11 @@ export default function PriorityPurchaseScreen() {
             direction: selectedDirection,
         };
 
+
+
+
         try {
-            setSubmitting(true); // 🔥 BẬT LOADING
+            setSubmitting(true);
 
             if (editData) {
                 await dispatch(updateAutoBuy({ id: editData.id, data: payload })).unwrap();
@@ -151,50 +206,81 @@ export default function PriorityPurchaseScreen() {
             setSubmitting(false);
         }
     };
+
     const handleChangeDirection = (direction) => {
         if (direction !== selectedDirection) {
 
+
             setPlaceFrom(placeTo);
             setPlaceTo(placeFrom);
-
-            // 🔥 ĐẢO ID
             setPickupLocationIds(dropoffLocationIds);
             setDropoffLocationIds(pickupLocationIds);
-
-            // 🔥 ĐẢO MANUAL
             setPickupManualText(dropoffManualText);
             setDropoffManualText(pickupManualText);
-
+            setSelectedStartLocation(selectedEndLocation); // ✅
+            setSelectedEndLocation(selectedStartLocation); // ✅
+            setPickupParentIds(dropoffParentIds); // ✅
+            setDropoffParentIds(pickupParentIds); // ✅
             setSelectedDirection(direction);
+            setPickupLevel1Name(dropoffLevel1Name);
+            setDropoffLevel1Name(pickupLevel1Name);
+
+            setPickupLocationType(dropoffLocationType);
+            setDropoffLocationType(pickupLocationType);
         }
     };
     const openSelectArea = () => {
-        setIsOpenModalSelectArea(!isOpenModalSelectArea);
-    }
-    const handleSelectArea = useCallback((area: any) => {
-        setCurrentArea(area);
-        setSelectedArea(area);
-
-        // 🔥 reset location khi đổi khu vực
+        setSelectedStartLocation([]);
+        setSelectedEndLocation([]);
         setPickupLocationIds([]);
         setDropoffLocationIds([]);
         setPickupManualText('');
         setDropoffManualText('');
         setPlaceFrom('');
         setPlaceTo('');
-
+        setIsOpenModalSelectArea(!isOpenModalSelectArea);
+        setIsOpenModalSelectArea(true);
+    }
+    const handleSelectArea = useCallback((area: any) => {
+        setCurrentArea(area);
+        setSelectedArea(area);
+        setSelectedStartLocation([]);
+        setSelectedEndLocation([]);
+        setPickupLocationIds([]);
+        setDropoffLocationIds([]);
+        setPickupManualText('');
+        setDropoffManualText('');
+        setPlaceFrom('');
+        setPlaceTo('');
+        setPickupLevel1Name(area?.level1_pickup_names || '');
+        setDropoffLevel1Name(area?.level1_dropoff_names || '');
+        setPickupLocationType('pickup');   // mặc định chiều đi = pickup
+        setDropoffLocationType('dropoff');
+        setPickupParentIds(area?.level1_pickup_ids || null);   // ✅
+        setDropoffParentIds(area?.level1_dropoff_ids || null);
         setIsOpenModalSelectArea(false);
     }, []);
+    console.log('editData: ', editData)
 
     return (
         <ScrollView style={{ flex: 1, gap: 8, backgroundColor: "#fff" }} contentContainerStyle={{ flex: 1 }}>
             <AppView flex={1} backgroundColor="#fff" padding={16}>
-                <AppButton onPress={openSelectArea}>
-                    {selectedArea || editData ? <AppText color={ColorsGlobal.main} bold fontSize={18}>{`Khu vực: ${selectedArea?.name || editData.area_name}`}</AppText> :
+                <AppButton onPress={openSelectArea} disabled={editData ? true : false}>
+                    {selectedArea || editData ? <AppText color={ColorsGlobal.main} bold fontSize={18}>{`Khu vực: ${selectedArea?.name ?? editData?.area_name}`}</AppText> :
                         <AppText bold fontSize={18}>{'Chọn nhóm bạn muốn mua ưu tiên'}</AppText>
                     }
                 </AppButton>
-                <ModalSelectArea isVisible={isOpenModalSelectArea} onClose={() => setIsOpenModalSelectArea(false)} onSelected={handleSelectArea} />
+                <ModalSelectArea
+                    isVisible={isOpenModalSelectArea}
+                    onClose={() => {
+                        if (!selectedArea && !editData) {
+
+                            navigation.goBack();
+                        } else {
+                            setIsOpenModalSelectArea(false);
+                        }
+                    }}
+                    onSelected={handleSelectArea} />
                 <AppView row gap={32}>
                     <AppButton onPress={() => handleChangeDirection(1)} row gap={8} flex={1} paddingVertical={14}>
                         <AppText>{'Chiều đi'}</AppText>
@@ -208,7 +294,9 @@ export default function PriorityPurchaseScreen() {
 
 
                 <AppView marginTop={8} >
-                    <AppText bold marginBottom={4}>{'Điểm đón khu ' + (selectedArea?.level1_pickup_names || '')}</AppText>
+                    <AppText bold marginBottom={4}>
+                        {'Điểm đón khu ' + pickupLevel1Name}
+                    </AppText>
 
                     <AppButton onPress={() => setIsCommuneWard(true)} radius={8} row gap={8}>
                         <TextInput
@@ -216,7 +304,7 @@ export default function PriorityPurchaseScreen() {
                             multiline editable={false}
                             onChangeText={(text) => {
                                 setPlaceFrom(text);
-                                setPickupManualText(text); // nếu bạn tách manual
+                                setPickupManualText(text);
                             }}
                             placeholder='Nhấn để chọn địa chỉ' style={{ color: "#666", borderWidth: 1, borderRadius: 10, borderColor: ColorsGlobal.borderColor, flex: 1, paddingLeft: 10 }} />
                         <AppButton onPress={() => setIsCommuneWard(true)} borderColor={ColorsGlobal.borderColor} borderWidth={1} radius={10} alignItems='center' justifyContent='center' paddingHorizontal={10}>
@@ -227,7 +315,9 @@ export default function PriorityPurchaseScreen() {
 
                 <AppView marginTop={8}>
 
-                    <AppText bold marginBottom={4}>Điểm trả khu {selectedArea?.level1_dropoff_names || ''}</AppText>
+                    <AppText bold marginBottom={4}>
+                        {'Điểm trả khu ' + dropoffLevel1Name}
+                    </AppText>
                     <AppButton onPress={() => setIsCommuneWardTo(true)} radius={8} row gap={8}>
 
                         <TextInput
@@ -235,7 +325,7 @@ export default function PriorityPurchaseScreen() {
                             multiline editable={false}
                             onChangeText={(text) => {
                                 setPlaceTo(text);
-                                setDropoffManualText(text); // nếu bạn tách manual
+                                setDropoffManualText(text);
                             }}
                             placeholder='Nhấn để chọn địa chỉ' style={{ color: "#666", borderWidth: 1, borderRadius: 10, borderColor: ColorsGlobal.borderColor, flex: 1, paddingLeft: 10 }} />
                         <AppButton onPress={() => setIsCommuneWardTo(true)} borderColor={ColorsGlobal.borderColor} borderWidth={1} radius={10} alignItems='center' justifyContent='center' paddingHorizontal={10}>
@@ -296,34 +386,39 @@ export default function PriorityPurchaseScreen() {
                 <ModalSelectLocationByArea
                     multiSelect={true}
                     isVisible={isCommuneWard}
-                    locationType={selectedDirection === 1 ? 'pickup' : 'dropoff'}
+                    locationType={pickupLocationType}
                     areaId={selectedArea?.id || editData?.area_id}
-                    defaultSelected={selectedStartLocation}
+                    defaultSelected={selectedStartLocation || (selectedDirection === 1 ? editData?.pickup_level2 : editData?.dropoff_level2) || []}
                     onClose={() => setIsCommuneWard(false)}
                     onSelected={(value) => {
+
                         setSelectedStartLocation(value);
                         const ids = value.map((item: any) => item.id);
                         const names = value.map((item: any) => item.name);
-
                         setPickupLocationIds(ids);
                         setPlaceFrom(names.join(" | "));
                     }}
+                    editData={editData}
+                    parentIds={pickupParentIds}  // ✅
                 />
+
                 <ModalSelectLocationByArea
                     multiSelect={true}
                     isVisible={isCommuneWardTo}
-                    locationType={selectedDirection === 1 ? 'dropoff' : 'pickup'}
+                    locationType={dropoffLocationType}
                     areaId={selectedArea?.id || editData?.area_id}
-                    defaultSelected={selectedEndLocation}
+                    defaultSelected={selectedEndLocation || (selectedDirection === 1 ? editData?.dropoff_level2 : editData?.pickup_level2) || []}
                     onClose={() => setIsCommuneWardTo(false)}
                     onSelected={(value) => {
                         setSelectedEndLocation(value);
                         const ids = value.map((item: any) => item.id);
                         const names = value.map((item: any) => item.name);
-                        const locationNames = value.map((item: any) => item.name);
                         setDropoffLocationIds(ids);
-                        setPlaceTo(locationNames.join(" | "));
+                        setPlaceTo(names.join(" | "));
                     }}
+                    editData={editData}
+                    parentIds={dropoffParentIds}// ✅
+
                 />
             </AppView>
         </ScrollView>

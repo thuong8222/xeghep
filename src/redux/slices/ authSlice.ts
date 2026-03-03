@@ -1,4 +1,3 @@
-
 // redux/slices/authSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -59,7 +58,6 @@ export const loginUser = createAsyncThunk<
 >('auth/loginUser', async (payload, { rejectWithValue }) => {
   try {
     const response = await api.post('/api/auth/login', payload);
- 
 
     const token = response.data.data.token;
     const successMessage = response.data.message || 'Đăng nhập thành công'; // ✅ lấy message
@@ -86,7 +84,10 @@ export const forgotPassword = createAsyncThunk<
   { rejectValue: string }
 >('auth/forgotPassword', async (payload, { rejectWithValue }) => {
   try {
-    const response = await api_hastoken.post('/api/auth/forgot-password', payload);
+    const response = await api_hastoken.post(
+      '/api/auth/forgot-password',
+      payload,
+    );
     return response.data.message || 'Yêu cầu thành công';
   } catch (err: any) {
     return rejectWithValue(
@@ -183,15 +184,8 @@ const authSlice = createSlice({
       .addCase(logoutAccount.pending, state => {
         state.loading = true;
         state.error = null;
-      
       })
-      .addCase(
-        logoutAccount.fulfilled,
-        (state, action: PayloadAction<string>) => {
-          state.loading = false;
-        
-        },
-      )
+      .addCase(logoutAccount.fulfilled, () => initialState)
 
       .addCase(logoutAccount.rejected, (state, action) => {
         state.loading = false;
@@ -201,13 +195,11 @@ const authSlice = createSlice({
       .addCase(deleteAccount.pending, state => {
         state.loading = true;
         state.error = null;
-      
       })
       .addCase(
         deleteAccount.fulfilled,
         (state, action: PayloadAction<string>) => {
           state.loading = false;
-          
         },
       )
 
