@@ -73,7 +73,7 @@ export default function MainNavigator() {
   useAutoBuyListUpdates(currentDriver?.id || driver?.id);
   return (
 
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <>
       {!isSplashDone ? (
         <CustomSplash onFinish={() => setIsSplashDone(true)} />
       ) : (
@@ -86,7 +86,7 @@ export default function MainNavigator() {
 
         </Stack.Navigator>
       )}
-    </GestureHandlerRootView>
+    </>
   );
 
 }

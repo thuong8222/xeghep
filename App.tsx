@@ -19,6 +19,7 @@ import { ContextProvider } from './src/context/AppContext';
 import { SocketProvider } from './src/context/SocketContext';
 import MainNavigator from './src/navigation/MainNavigator';
 import { navigationRef } from './src/navigation/navigationRef';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 
 const App = () => {
@@ -48,17 +49,17 @@ const App = () => {
 
 
   return (
-
-    <Provider store={store}>
-      <SocketProvider>
-        <ContextProvider>
-          <NavigationContainer ref={navigationRef}>
-            <MainNavigator />
-          </NavigationContainer>
-        </ContextProvider>
-      </SocketProvider>
-    </Provider>
-
+    <GestureHandlerRootView style={{ flex: 1 }}>  {/* ← NGOÀI CÙNG */}
+      <Provider store={store}>
+        <SocketProvider>
+          <ContextProvider>
+            <NavigationContainer ref={navigationRef}>
+              <MainNavigator />
+            </NavigationContainer>
+          </ContextProvider>
+        </SocketProvider>
+      </Provider>
+    </GestureHandlerRootView>
   );
 };
 
