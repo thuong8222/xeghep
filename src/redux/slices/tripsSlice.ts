@@ -72,7 +72,7 @@ export const api = axios.create({
 export interface CreateTripPayload {
   direction: number;
   guests: number;
-  time_start: string;
+  time_start: string | number;
   price_sell: number;
   place_start: string;
   place_end: string;

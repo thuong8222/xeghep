@@ -31,6 +31,7 @@ export default function PointScreen({ navigation }: Props) {
     const [openModalTranferMoney, setOpenModalTranferMoney] = useState(false);
     const [pointSelected, setPointSelected] = useState({});
     const { points, loading, error } = useSelector((state: RootState) => state.point);
+    const [isLoading, setIsLoading] = useState(false);
 
     usePointsListRealtime();
     useEffect(() => {
@@ -166,8 +167,11 @@ export default function PointScreen({ navigation }: Props) {
 
         )
     }
-    const SaleTrips = () => {
+    const SaleTrips = async () => {
+        setIsLoading(true);
+        await new Promise(resolve => setTimeout(resolve, 100));
         navigation.navigate('PointAddScreen')
+        setIsLoading(false);
     }
 
     return (
@@ -197,8 +201,8 @@ export default function PointScreen({ navigation }: Props) {
                     </AppView>
                 )}
                 onRowDidOpen={rowKey => console.log(`Hàng ${rowKey} đã mở`)} />
-            <AppButton onPress={SaleTrips} position={'absolute'} right={36} bottom={34} width={48} height={48} radius={999} backgroundColor={ColorsGlobal.main} justifyContent='center' alignItems='center'>
-                <IconPlus size={20} />
+            <AppButton onPress={SaleTrips} disabled={isLoading} position={'absolute'} right={36} bottom={34} width={48} height={48} radius={999} backgroundColor={ColorsGlobal.main} justifyContent='center' alignItems='center'>
+                {isLoading ? <ActivityIndicator color="#fff" size="small" /> : <IconPlus size={20} />}
             </AppButton>
             <ModalShowInfoTranferMoney isVisible={openModalTranferMoney} data={pointSelected} onRequestClose={() => setOpenModalTranferMoney(false)} />
         </AppView>

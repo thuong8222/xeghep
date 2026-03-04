@@ -79,14 +79,29 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
     setNoteOptions(val ?? "");
   };
 
-  const handleCreateTrip = async () => {
-    const place_start = [placeStart,
-      selectedStartLocation[0]?.name
-    ].filter(Boolean).join(', ')
+  const updateLocationText = (currentText: string, newValue: any, oldValue: any) => {
+    if (!currentText) return newValue.name;
 
-    const place_end = [placeEnd,
-      selectedEndLocation[0]?.name
-    ].filter(Boolean).join(', ')
+    if (oldValue) {
+      if (currentText.includes(oldValue.name)) {
+        return currentText.replace(oldValue.name, newValue.name);
+      }
+
+      const lastCommaIndex = currentText.lastIndexOf(',');
+      if (lastCommaIndex !== -1) {
+        const prefix = currentText.substring(0, lastCommaIndex).trim();
+        return `${prefix}, ${newValue.name}`;
+      }
+
+      return newValue.name;
+    }
+
+    return `${currentText}, ${newValue.name}`;
+  };
+
+  const handleCreateTrip = async () => {
+    const place_start = placeStart
+    const place_end = placeEnd
     if (!place_start || !place_end) {
       Alert.alert('Thông báo', 'Điểm đi/Điểm đến không được để trống!')
       return;
@@ -155,6 +170,9 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
     // swap districtCode
     const newDistrictStart = districtCode;
     const newDistrictEnd = districtCodeTo;
+    // swap selectedLocation
+    const newSelectedStartLocation = selectedEndLocation;
+    const newSelectedEndLocation = selectedStartLocation;
 
     setPlaceStart(newPlaceStart);
     setPlaceEnd(newPlaceEnd);
@@ -164,6 +182,10 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
 
     setDistrictCodeTo(newDistrictStart);
     setDistrictCode(newDistrictEnd);
+
+    setSelectedStartLocation(newSelectedStartLocation);
+    setSelectedEndLocation(newSelectedEndLocation);
+
     setSelectedDirection(direction);
   };
   const areaLevel1Names =
@@ -224,9 +246,7 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
                 <AppView flex={1}>
                   <AppInput
                     label={labelText}
-                    value={[placeStart,
-                      selectedStartLocation[0]?.name
-                    ].filter(Boolean).join(', ')}
+                    value={placeStart}
                     onChangeText={setPlaceStart}
                     placeholder="Nhập chi tiết điểm đón"
                   />
@@ -250,9 +270,7 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
                 <AppView flex={1}>
                   <AppInput
                     label={labelTextTo}
-                    value={[placeEnd,
-                      selectedEndLocation[0]?.name
-                    ].filter(Boolean).join(', ')}
+                    value={placeEnd}
                     onChangeText={setPlaceEnd}
                     placeholder="Nhập chi tiết điểm trả"
                   />
@@ -284,7 +302,9 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
         defaultSelected={selectedStartLocation}
         onClose={() => setIsCommuneWardTo(false)}
         onSelected={(value) => {
+          const oldLocation = selectedStartLocation[0];
           setSelectedStartLocation([value]);
+          setPlaceStart(prev => updateLocationText(prev, value, oldLocation));
         }}
         parentIds={selectedDirection === 1 ? currentArea?.level1_pickup_ids : currentArea?.level1_dropoff_ids}
       />
@@ -297,7 +317,9 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
         defaultSelected={selectedEndLocation}
         onClose={() => setIsCommuneWard(false)}
         onSelected={(value) => {
+          const oldLocation = selectedEndLocation[0];
           setSelectedEndLocation([value]);
+          setPlaceEnd(prev => updateLocationText(prev, value, oldLocation));
         }}
         parentIds={selectedDirection === 1 ? currentArea?.level1_dropoff_ids : currentArea?.level1_pickup_ids}
       />

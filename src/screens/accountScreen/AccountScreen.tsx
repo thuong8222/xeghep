@@ -55,20 +55,33 @@ export default function AccountScreen({ navigation }: Props) {
 
 
   const handleLogout = async () => {
-    try {
-      const result = await dispatch(logoutAccount()).unwrap();
-      await AsyncStorage.removeItem('token');
-      await AsyncStorage.removeItem("driver");
-      setCurrentDriver(null); // ✅ thêm lại
-    } catch (error) {
-      console.error('❌ Lỗi khi đăng xuất:', error);
-      // ✅ Dù lỗi API vẫn xoá local và chuyển màn hình
-      await AsyncStorage.removeItem('token');
-      await AsyncStorage.removeItem("driver");
-      await AsyncStorage.removeItem('biometric_phone');   // ✅
-      await AsyncStorage.removeItem('biometric_password'); // ✅
-      setCurrentDriver(null);
-    }
+    Alert.alert(
+      'Xeghep',
+      'Bạn có chắc chắn muốn đăng xuất?',
+      [
+        { text: 'Hủy', style: 'cancel' },
+        {
+          text: 'Đăng xuất',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const result = await dispatch(logoutAccount()).unwrap();
+              await AsyncStorage.removeItem('token');
+              await AsyncStorage.removeItem("driver");
+              setCurrentDriver(null); // ✅ thêm lại
+            } catch (error) {
+              console.error('❌ Lỗi khi đăng xuất:', error);
+              // ✅ Dù lỗi API vẫn xoá local và chuyển màn hình
+              await AsyncStorage.removeItem('token');
+              await AsyncStorage.removeItem("driver");
+              await AsyncStorage.removeItem('biometric_phone');   // ✅
+              await AsyncStorage.removeItem('biometric_password'); // ✅
+              setCurrentDriver(null);
+            }
+          }
+        }
+      ]
+    );
   };
   const DeleteAccount = () => {
     const handleDelete = async () => {

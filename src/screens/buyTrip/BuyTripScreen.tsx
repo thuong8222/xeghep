@@ -1,4 +1,4 @@
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View, } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import AppView from '../../components/common/AppView'
 
@@ -52,6 +52,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
     const [boughtTrip, setBoughtTrip] = useState();
     const [tripToCancel, setTripToCancel] = useState(null);
     const [showConfirmCancel, setShowConfirmCancel] = useState(false);
+    const [isSaleTripLoading, setIsSaleTripLoading] = useState(false);
 
     const gotoInfoGroup = () => {
 
@@ -170,8 +171,12 @@ export default function BuyTripScreen({ navigation, route }: Props) {
             });
     };
 
-    const SaleTrips = () => {
+    const SaleTrips = async () => {
+        setIsSaleTripLoading(true);
+        // Simulate a small delay or just wait for navigation if needed
+        await new Promise(resolve => setTimeout(resolve, 100));
         navigation.navigate('SaleTrip', { id_area: id_area, })
+        setIsSaleTripLoading(false);
     }
 
     const renderHiddenItem = (data, rowMap) => {
@@ -266,6 +271,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
             <TouchableOpacity
                 onPress={SaleTrips}
                 activeOpacity={0.8}
+                disabled={isSaleTripLoading}
                 style={{
                     position: 'absolute',
                     right: 36,
@@ -284,7 +290,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
                     shadowRadius: 4,
                 }}
             >
-                <IconPlus size={20} />
+                {isSaleTripLoading ? <ActivityIndicator color="#fff" size="small" /> : <IconPlus size={20} />}
             </TouchableOpacity>
             <ModalBuyTrip
                 visible={isModalVisible}
