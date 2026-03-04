@@ -38,7 +38,7 @@ export default function ModalSelectLocationByArea({
   const [selected, setSelected] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const { currentArea, currentAreaAutoTrip } = useAppContext();
-
+  console.log('currentArea: ', currentArea)
   useEffect(() => {
     if (isVisible) {
       setSelected(defaultSelected || []);
@@ -60,8 +60,10 @@ export default function ModalSelectLocationByArea({
         : currentArea?.level1_dropoff_ids;
   }
   useEffect(() => {
-    if (isVisible && areaId && parentIds) {
-      fetchLocations(parentIds, locationType);
+    const ids = parentIds || parent_id;
+    if (isVisible && areaId && ids) {
+      console.log('ids, locationType: ', ids, locationType);
+      fetchLocations(ids, locationType);
     }
   }, [isVisible, areaId, parentIds, locationType]);
 
@@ -87,8 +89,9 @@ export default function ModalSelectLocationByArea({
       }
       console.log('before fetch loation params: ', params)
       console.log('before fetch areaId: ', areaId)
+      const areaId_ = areaId || currentArea?.id;
       const res = await axios.get(
-        `https://app.xeghepnd.com/api/areas/${areaId}/locations`,
+        `https://app.xeghepnd.com/api/areas/${areaId_}/locations`,
         {
           headers: {
             Accept: 'application/json',

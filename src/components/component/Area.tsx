@@ -1,11 +1,12 @@
 import React from "react";
+import { ActivityIndicator } from "react-native";
 import AppButton from "../common/AppButton";
 import AppView from "../common/AppView";
 import { ColorsGlobal } from "../base/Colors/ColorsGlobal";
 import AppText from "../common/AppText";
 import { scale } from "../../utils/Helper";
 
-const Area = React.memo(({ data, gotoDetailAreaPress }: any) => {
+const Area = React.memo(({ data, loading, gotoDetailAreaPress }: any) => {
     const isJoinArea = data?.is_member;
 
     return (
@@ -19,7 +20,7 @@ const Area = React.memo(({ data, gotoDetailAreaPress }: any) => {
             flex={1}
             row
             opacity={isJoinArea ? 1 : 0.5}
-            disabled={!isJoinArea}
+            disabled={!isJoinArea || loading}
         >
             <AppView
                 height={45}
@@ -40,7 +41,7 @@ const Area = React.memo(({ data, gotoDetailAreaPress }: any) => {
                 </AppText>
             </AppView>
 
-            <AppView>
+            <AppView flex={1}>
                 <AppText
                     color={
                         data?.is_read
@@ -64,6 +65,12 @@ const Area = React.memo(({ data, gotoDetailAreaPress }: any) => {
                     {'Khu vực ' + data?.description}
                 </AppText>
             </AppView>
+
+            {loading && (
+                <AppView paddingRight={12} justifyContent="center">
+                    <ActivityIndicator color={ColorsGlobal.main} size="small" />
+                </AppView>
+            )}
         </AppButton>
     );
 });

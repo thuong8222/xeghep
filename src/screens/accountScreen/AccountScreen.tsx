@@ -35,6 +35,7 @@ export default function AccountScreen({ navigation }: Props) {
 
   const { isConnected } = useSocket();
   const [isModalChangePw, setIsModalChangePw] = useState(false);
+  const [loadingAction, setLoadingAction] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -95,7 +96,9 @@ export default function AccountScreen({ navigation }: Props) {
     );
   };
   //gotoBankStatementBuySalePoint
-  const gotoBankStatementBuySalePoint = () => {
+  const gotoBankStatementBuySalePoint = async () => {
+    setLoadingAction('BankStatementBuySalePoint');
+    await new Promise(resolve => setTimeout(resolve, 100));
     navigation.navigate('RootNavigator', {
       screen: 'BottomTabs',
       params: {
@@ -105,10 +108,11 @@ export default function AccountScreen({ navigation }: Props) {
         }
       }
     });
-
+    setLoadingAction(null);
   }
-  const gotoHistoryBuySalePoint = () => {
-
+  const gotoHistoryBuySalePoint = async () => {
+    setLoadingAction('HistoryBuySalePoint');
+    await new Promise(resolve => setTimeout(resolve, 100));
     navigation.navigate('RootNavigator', {
       screen: 'BottomTabs',
       params: {
@@ -118,9 +122,11 @@ export default function AccountScreen({ navigation }: Props) {
         }
       }
     });
-
+    setLoadingAction(null);
   }
-  const gotoInfoAccount = () => {
+  const gotoInfoAccount = async () => {
+    setLoadingAction('AccountInfoScreen');
+    await new Promise(resolve => setTimeout(resolve, 100));
     navigation.navigate('RootNavigator', {
       screen: 'BottomTabs',
       params: {
@@ -133,8 +139,11 @@ export default function AccountScreen({ navigation }: Props) {
         },
       },
     });
+    setLoadingAction(null);
   }
-  const gotoInfoCar = () => {
+  const gotoInfoCar = async () => {
+    setLoadingAction('CarInfoScreen');
+    await new Promise(resolve => setTimeout(resolve, 100));
     navigation.navigate('RootNavigator', {
       screen: 'BottomTabs',
       params: {
@@ -147,8 +156,11 @@ export default function AccountScreen({ navigation }: Props) {
         }
       }
     });
+    setLoadingAction(null);
   }
-  const gotoNotification = () => {
+  const gotoNotification = async () => {
+    setLoadingAction('Notification');
+    await new Promise(resolve => setTimeout(resolve, 100));
     navigation.navigate('RootNavigator', {
       screen: 'BottomTabs',
       params: {
@@ -158,6 +170,7 @@ export default function AccountScreen({ navigation }: Props) {
         }
       }
     });
+    setLoadingAction(null);
   };
 
   return (
@@ -204,8 +217,8 @@ export default function AccountScreen({ navigation }: Props) {
         </AppView>
         <AppView gap={6} height={'auto'} >
           <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Tài khoản'}</AppText>
-          <FunctionSection label='Thông tin cá nhân' onPress={gotoInfoAccount} data={driver} />
-          <FunctionSection label='Thông tin xe' onPress={gotoInfoCar} />
+          <FunctionSection label='Thông tin cá nhân' onPress={gotoInfoAccount} data={driver} loading={loadingAction === 'AccountInfoScreen'} />
+          <FunctionSection label='Thông tin xe' onPress={gotoInfoCar} loading={loadingAction === 'CarInfoScreen'} />
         </AppView>
 
 
@@ -213,9 +226,9 @@ export default function AccountScreen({ navigation }: Props) {
           <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Tính năng'}</AppText>
           <AppView gap={8}>
             <FunctionSection label='Đổi mật khẩu' onPress={() => setIsModalChangePw(true)} />
-            <FunctionSection label='Sao kê lịch sử điểm' onPress={gotoBankStatementBuySalePoint} />
-            <FunctionSection label='Lịch sử mua bán điểm' onPress={gotoHistoryBuySalePoint} />
-            <FunctionSection label='Thông báo hệ thống' onPress={gotoNotification} />
+            <FunctionSection label='Sao kê lịch sử điểm' onPress={gotoBankStatementBuySalePoint} loading={loadingAction === 'BankStatementBuySalePoint'} />
+            <FunctionSection label='Lịch sử mua bán điểm' onPress={gotoHistoryBuySalePoint} loading={loadingAction === 'HistoryBuySalePoint'} />
+            <FunctionSection label='Thông báo hệ thống' onPress={gotoNotification} loading={loadingAction === 'Notification'} />
 
             {/* <FunctionSection label='Xoá tài khoản' onPress={DeleteAccount} /> */}
             <FunctionSection label='Đăng xuất' onPress={handleLogout} />

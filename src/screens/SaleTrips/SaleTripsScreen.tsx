@@ -286,6 +286,7 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
         onSelected={(value) => {
           setSelectedStartLocation([value]);
         }}
+        parentIds={selectedDirection === 1 ? currentArea?.level1_pickup_ids : currentArea?.level1_dropoff_ids}
       />
 
       <ModalSelectLocationByArea
@@ -298,6 +299,7 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
         onSelected={(value) => {
           setSelectedEndLocation([value]);
         }}
+        parentIds={selectedDirection === 1 ? currentArea?.level1_dropoff_ids : currentArea?.level1_pickup_ids}
       />
 
 

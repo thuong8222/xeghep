@@ -23,6 +23,7 @@ import IconPhone from "../assets/icons/iconPhone";
 import ModalUploadCarImage from "../components/component/modals/ModalUploadCarImage";
 import AppConfig from "../services/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import FastImage from "react-native-fast-image";
 
 
 
@@ -312,7 +313,7 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
           {/* 🖼️ Hiển thị ảnh nếu có */}
           {item.image_url && (
             <TouchableOpacity onPress={() => setPreviewImage(item?.image_url)}>
-              <Image
+              <FastImage
                 source={{ uri: item.image_url }}
                 style={styles.messageImage}
                 resizeMode="cover"

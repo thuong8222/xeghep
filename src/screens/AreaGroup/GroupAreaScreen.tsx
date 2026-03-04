@@ -30,6 +30,7 @@ export default function GroupAreaScreen({ navigation }: Props) {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadingId, setLoadingId] = useState<number | null>(null);
 
   const { groups, loading, getAreas } = useAreaApi();
 
@@ -69,17 +70,24 @@ export default function GroupAreaScreen({ navigation }: Props) {
    * Navigate detail
    */
   const gotoDetailArea = useCallback(
-    (area: any) => {
+    async (area: any) => {
       if (!area?.is_member) return;
 
-      setCurrentArea(area);
+      setLoadingId(area.id);
+      
+      try {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        setCurrentArea(area);
 
-      navigation.navigate('BuyTrip', {
-        nameGroup: area.name,
-        countMember: area.members_count || 0,
-        id_area: area.id,
-        isJoin: area.is_member,
-      });
+        navigation.navigate('BuyTrip', {
+          nameGroup: area.name,
+          countMember: area.members_count || 0,
+          id_area: area.id,
+          isJoin: area.is_member,
+        });
+      } finally {
+        setLoadingId(null);
+      }
     },
     [navigation, setCurrentArea]
   );
@@ -90,6 +98,7 @@ export default function GroupAreaScreen({ navigation }: Props) {
   const renderItem = ({ item }: any) => (
     <Area
       data={item}
+      loading={loadingId === item.id}
       gotoDetailAreaPress={() => gotoDetailArea(item)}
     />
   );
