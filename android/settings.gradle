@@ -11,13 +11,19 @@ plugins {
     id("com.facebook.react.settings")
 }
 
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+    ex.autolinkLibrariesFromCommand()
+}
+
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
     repositories {
         google()
         mavenCentral()
     }
 }
 
+
 rootProject.name = "xeghep"
 include(":app")
+includeBuild("../node_modules/@react-native/gradle-plugin")
