@@ -74,8 +74,8 @@ export default function AccountScreen({ navigation }: Props) {
               // ✅ Dù lỗi API vẫn xoá local và chuyển màn hình
               await AsyncStorage.removeItem('token');
               await AsyncStorage.removeItem("driver");
-              await AsyncStorage.removeItem('biometric_phone');   // ✅
-              await AsyncStorage.removeItem('biometric_password'); // ✅
+              // await AsyncStorage.removeItem('biometric_phone');   // ✅
+              // await AsyncStorage.removeItem('biometric_password'); // ✅
               setCurrentDriver(null);
             }
           }

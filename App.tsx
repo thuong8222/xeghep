@@ -20,6 +20,7 @@ import { SocketProvider } from './src/context/SocketContext';
 import MainNavigator from './src/navigation/MainNavigator';
 import { navigationRef } from './src/navigation/navigationRef';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { View } from 'react-native';
 
 
 const App = () => {
@@ -31,14 +32,14 @@ const App = () => {
       // 1️⃣ Tạo channel Android
       await createAndroidChannel();
 
-      // 2️⃣ Xin quyền notification
+      // // 2️⃣ Xin quyền notification
       await requestUserPermission();
 
 
 
-      // 4️⃣ Lắng nghe notification khi app đang foreground
+      // // 4️⃣ Lắng nghe notification khi app đang foreground
       listenForForegroundMessages();
-      // ⭐ Setup notification listeners với navigation
+      // // ⭐ Setup notification listeners với navigation
       if (navigationRef.current) {
         setupNotificationListeners(navigationRef.current);
       }
@@ -49,7 +50,7 @@ const App = () => {
 
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>  {/* ← NGOÀI CÙNG */}
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <Provider store={store}>
         <SocketProvider>
           <ContextProvider>

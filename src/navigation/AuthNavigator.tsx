@@ -24,9 +24,6 @@ export default function AuthNavigator() {
           title: route.params?.typeScreen || 'Default Title', // hiển thị nameScreen trên header
         })}
       />
-
-
-
     </Stack.Navigator>
   )
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ViewStyle } from 'react-native';
+import { View, ViewStyle, Text } from 'react-native';
 
 import { BaseViewProps } from '../base/types/baseViewProps';
 import { scale } from '../../utils/Helper';
@@ -109,8 +109,14 @@ const AppView: React.FC<BaseViewProps> = ({
     ...(row && { flexDirection: 'row' }),
     
   };
+  const renderChildren = React.Children.map(children, (child) => {
+    if (typeof child === 'string' || typeof child === 'number') {
+      return <Text>{child}</Text>;
+    }
+    return child;
+  });
  
-  return <View style={[viewStyle, style]}>{children}</View>;
+  return <View style={[viewStyle, style]}>{renderChildren}</View>;
   
 };
 

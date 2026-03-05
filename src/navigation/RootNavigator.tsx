@@ -12,6 +12,7 @@ import { useSellerNotifications } from '../hooks/useSellerNotifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppContext } from '../context/AppContext';
 import { useBuyerNotifications } from '../hooks/useBuyerNotifications';
+import AppView from '../components/common/AppView';
 
 export type RootStackParamList = {
   BottomTabs: NavigatorScreenParams<BottomTabParamList>;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, ViewStyle, StyleSheet } from 'react-native';
+import { TouchableOpacity, ViewStyle, Text } from 'react-native';
 import { CustomButtonProps } from '../base/types/baseViewProps';
 import { scale } from '../../utils/Helper';
 
@@ -87,6 +87,13 @@ const AppButton: React.FC<CustomButtonProps> = ({
     ...(row && { flexDirection: 'row' }),  
   };
 
+  const renderChildren = React.Children.map(children, (child) => {
+    if (typeof child === 'string' || typeof child === 'number') {
+      return <Text>{child}</Text>;
+    }
+    return child;
+  });
+
   return (
     <TouchableOpacity
       style={[viewStyle, style]}  
@@ -94,7 +101,7 @@ const AppButton: React.FC<CustomButtonProps> = ({
       disabled={disabled}
       activeOpacity={activeOpacity || 0.7}  
     >
-      {children}
+      {renderChildren}
     </TouchableOpacity>
   );
 };

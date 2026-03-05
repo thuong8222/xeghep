@@ -74,7 +74,7 @@ export default function GroupAreaScreen({ navigation }: Props) {
       if (!area?.is_member) return;
 
       setLoadingId(area.id);
-      
+
       try {
         await new Promise(resolve => setTimeout(resolve, 100));
         setCurrentArea(area);
@@ -104,7 +104,7 @@ export default function GroupAreaScreen({ navigation }: Props) {
   );
 
   return (
-    <Container loading={loading}>
+    <Container loading={loading} ignoreBottomInset>
       <FlatList
         data={groups || []}
         keyExtractor={(item) => item.id.toString()}

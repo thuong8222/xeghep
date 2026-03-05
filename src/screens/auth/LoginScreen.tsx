@@ -34,8 +34,8 @@ interface Props {
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const { login, token, loading, error, successMessage, clear } = useAuthApi();
-  const [phoneNumber, setPhoneNumber] = useState("0987987987");
-  const [password, setPassword] = useState("Admin123456@");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [password, setPassword] = useState("");
   const [phoneNumberError, setPhoneNumberError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const { setCurrentDriver } = useAppContext();
@@ -105,6 +105,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         Alert.alert('Xác thực thất bại hoặc bị hủy');
       }
     } catch (e: any) {
+      console.log('handleLoginWithBiometric error:', e);
       Alert.alert('Lỗi khi xác thực biometric', e?.message || String(e));
     }
   };

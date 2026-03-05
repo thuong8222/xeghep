@@ -30,7 +30,7 @@ const Stack = createNativeStackNavigator<RootParamList>();
 export default function MainNavigator() {
   const { currentDriver } = useAppContext();
   const { socket, isConnected } = useSocket();
-  const [isSplashDone, setIsSplashDone] = useState(true);
+  const [isSplashDone, setIsSplashDone] = useState(false);
   const [driver, setDriver] = useState<any>(null);
 
   useEffect(() => {
@@ -48,10 +48,8 @@ export default function MainNavigator() {
   console.log('currentDriver?.id || driver?.id: ', currentDriver?.id || driver?.id)
   useEffect(() => {
     if (!socket || !isConnected || !currentDriver?.id || !driver?.id) return;
-
-
-    socket.emit("register_user", currentDriver.id);
-  }, [socket, isConnected, currentDriver?.id]);
+    socket.emit("register_user", currentDriver.id || driver?.id);
+  }, [socket, isConnected, currentDriver?.id, driver?.id]);
 
 
 
@@ -72,7 +70,6 @@ export default function MainNavigator() {
   useAutoBuyRealtimeUpdates(currentDriver?.id || driver?.id);           // Cập nhật danh sách realtime
   useAutoBuyListUpdates(currentDriver?.id || driver?.id);
   return (
-
     <>
       {!isSplashDone ? (
         <CustomSplash onFinish={() => setIsSplashDone(true)} />
@@ -85,7 +82,8 @@ export default function MainNavigator() {
           )}
 
         </Stack.Navigator>
-      )}
+      )
+      }
     </>
   );
 
