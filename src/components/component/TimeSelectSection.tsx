@@ -14,24 +14,36 @@ import ButtonChange from './ButtonChange';
 
 interface TimeSelectSectionProps {
     onTimeChange?: (timestampSeconds: number | null) => void;
+    // ✅ Truyền ra ngoài: time đã chọn (unix sec) + số phút instant (+/-)
+    onTimeWithMeta?: (timestampSeconds: number | null, minutesInstant: number) => void;
+    onMetaChange?: (info: { now: number; minutes: number; target: number | null }) => void;
 }
 
-export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionProps) {
+export default function TimeSelectSection({
+    onTimeChange,
+    onTimeWithMeta,
+    onMetaChange,
+}: TimeSelectSectionProps) {
     const [isInstant, setIsInstant] = useState(true);
-    const [time, setTime] = useState(15);
+    const [time, setTime] = useState(15); // phút cộng thêm khi "Đi ngay"
     const [showDropdown, setShowDropdown] = useState(false);
     const [showPicker, setShowPicker] = useState(false);
-
     const [selectedTime, setSelectedTime] = useState<Date>(new Date());
-
-    // Android: phân biệt date / time
     const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date');
 
     /* ================== Đi ngay (+/- phút) ================== */
+    const emitMeta = (minutes: number, target: number | null) => {
+        const now = Math.floor(Date.now() / 1000);
+        onMetaChange?.({ now, minutes, target });
+    };
+
     const updateInstantTime = (minutes: number) => {
         const now = new Date();
         const future = new Date(now.getTime() + minutes * 60 * 1000);
-        onTimeChange?.(Math.floor(future.getTime() / 1000));
+        const sec = Math.floor(future.getTime() / 1000);
+        onTimeChange?.(sec);
+        onTimeWithMeta?.(sec, minutes); // ✅ truyền cả sec + số phút
+        emitMeta(minutes, sec);
     };
 
     const addTime = () => {
@@ -53,7 +65,6 @@ export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionPro
     /* ================== Dropdown ================== */
     const handleSelectOption = (option: string) => {
         setShowDropdown(false);
-
         if (option === 'Đi ngay') {
             setIsInstant(true);
             setShowPicker(false);
@@ -61,7 +72,6 @@ export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionPro
             updateInstantTime(0);
         } else {
             setIsInstant(false);
-
             if (Platform.OS === 'android') {
                 setPickerMode('date');
                 setShowPicker(true);
@@ -73,17 +83,13 @@ export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionPro
 
     /* ================== Android onChange ================== */
     const onChangeAndroid = (_: any, date?: Date) => {
-        if (!date) {
-            setShowPicker(false);
-            return;
-        }
+        if (!date) { setShowPicker(false); return; }
 
         if (pickerMode === 'date') {
             const newDate = new Date(selectedTime);
             newDate.setFullYear(date.getFullYear());
             newDate.setMonth(date.getMonth());
             newDate.setDate(date.getDate());
-
             setSelectedTime(newDate);
             setPickerMode('time');
             setShowPicker(true);
@@ -91,11 +97,13 @@ export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionPro
             const newDate = new Date(selectedTime);
             newDate.setHours(date.getHours());
             newDate.setMinutes(date.getMinutes());
-
             setSelectedTime(newDate);
             setShowPicker(false);
-
-            onTimeChange?.(Math.floor(newDate.getTime() / 1000));
+            const sec = Math.floor(newDate.getTime() / 1000);
+            onTimeChange?.(sec);
+            onTimeWithMeta?.(sec, 0); // ✅ chọn lịch → minutesInstant = 0
+            const minutes = Math.max(0, Math.round((newDate.getTime() - Date.now()) / 60000));
+            emitMeta(minutes, sec);
         }
     };
 
@@ -103,12 +111,18 @@ export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionPro
     const onChangeIOS = (_: any, date?: Date) => {
         if (date) {
             setSelectedTime(date);
-            onTimeChange?.(Math.floor(date.getTime() / 1000));
+            const sec = Math.floor(date.getTime() / 1000);
+            onTimeChange?.(sec);
+            onTimeWithMeta?.(sec, 0); // ✅ chọn lịch → minutesInstant = 0
+            const minutes = Math.max(0, Math.round((date.getTime() - Date.now()) / 60000));
+            emitMeta(minutes, sec);
         }
     };
+
     const formattedTime = React.useMemo(() => {
         return moment(selectedTime).format('DD/MM/YYYY HH:mm');
     }, [selectedTime]);
+
     return (
         <AppView row justifyContent="space-between" alignItems="center" paddingVertical={9}>
             <AppText>Thời gian :</AppText>
@@ -118,9 +132,7 @@ export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionPro
                 <AppView>
                     <AppButton row gap={4} onPress={() => setShowDropdown(p => !p)} paddingHorizontal={10} paddingVertical={10}>
                         <AppText fontWeight={700}>
-                            {isInstant
-                                ? 'Đi ngay'
-                                : formattedTime}
+                            {isInstant ? 'Đi ngay' : formattedTime}
                         </AppText>
                         <IconArrowDown color={ColorsGlobal.colorIconNoActive} />
                     </AppButton>
@@ -153,7 +165,7 @@ export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionPro
                     )}
                 </AppView>
 
-                {/* +/- phút */}
+                {/* +/- phút (chỉ hiện khi "Đi ngay") */}
                 {isInstant && (
                     <AppView row gap={8} alignItems="center">
                         <ButtonChange onPress={subTime} icon={<IconMinus />} />
@@ -163,7 +175,7 @@ export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionPro
                 )}
             </AppView>
 
-            {/* ================= ANDROID PICKER ================= */}
+            {/* ANDROID PICKER */}
             {showPicker && Platform.OS === 'android' && (
                 <DateTimePicker
                     value={selectedTime}
@@ -174,7 +186,7 @@ export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionPro
                 />
             )}
 
-            {/* ================= iOS PICKER ================= */}
+            {/* iOS PICKER */}
             <AppModal
                 isVisible={showPicker && Platform.OS === 'ios'}
                 onClose={() => setShowPicker(false)}
@@ -187,7 +199,6 @@ export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionPro
                     display="spinner"
                     onChange={onChangeIOS}
                 />
-
                 <AppButton
                     onPress={() => setShowPicker(false)}
                     backgroundColor={ColorsGlobal.main}
@@ -196,9 +207,7 @@ export default function TimeSelectSection({ onTimeChange }: TimeSelectSectionPro
                     radius={8}
                     marginTop={8}
                 >
-                    <AppText color="white" fontWeight={700} textAlign="center">
-                        Xác nhận
-                    </AppText>
+                    <AppText color="white" fontWeight={700} textAlign="center">Xác nhận</AppText>
                 </AppButton>
             </AppModal>
         </AppView>

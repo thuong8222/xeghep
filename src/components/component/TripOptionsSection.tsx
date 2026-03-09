@@ -9,18 +9,24 @@ import IconPlus from '../../assets/icons/IconPlus';
 import GuestModal from './modals/GuestModal';
 import AppInput from '../common/AppInput';
 import TimeSelectSection from './TimeSelectSection';
-import { CONSTANT, NumberFormat, scale, validatePrice } from '../../utils/Helper';
+import { NumberFormat, validatePrice } from '../../utils/Helper';
 import ModalTypeCar from './modals/ModalTypeCar';
 import ButtonChange from './ButtonChange';
+
 interface TripOptionsSectionProps {
+    // minutesAdded: số phút cộng thêm (riêng, lưu DB)
+    // minutesInstant: phút +/- trong "Đi ngay" (dùng để hiển thị, cũng là minutes_added khi Đi ngay)
     onTripOptionsChange?: (
         numGuests: number | null,
         price?: string,
         points?: string | number,
         guestType?: string,
-        timeStart?: number) => void;
-    typeCar?: { type: string; name: string } | null
+        timeStart?: number | null,
+        minutesAdded?: number,
+    ) => void;
+    typeCar?: { type: string; name: string } | null;
 }
+
 export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsSectionProps) {
 
     const [numGuests, setNumGuests] = useState(1);
@@ -30,61 +36,36 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
     const [priceError, setPriceError] = useState('');
     const [timeStart, setTimeStart] = useState<number | null>(null);
     const [showGuestModal, setShowGuestModal] = useState(false);
-    const [showTypeCar, setShowTypeCar] = useState(false)
+    const [showTypeCar, setShowTypeCar] = useState(false);
     const [selectedCar, setSelectedCar] = useState<{ type: string; name: string } | null>(null);
+    // ✅ minutesAdded = số phút từ TimeSelectSection (instant minutes hoặc 0 khi chọn lịch)
+    const [minutesAdded, setMinutesAdded] = useState(0);
+
     const notifyChange = (
         newNumGuests?: number,
         newPrice?: number,
         newPoints?: number | string,
         newGuestType?: typeof guestType,
         newTimeStart?: number | null,
+        newMinutesAdded?: number,
     ) => {
-        if (onTripOptionsChange) {
-            onTripOptionsChange(
-                newNumGuests ?? numGuests,
-                (newPrice ?? price).toString(),
-                (newPoints ?? points).toString(),
-                newGuestType ?? guestType,
-                newTimeStart ?? timeStart,
-            );
-        }
+        onTripOptionsChange?.(
+            newNumGuests ?? numGuests,
+            (newPrice ?? price).toString(),
+            (newPoints ?? points).toString(),
+            newGuestType ?? guestType,
+            newTimeStart ?? timeStart,
+            newMinutesAdded ?? minutesAdded,
+        );
     };
 
-    const addPrice = () => {
-        const newPrice = price + 10;
-        setPrice(newPrice);
-        notifyChange(undefined, newPrice);
-    };
+    const addPrice = () => { const v = price + 10; setPrice(v); notifyChange(undefined, v); };
+    const subPrice = () => { const v = Math.max(price - 10, 0); setPrice(v); notifyChange(undefined, v); };
+    const addPoint = () => { const v = Math.min(points + 0.5, 10); setPoints(v); notifyChange(undefined, undefined, v); };
+    const subPoint = () => { const v = Math.max(points - 0.5, 0); setPoints(v); notifyChange(undefined, undefined, v); };
+    const addGuest = () => { const v = Math.min(numGuests + 1, 6); setNumGuests(v); notifyChange(v); };
+    const subGuest = () => { const v = Math.max(numGuests - 1, 1); setNumGuests(v); notifyChange(v); };
 
-    const subPrice = () => {
-        const newPrice = Math.max(price - 10, 0);
-        setPrice(newPrice);
-        notifyChange(undefined, newPrice);
-    };
-
-    const addPoint = () => {
-        const newPoints = Math.min(points + 0.5, 10);
-        setPoints(newPoints);
-        notifyChange(undefined, undefined, newPoints);
-    };
-
-    const subPoint = () => {
-        const newPoints = Math.max(points - 0.5, 0);
-        setPoints(newPoints);
-        notifyChange(undefined, undefined, newPoints);
-    };
-
-    const addGuest = () => {
-        const newGuests = Math.min(numGuests + 1, 6);
-        setNumGuests(newGuests);
-        notifyChange(newGuests);
-    };
-
-    const subGuest = () => {
-        const newGuests = Math.max(numGuests - 1, 1);
-        setNumGuests(newGuests);
-        notifyChange(newGuests);
-    };
     const guestTypeNameMap: Record<string, string> = {
         normal: `${numGuests} khách`,
         car5: 'Bao xe 5 chỗ',
@@ -96,60 +77,46 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
 
     return (
         <>
-            <AppView
-                borderTopWidth={1}
-                paddingTop={18}
-                borderTopColor={ColorsGlobal.borderColor}
-            >
+            <AppView borderTopWidth={1} paddingTop={18} borderTopColor={ColorsGlobal.borderColor}>
+
+                {/* ✅ Dùng onTimeWithMeta để nhận cả time + minutesInstant */}
                 <TimeSelectSection
-                    onTimeChange={(time) => {
-                        setTimeStart(time);
-                        notifyChange(undefined, undefined, undefined, undefined, time);
+                    onTimeWithMeta={(sec, minutes) => {
+                        setTimeStart(sec);
+                        setMinutesAdded(minutes);
+                        notifyChange(undefined, undefined, undefined, undefined, sec, minutes);
+                    }}
+                    // giữ onTimeChange để không break nếu nơi khác dùng
+                    onTimeChange={(sec) => {
+                        setTimeStart(sec);
                     }}
                 />
+
+                {/* Số khách — giữ nguyên */}
                 <AppView row justifyContent="space-between" alignItems='center' paddingVertical={9}>
                     <AppText>{'Số khách :'}</AppText>
                     <AppView row alignItems='center'>
                         {guestType === 'normal' && (
-                            <ButtonChange
-                                onPress={subGuest}
-                                icon={<IconMinus size={20} color={ColorsGlobal.colorIconNoActive} />}
-                            />
+                            <ButtonChange onPress={subGuest} icon={<IconMinus size={20} color={ColorsGlobal.colorIconNoActive} />} />
                         )}
                         <AppView>
                             <AppButton row gap={4} onPress={() => setShowGuestModal(true)} paddingHorizontal={4} paddingVertical={8}>
-                                <AppText fontWeight={700}>
-                                    {guestTypeNameMap[guestType] || `${numGuests} khách`}
-                                </AppText>
+                                <AppText fontWeight={700}>{guestTypeNameMap[guestType] || `${numGuests} khách`}</AppText>
                                 <IconArrowDown color={ColorsGlobal.colorIconNoActive} />
                             </AppButton>
                         </AppView>
                         {guestType === 'normal' && (
-                            <ButtonChange
-                                onPress={addGuest}
-                                icon={<IconPlus size={18} color={ColorsGlobal.colorIconNoActive} />}
-                            />
+                            <ButtonChange onPress={addGuest} icon={<IconPlus size={18} color={ColorsGlobal.colorIconNoActive} />} />
                         )}
                     </AppView>
                 </AppView>
 
-                <AppView row justifyContent="space-between" alignItems='center' paddingVertical={2} >
+                {/* Giá tiền — giữ nguyên */}
+                <AppView row justifyContent="space-between" alignItems='center' paddingVertical={2}>
                     <AppText>{'Giá tiền :'}</AppText>
                     <AppView row gap={8} alignItems="center">
-                        <ButtonChange
-                            onPress={subPrice}
-                            icon={<IconMinus size={20} color={ColorsGlobal.colorIconNoActive} />}
-                        />
-                        <AppView
-                            style={{
-                                borderBottomWidth: 1,
-                                borderBottomColor: ColorsGlobal.borderColor,
-                                paddingHorizontal: 8,
-                                flexDirection: 'row', gap: 4,
-                                paddingBottom: 4
-                            }}
-                            alignItems='center'
-                        >
+                        <ButtonChange onPress={subPrice} icon={<IconMinus size={20} color={ColorsGlobal.colorIconNoActive} />} />
+                        <AppView style={{ borderBottomWidth: 1, borderBottomColor: ColorsGlobal.borderColor, paddingHorizontal: 8, flexDirection: 'row', gap: 4, paddingBottom: 4 }} alignItems='center'>
                             <AppView alignItems='center' justifyContent='center'>
                                 <AppInput marginTop={0}
                                     value={NumberFormat(price.toString())}
@@ -162,46 +129,22 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
                                     }}
                                     error={priceError}
                                     keyboardType="numeric"
-                                    style={{
-                                        textAlign: 'center',
-                                        fontWeight: '700',
-                                        color: ColorsGlobal.textDark,
-                                        fontSize: 16,
-                                        padding: 0, height: 40, alignItems: 'center', justifyContent: 'center', width: 80
-                                    }}
+                                    style={{ textAlign: 'center', fontWeight: '700', color: ColorsGlobal.textDark, fontSize: 16, padding: 0, height: 40, alignItems: 'center', justifyContent: 'center', width: 80 }}
                                 />
                             </AppView>
-
                             <AppText fontWeight={600}>K</AppText>
-
-
                         </AppView>
-                        <ButtonChange
-                            onPress={addPrice}
-                            icon={<IconPlus size={18} color={ColorsGlobal.colorIconNoActive} />}
-                        />
-
+                        <ButtonChange onPress={addPrice} icon={<IconPlus size={18} color={ColorsGlobal.colorIconNoActive} />} />
                     </AppView>
                 </AppView>
 
-
-                {/* Điểm bán */}
+                {/* Điểm bán — giữ nguyên */}
                 <AppView row justifyContent="space-between" alignItems='center' paddingVertical={2}>
                     <AppText>{'Điểm bán :'}</AppText>
                     <AppView row gap={8} alignItems="center">
-                        <ButtonChange onPress={subPoint}
-                            icon={<IconMinus size={20} color={ColorsGlobal.colorIconNoActive} />}
-                        />
-                        <AppView gap={8}
-                            style={{
-                                borderBottomWidth: 1,
-                                borderBottomColor: ColorsGlobal.borderColor,
-                                paddingHorizontal: 8,
-                                flexDirection: 'row', alignItems: 'flex-end', gap: 4,
-                                paddingBottom: 4
-                            }}
-                        >
-                            <AppView >
+                        <ButtonChange onPress={subPoint} icon={<IconMinus size={20} color={ColorsGlobal.colorIconNoActive} />} />
+                        <AppView gap={8} style={{ borderBottomWidth: 1, borderBottomColor: ColorsGlobal.borderColor, paddingHorizontal: 8, flexDirection: 'row', alignItems: 'flex-end', gap: 4, paddingBottom: 4 }}>
+                            <AppView>
                                 <AppInput
                                     value={points.toString()}
                                     onChangeText={(text) => {
@@ -212,30 +155,14 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
                                         setPoints(newVal);
                                         notifyChange(undefined, undefined, newVal);
                                     }}
-                                    onBlur={() => {
-
-                                        if (points === '' || isNaN(points)) {
-                                            setPoints(1);
-                                        }
-                                    }}
+                                    onBlur={() => { if (points === '' || isNaN(points)) setPoints(1); }}
                                     keyboardType="numeric"
-                                    style={{
-                                        textAlign: 'center',
-                                        fontWeight: '700',
-                                        color: ColorsGlobal.textDark,
-                                        fontSize: 16,
-                                        padding: 0,
-
-                                    }}
+                                    style={{ textAlign: 'center', fontWeight: '700', color: ColorsGlobal.textDark, fontSize: 16, padding: 0 }}
                                 />
                             </AppView>
                             <AppText fontWeight={600}>{'điểm'}</AppText>
                         </AppView>
-                        <ButtonChange
-                            onPress={addPoint}
-                            icon={<IconPlus size={18} color={ColorsGlobal.colorIconNoActive} />}
-                        />
-
+                        <ButtonChange onPress={addPoint} icon={<IconPlus size={18} color={ColorsGlobal.colorIconNoActive} />} />
                     </AppView>
                 </AppView>
             </AppView>
@@ -245,22 +172,14 @@ export default function TripOptionsSection({ onTripOptionsChange }: TripOptionsS
                 onClose={() => setShowGuestModal(false)}
                 guestType={guestType}
                 numGuests={numGuests}
-                setGuestType={(val) => {
-                    setGuestType(val);
-                    notifyChange(undefined, undefined, undefined, val);
-                }}
+                setGuestType={(val) => { setGuestType(val); notifyChange(undefined, undefined, undefined, val); }}
                 setNumGuests={(val) => { setNumGuests(val); notifyChange(val); }}
             />
             <ModalTypeCar
                 isVisible={showTypeCar}
                 onClose={() => setShowTypeCar(false)}
-                onSelect={(car) => {
-                    setSelectedCar(car);
-                    notifyChange(undefined, undefined, undefined, undefined, undefined, car);
-                }}
+                onSelect={(car) => { setSelectedCar(car); }}
             />
-
-
         </>
     );
 }

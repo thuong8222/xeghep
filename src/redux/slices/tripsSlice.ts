@@ -30,6 +30,8 @@ export interface Trip {
   time_receive?: string | null;
   phone_number_guest: string;
   id_quick_note?: string | null;
+  time_created?: number | null; // unix timestamp lúc tạo chuyến
+  minutes_added?: number; // số phút thêm driver nhập
 }
 
 export interface DriverArea {
@@ -97,6 +99,7 @@ export interface CreateTripPayload {
   cover_car?: number;
   time_receive?: string | null;
   phone_number_guest: string;
+  minutes_added?: number; // số phút thêm (vd: 15, 30, 60)
 }
 
 // ✅ Payload cho chỉnh sửa chuyến đang bán
@@ -236,8 +239,9 @@ export const editTrip = createAsyncThunk<
   { rejectValue: string }
 >('trips/editTrip', async ({ tripId, ...fields }, { rejectWithValue }) => {
   try {
+    // POST /{id}/update để tránh server chặn PATCH/PUT (405)
     const response = await api.post(`api/trips/${tripId}/update`, fields);
-    console.log('editTrip response: ',response);
+    console.log('editTrip response: ', response);
     return response.data.data || response.data;
   } catch (err: any) {
     console.log('err editTrip: ', err);
@@ -530,3 +534,21 @@ export const {
 } = tripsSlice.actions;
 
 export default tripsSlice.reducer;
+
+/**
+ * Format hiển thị thời gian chuyến: "05:20 + 10'" hoặc "05:20" nếu không có phút
+ * time_start: unix timestamp (giây)
+ * minutes_added: số phút cộng thêm lưu DB
+ */
+export function formatTripTime(
+  time_start?: number | null,
+  minutes_added?: number,
+): string {
+  if (!time_start) return '--:--';
+  const base = new Date(time_start * 1000);
+  const hh = String(base.getHours()).padStart(2, '0');
+  const mm = String(base.getMinutes()).padStart(2, '0');
+  const baseStr = `${hh}:${mm}`;
+  if (!minutes_added || minutes_added === 0) return baseStr;
+  return `${baseStr} + ${minutes_added}'`;
+}

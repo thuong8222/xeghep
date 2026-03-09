@@ -110,7 +110,7 @@ export default function ModalEditTrip({ visible, onRequestClose, trip }: Props) 
           </AppView>
 
           <AppView gap={12}>
-            <AppButton onPress={() => setShowPicker(true)} borderWidth={1} padding={12} radius={8}>
+            <AppButton onPress={() => setShowPicker(true)}  padding={12} radius={8}>
               <AppView gap={4}>
                 <AppText color={ColorsGlobal.textLight}>Giờ xuất phát</AppText>
                 <AppText>{formattedTime}</AppText>

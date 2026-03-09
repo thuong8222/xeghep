@@ -1,5 +1,5 @@
-import { ActivityIndicator, Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native'
-import React, { useState } from 'react'
+import { ActivityIndicator, Alert, Platform, ScrollView } from 'react-native'
+import React, { useRef, useState } from 'react'
 import AppView from '../../components/common/AppView'
 import AppText from '../../components/common/AppText'
 import IconTickCircle from '../../assets/icons/IconTickCircle'
@@ -8,53 +8,54 @@ import IconNoneTickCircle from '../../assets/icons/IconNoneTickCircle'
 import AppInput from '../../components/common/AppInput'
 import IconDotHorizonal from '../../assets/icons/IconDotHorizonal'
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal'
-
 import ButtonSubmit from '../../components/common/ButtonSubmit'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import NoteInputSection from '../../components/component/NoteInputSection'
-
-
 import TripOptionsSection from '../../components/component/TripOptionsSection'
 import { useDispatch, useSelector } from 'react-redux'
-import { createTrip, CreateTripPayload, fetchTrips } from '../../redux/slices/tripsSlice'
+import { createTrip, CreateTripPayload } from '../../redux/slices/tripsSlice'
 import moment from 'moment'
 import { useAppContext } from '../../context/AppContext'
-
 import ModalSelectLocationByArea from '../../components/component/modals/ModalSelectLocationByArea'
 
 interface Props {
   route: any;
   navigation: any;
 }
-export default function SaleTripsScreen({ route, navigation }: Props) {
 
+const DEFAULT_MINUTES = 15;
+
+export default function SaleTripsScreen({ route, navigation }: Props) {
   const { id_area } = route.params;
   const insets = useSafeAreaInsets();
-
   const dispatch = useDispatch();
-  const { setUpdateTrips, currentArea } = useAppContext()
+  const { setUpdateTrips, currentArea } = useAppContext();
+  const { loading } = useSelector((state: any) => state.trips);
+
   const [selectedDirection, setSelectedDirection] = useState(1);
   const [isCommuneWard, setIsCommuneWard] = useState(false);
   const [isCommuneWardTo, setIsCommuneWardTo] = useState(false);
-
   const [placeStart, setPlaceStart] = useState('');
   const [placeEnd, setPlaceEnd] = useState('');
   const [communeWard, setCommuneWard] = useState('');
   const [communeWardTo, setCommuneWardTo] = useState('');
-  const { loading } = useSelector((state: any) => state.trips);
   const [districtCode, setDistrictCode] = useState('');
   const [districtCodeTo, setDistrictCodeTo] = useState('');
   const [selectedStartLocation, setSelectedStartLocation] = useState<any[]>([]);
   const [selectedEndLocation, setSelectedEndLocation] = useState<any[]>([]);
-  const [tripOptions, setTripOptions] = useState({
+  const [noteOptions, setNoteOptions] = useState('');
+
+  // ✅ Dùng useRef để luôn đọc giá trị mới nhất, tránh stale closure
+  const tripOptionsRef = useRef({
     numGuests: 1,
     price: '250',
     points: '1',
     guestType: 'normal',
     timeStart: null as number | null,
-    typeCar: null as { type: string; name: string } | null
+    minutesAdded: DEFAULT_MINUTES, // mặc định 15p
   });
-  const [noteOptions, setNoteOptions] = useState();
+  // state chỉ để trigger re-render khi cần (display)
+  const [tripOptions, setTripOptions] = useState(tripOptionsRef.current);
 
   const handleTripOptionsChange = (
     numGuests: number | null,
@@ -62,93 +63,80 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
     points?: string | number,
     guestType?: string,
     timeStart?: number | null,
-    typeCar?: { type: string; name: string } | null
+    minutesAdded?: number,
   ) => {
-
-    setTripOptions(prev => ({
-      numGuests: numGuests ?? prev.numGuests,
-      price: price ?? prev.price,
-      points: points?.toString() ?? prev.points,
-      guestType: guestType ?? prev.guestType,
-      timeStart: timeStart ?? prev.timeStart,
-      typeCar: typeCar !== undefined ? typeCar : prev.typeCar
-    }));
+    // ✅ Update ref ngay lập tức (không bất đồng bộ như setState)
+    tripOptionsRef.current = {
+      numGuests: numGuests ?? tripOptionsRef.current.numGuests,
+      price: price ?? tripOptionsRef.current.price,
+      points: points?.toString() ?? tripOptionsRef.current.points,
+      guestType: guestType ?? tripOptionsRef.current.guestType,
+      timeStart: timeStart !== undefined ? timeStart : tripOptionsRef.current.timeStart,
+      minutesAdded: minutesAdded !== undefined ? minutesAdded : tripOptionsRef.current.minutesAdded,
+    };
+    setTripOptions({ ...tripOptionsRef.current });
   };
 
-  const handleNoteChange = (val?: string) => {
-    setNoteOptions(val ?? "");
-  };
-
-  const updateLocationText = (currentText: string, newValue: any, oldValue: any) => {
-    if (!currentText) return newValue.name;
-
-    if (oldValue) {
-      if (currentText.includes(oldValue.name)) {
-        return currentText.replace(oldValue.name, newValue.name);
-      }
-
-      const lastCommaIndex = currentText.lastIndexOf(',');
-      if (lastCommaIndex !== -1) {
-        const prefix = currentText.substring(0, lastCommaIndex).trim();
-        return `${prefix}, ${newValue.name}`;
-      }
-
-      return newValue.name;
-    }
-
-    return `${currentText}, ${newValue.name}`;
-  };
+  const handleNoteChange = (val?: string) => setNoteOptions(val ?? '');
 
   const handleCreateTrip = async () => {
-    const place_start = placeStart
-    const place_end = placeEnd
+    const place_start = placeStart;
+    const place_end = placeEnd;
     if (!place_start || !place_end) {
-      Alert.alert('Thông báo', 'Điểm đi/Điểm đến không được để trống!')
+      Alert.alert('Thông báo', 'Điểm đi/Điểm đến không được để trống!');
       return;
     }
-    const defaultTimeStart = Math.floor(Date.now() / 1000) + 15 * 60;
+
+    // ✅ Đọc từ ref — luôn là giá trị mới nhất
+    const opts = tripOptionsRef.current;
+    const defaultTimeStart = Math.floor(Date.now() / 1000) + DEFAULT_MINUTES * 60;
+
     const payload: CreateTripPayload = {
       area_id: id_area,
       direction: selectedDirection,
-      guests: tripOptions?.numGuests || 1,
-      time_start: tripOptions?.timeStart || defaultTimeStart,
-      price_sell: Number(tripOptions.price) || 250,
-      place_start: place_start,
-      place_end: place_end,
-      point: Number(tripOptions?.points),
+      guests: opts.numGuests || 1,
+      time_start: opts.timeStart || defaultTimeStart,
+      price_sell: Number(opts.price) || 250,
+      place_start,
+      place_end,
+      point: Number(opts.points),
       note: noteOptions || '',
-      type_car: tripOptions?.guestType,
-      cover_car: tripOptions.guestType === 'normal' ? 0 : 1,
+      type_car: opts.guestType,
+      cover_car: opts.guestType === 'normal' ? 0 : 1,
+      minutes_added: opts.minutesAdded,
+      phone_number_guest: '',
     };
 
+    console.log('CreateTrip payload:', {
+      time_start: payload.time_start,
+      minutes_added: payload.minutes_added,
+    });
 
     try {
-      await dispatch(createTrip(payload)).unwrap();
+      await dispatch(createTrip(payload) as any).unwrap();
       setUpdateTrips(moment().unix());
+
+      // Reset
       setSelectedDirection(1);
-      setPlaceStart("");
-      setPlaceEnd("");
-      setCommuneWard("");
+      setPlaceStart('');
+      setPlaceEnd('');
+      setCommuneWard('');
       setCommuneWardTo('');
+      setNoteOptions('');
+      tripOptionsRef.current = {
+        numGuests: 1, price: '250', points: '1',
+        guestType: 'normal', timeStart: null, minutesAdded: DEFAULT_MINUTES,
+      };
+      setTripOptions({ ...tripOptionsRef.current });
 
-      setTripOptions({
-        numGuests: 1,
-        price: '250',
-        points: '1',
-        guestType: 'normal',
-        timeStart: null,
-        typeCar: null
-      });
-
-      setNoteOptions("");
       Alert.alert('Thành công', 'Tạo chuyến thành công!');
       const info = route?.params?.ereaData;
       if (info?.nameGroup && info?.countMember) {
         navigation.navigate('BuyTrip', {
           nameGroup: info.nameGroup,
           countMember: info.countMember,
-          id_area: id_area,
-          isJoin: info?.isJoin
+          id_area,
+          isJoin: info?.isJoin,
         });
       } else {
         navigation.goBack();
@@ -159,79 +147,47 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
     }
   };
 
-  // Mở modal chọn tỉnh/huyện cho điểm đón
-  const handleSelectCommuneWardStart = () => {
-    setIsCommuneWardTo(true);
-  };
+  const handleSelectCommuneWardStart = () => setIsCommuneWardTo(true);
+  const handleSelectCommuneWardEnd = () => setIsCommuneWard(true);
 
-  // Mở modal chọn tỉnh/huyện cho điểm trả
-  const handleSelectCommuneWardEnd = () => {
-    setIsCommuneWard(true);
-  };
   const handleChangeDirection = (direction: number) => {
-
     if (direction === selectedDirection) return;
-    // swap place
-    const newPlaceStart = placeEnd;
-    const newPlaceEnd = placeStart;
-    // swap commune
-    const newCommuneStart = communeWard;
-    const newCommuneEnd = communeWardTo;
-    // swap districtCode
-    const newDistrictStart = districtCode;
-    const newDistrictEnd = districtCodeTo;
-    // swap selectedLocation
-    const newSelectedStartLocation = selectedEndLocation;
-    const newSelectedEndLocation = selectedStartLocation;
-
-    setPlaceStart(newPlaceStart);
-    setPlaceEnd(newPlaceEnd);
-
-    setCommuneWardTo(newCommuneStart);
-    setCommuneWard(newCommuneEnd);
-
-    setDistrictCodeTo(newDistrictStart);
-    setDistrictCode(newDistrictEnd);
-
-    setSelectedStartLocation(newSelectedStartLocation);
-    setSelectedEndLocation(newSelectedEndLocation);
-
+    setPlaceStart(placeEnd); setPlaceEnd(placeStart);
+    setCommuneWardTo(communeWard); setCommuneWard(communeWardTo);
+    setDistrictCodeTo(districtCode); setDistrictCode(districtCodeTo);
+    setSelectedStartLocation(selectedEndLocation);
+    setSelectedEndLocation(selectedStartLocation);
     setSelectedDirection(direction);
   };
-  const areaLevel1Names =
-    selectedDirection === 1
-      ? currentArea?.level1_pickup_names
-      : currentArea?.level1_dropoff_names;
 
-  const labelText = `Điểm xuất phát khu vực ${areaLevel1Names?.length ? areaLevel1Names.join(', ') : ''
-    }`;
-  const areaLevel1NamesTo =
-    selectedDirection === 1
-      ? currentArea?.level1_dropoff_names
-      : currentArea?.level1_pickup_names;
-
+  const areaLevel1Names = selectedDirection === 1 ? currentArea?.level1_pickup_names : currentArea?.level1_dropoff_names;
+  const labelText = `Điểm xuất phát khu vực ${areaLevel1Names?.length ? areaLevel1Names.join(', ') : ''}`;
+  const areaLevel1NamesTo = selectedDirection === 1 ? currentArea?.level1_dropoff_names : currentArea?.level1_pickup_names;
   const labelTextTo = `Điểm đến khu vực ${areaLevel1NamesTo?.length ? areaLevel1NamesTo.join(', ') : ''}`;
-  return (
-    <AppView
-      flex={1}
-      backgroundColor='#fff'
-      paddingHorizontal={16}
-      paddingTop={16}
 
-      paddingBottom={Platform.OS === 'ios' ? insets.bottom : 0}
-      position='relative'
-    >
+  const updateLocationText = (currentText: string, newValue: any, oldValue: any) => {
+    if (!currentText) return newValue.name;
+    if (oldValue) {
+      if (currentText.includes(oldValue.name)) return currentText.replace(oldValue.name, newValue.name);
+      const lastCommaIndex = currentText.lastIndexOf(',');
+      if (lastCommaIndex !== -1) return `${currentText.substring(0, lastCommaIndex).trim()}, ${newValue.name}`;
+      return newValue.name;
+    }
+    return `${currentText}, ${newValue.name}`;
+  };
+
+  return (
+    <AppView flex={1} backgroundColor='#fff' paddingHorizontal={16} paddingTop={16}
+      paddingBottom={Platform.OS === 'ios' ? insets.bottom : 0} position='relative'>
+
       {loading && (
-        <AppView>
-          <AppView alignItems="center" gap={12}>
-            <ActivityIndicator size="large" color={ColorsGlobal.main} />
-            <AppText color={ColorsGlobal.main} title={'Đang tạo chuyến...'} />
-          </AppView>
+        <AppView alignItems="center" gap={12}>
+          <ActivityIndicator size="large" color={ColorsGlobal.main} />
+          <AppText color={ColorsGlobal.main} title={'Đang tạo chuyến...'} />
         </AppView>
       )}
 
-      {/* Chọn chiều đi/về */}
-      <AppView row gap={32} marginBottom={16} >
+      <AppView row gap={32} marginBottom={16}>
         <AppButton onPress={() => handleChangeDirection(1)} row gap={8} height={40} alignItems='center' flex={1}>
           <AppText>{'Chiều đi'}</AppText>
           {selectedDirection === 1 ? <IconTickCircle /> : <IconNoneTickCircle />}
@@ -242,59 +198,30 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
         </AppButton>
       </AppView>
 
-      <ScrollView
-        style={{ flex: 1 }}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingBottom: 20 }}
-      >
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 20 }}>
         <AppView gap={18}>
           <AppView gap={12}>
-            {/* ĐIỂM ĐÓN */}
             <AppView gap={6}>
               <AppView row gap={8} alignItems='flex-end'>
                 <AppView flex={1}>
-                  <AppInput
-                    label={labelText}
-                    value={placeStart}
-                    onChangeText={setPlaceStart}
-                    placeholder="Nhập chi tiết điểm đón"
-                  />
+                  <AppInput label={labelText} value={placeStart} onChangeText={setPlaceStart} placeholder="Nhập chi tiết điểm đón" />
                 </AppView>
-                <AppButton
-                  onPress={handleSelectCommuneWardStart}
-                  padding={7}
-                  radius={6}
-                  borderColor={ColorsGlobal.borderColor} borderWidth={1}
-                >
+                <AppButton onPress={handleSelectCommuneWardStart} padding={7} radius={6} borderColor={ColorsGlobal.borderColor} borderWidth={1}>
                   <IconDotHorizonal />
                 </AppButton>
               </AppView>
-
-
             </AppView>
 
-            {/* ĐIỂM TRẢ */}
             <AppView gap={6}>
               <AppView row gap={8} alignItems='flex-end'>
                 <AppView flex={1}>
-                  <AppInput
-                    label={labelTextTo}
-                    value={placeEnd}
-                    onChangeText={setPlaceEnd}
-                    placeholder="Nhập chi tiết điểm trả"
-                  />
+                  <AppInput label={labelTextTo} value={placeEnd} onChangeText={setPlaceEnd} placeholder="Nhập chi tiết điểm trả" />
                 </AppView>
-                <AppButton
-                  onPress={handleSelectCommuneWardEnd}
-                  padding={7}
-                  radius={6}
-                  borderColor={ColorsGlobal.borderColor} borderWidth={1}
-                >
+                <AppButton onPress={handleSelectCommuneWardEnd} padding={7} radius={6} borderColor={ColorsGlobal.borderColor} borderWidth={1}>
                   <IconDotHorizonal />
                 </AppButton>
               </AppView>
-
             </AppView>
           </AppView>
 
@@ -304,37 +231,28 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
       </ScrollView>
 
       <ButtonSubmit title='Đăng bán' onPress={handleCreateTrip} />
-      <ModalSelectLocationByArea
-        multiSelect={false}
-        isVisible={isCommuneWardTo}
-        locationType={selectedDirection === 1 ? 'pickup' : 'dropoff'}
-        areaId={id_area}
-        defaultSelected={selectedStartLocation}
-        onClose={() => setIsCommuneWardTo(false)}
+
+      <ModalSelectLocationByArea multiSelect={false} isVisible={isCommuneWardTo}
+        locationType={selectedDirection === 1 ? 'pickup' : 'dropoff'} areaId={id_area}
+        defaultSelected={selectedStartLocation} onClose={() => setIsCommuneWardTo(false)}
         onSelected={(value) => {
-          const oldLocation = selectedStartLocation[0];
+          const old = selectedStartLocation[0];
           setSelectedStartLocation([value]);
-          setPlaceStart(prev => updateLocationText(prev, value, oldLocation));
+          setPlaceStart(prev => updateLocationText(prev, value, old));
         }}
         parentIds={selectedDirection === 1 ? currentArea?.level1_pickup_ids : currentArea?.level1_dropoff_ids}
       />
 
-      <ModalSelectLocationByArea
-        multiSelect={false}
-        isVisible={isCommuneWard}
-        locationType={selectedDirection === 1 ? 'dropoff' : 'pickup'}
-        areaId={id_area}
-        defaultSelected={selectedEndLocation}
-        onClose={() => setIsCommuneWard(false)}
+      <ModalSelectLocationByArea multiSelect={false} isVisible={isCommuneWard}
+        locationType={selectedDirection === 1 ? 'dropoff' : 'pickup'} areaId={id_area}
+        defaultSelected={selectedEndLocation} onClose={() => setIsCommuneWard(false)}
         onSelected={(value) => {
-          const oldLocation = selectedEndLocation[0];
+          const old = selectedEndLocation[0];
           setSelectedEndLocation([value]);
-          setPlaceEnd(prev => updateLocationText(prev, value, oldLocation));
+          setPlaceEnd(prev => updateLocationText(prev, value, old));
         }}
         parentIds={selectedDirection === 1 ? currentArea?.level1_dropoff_ids : currentArea?.level1_pickup_ids}
       />
-
-
     </AppView>
-  )
+  );
 }

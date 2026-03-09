@@ -15,11 +15,22 @@ export default function Trip(props) {
     const guests = props.data?.guests;
     const time_start_sec = props.data?.time_start;
     const isSold = props.data?.is_sold === 1;
+    const time_created_sec_raw = props.data?.time_created;
+    const minutes_added = props.data?.minutes_added || 0;
     const time = parseTime(time_start_sec);
     const isToday = time.isSame(moment(), 'day');
     const formatted = isToday
         ? time.format("HH:mm")
         : time.format("DD/MM/YYYY HH:mm");
+    let displayTime = formatted;
+    if (time_created_sec_raw) {
+        const num = typeof time_created_sec_raw === 'string' ? Number(time_created_sec_raw) : time_created_sec_raw;
+        if (!isNaN(num as number)) {
+            const base = moment.unix(num as number).format("HH:mm");
+            displayTime = minutes_added && Number(minutes_added) > 0 ? `${base} + ${minutes_added}'` : base;
+        }
+    }
+    // console.log('minutes_added time_created_sec_raw:', minutes_added, time_created_sec_raw)
     const countdown = useCountdown(time_start_sec);
     const type_car = props?.data?.type_car;
     const name_type_car = CONSTANT.TYPE_CAR_LIST.find(item => item.key === type_car)?.name;
@@ -83,11 +94,11 @@ export default function Trip(props) {
 
                     <AppView row gap={8} alignItems='center'>
                         <AppText fontWeight={600} color={getTextColor()}>
-                            {formatted}
+                            {displayTime}
                         </AppText>
 
                         {/* ✅ Đếm ngược chỉ hiện khi còn <= 15 phút */}
-                        {showCountdown && <CountdownStyled seconds={countdown} />}
+                        {/* {showCountdown && <CountdownStyled seconds={countdown} />} */}
 
                         {/* ✅ Badge "Đã qua" khi isPast và chưa bán */}
                         {isPast && !isSold && (
