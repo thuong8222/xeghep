@@ -12,6 +12,7 @@ import moment from 'moment';
 import IconComment from '../../assets/icons/iconComment';
 import { useAppContext } from '../../context/AppContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getTripDisplayStatus } from '../../utils/Helper';
 
 export default function DetailTripHistorySreen({ route, navigation }) {
     const data = route?.params?.data;
@@ -30,6 +31,11 @@ export default function DetailTripHistorySreen({ route, navigation }) {
     const driverSell = data?.driver_sell || {};
     const driverReceive = data?.driver_receive;
     const isSold = data?.is_sold;
+    const statusKey =
+        data?.display_status
+            ? String(data.display_status)
+            : (isSold === 1 ? 'sold' : (data?.status === 2 ? 'cancelled' : 'selling'));
+    const statusInfo = getTripDisplayStatus(statusKey);
     const formatTime = (value) => {
         if (!value) return "--";
 
@@ -55,20 +61,11 @@ export default function DetailTripHistorySreen({ route, navigation }) {
     const gotoChat = () => {
         navigation.push('ChatScreen', { data: data })
     }
-    let status_ = '';
-
-    if (isSold === 1) {
-        status_ = isSeller ? 'Đã bán' : 'Đã nhận';
-    } else if (isSold === 2 && data?.status === 0) {
-        status_ = 'Đã huỷ';
-    } else {
-        status_ = 'Không bán được';
-    }
     return (
         <AppView style={styles.container}>
-            <AppView padding={16} marginBottom={16} borderWidth={1} borderColor={isSold === 1 ? 'green' : 'red'} radius={999} row justifyContent={'space-between'}>
+            <AppView padding={16} marginBottom={16} borderWidth={1} borderColor={statusInfo.color} backgroundColor={statusInfo.background} radius={999} row justifyContent={'space-between'}>
                 <AppText  >{'Trạng thái: '}</AppText>
-                <AppText textAlign={'right'} color={isSold === 1 ? 'green' : 'red'}>{status_}</AppText>
+                <AppText textAlign={'right'} color={statusInfo.color}>{statusInfo.label}</AppText>
             </AppView>
             {/* --- Header tài xế bán chuyến --- */}
             {isSold === 1 &&
@@ -243,4 +240,3 @@ const styles = StyleSheet.create({
         marginTop: 10,
     }
 });
-

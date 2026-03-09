@@ -49,7 +49,6 @@ export default function Trip(props) {
         if (isPast) return '#999999';
         return defaultColor;
     };
-
     return (
         <AppView
             gap={4}

@@ -1,4 +1,4 @@
-import { StyleSheet, View, FlatList, RefreshControl } from 'react-native';
+import { StyleSheet, View, FlatList, RefreshControl, ActivityIndicator } from 'react-native';
 import React, { useEffect, useState, useCallback } from 'react';
 import AppView from '../../components/common/AppView';
 
@@ -9,17 +9,19 @@ import AppInput from '../../components/common/AppInput';
 import AppText from '../../components/common/AppText';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/data/store';
-import { fetchReceivedTrips, FetchReceivedTripsParams, fetchSoldTrips } from '../../redux/slices/tripsSlice';
+import { fetchReceivedTrips, FetchReceivedTripsParams, fetchSoldTrips, fetchMyTrips, Trip } from '../../redux/slices/tripsSlice';
 import { useAppContext } from '../../context/AppContext';
 import moment from 'moment';
 import TypeFilterBar from '../../components/component/TypeFilterBar';
 import { scale } from '../../utils/Helper';
+import ModalEditTrip from '../../components/component/modals/ModalEditTrip';
+import { ACCESSIBLE } from 'react-native-keychain';
 
 export default function ReceivingScheduleScreen() {
 
   const dispatch = useDispatch<AppDispatch>();
   const { updateTrips } = useAppContext();
-  const { receivedTrips, soldTrips, loading, error } = useSelector((state: RootState) => state.trips);
+  const { receivedTrips, soldTrips, myTrips, loading, error } = useSelector((state: RootState) => state.trips);
 
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
   const [fromDate, setFromDate] = useState('');
@@ -28,7 +30,8 @@ export default function ReceivingScheduleScreen() {
   const [errorMessage, setErrorMessage] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [selectedType, setSelectedType] = useState<string | null>('chuyến nhận');
-  const types = ['chuyến nhận', 'chuyến bán']
+  const types = ['chuyến nhận', 'chuyến bán', 'chuyến của tôi']
+  const [editTripItem, setEditTripItem] = useState<any | null>(null);
 
 
   const toggleFilter = (type: string) => {
@@ -72,10 +75,13 @@ export default function ReceivingScheduleScreen() {
     if (selectedType == 'chuyến nhận') {
       console.log('chuyến nhận fetchReceivedTrips')
       return dispatch(fetchReceivedTrips(params));
-    } else {
+    } else if (selectedType == 'chuyến bán') {
       console.log('chuyến nhận fetchSoldTrips')
 
       return dispatch(fetchSoldTrips(params));
+    } else {
+      console.log('chuyến của tôi fetchMyTrips')
+      return dispatch(fetchMyTrips(params));
     }
 
   }, [dispatch, fromDate, toDate, dateToTimestamp, selectedType]);
@@ -95,8 +101,10 @@ export default function ReceivingScheduleScreen() {
 
     if (selectedType == 'chuyến nhận') {
       await dispatch(fetchReceivedTrips({}));
-    } else {
+    } else if (selectedType == 'chuyến bán') {
       await dispatch(fetchSoldTrips({}));
+    } else {
+      await dispatch(fetchMyTrips({}));
     }
 
     setRefreshing(false);
@@ -105,8 +113,17 @@ export default function ReceivingScheduleScreen() {
 
 
   const renderItem_trip = useCallback(
-    ({ item }) => <TripHistory data={item} />,
-    []
+    ({ item }: { item: Trip }) => (
+      <TripHistory
+        data={item}
+        onEdit={
+          selectedType === 'chuyến của tôi'
+            ? (trip: any) => setEditTripItem(trip)
+            : undefined
+        }
+      />
+    ),
+    [selectedType]
   );
 
 
@@ -168,7 +185,7 @@ export default function ReceivingScheduleScreen() {
     if (loading && !refreshing) {
       return (
         <AppView paddingTop={32} alignItems="center">
-          <AppText title="Đang tải dữ liệu..." />
+          <ActivityIndicator />
         </AppView>
       );
     }
@@ -236,12 +253,23 @@ export default function ReceivingScheduleScreen() {
 
       <AppView flex={1}>
         <FlatList
-          data={selectedType === 'chuyến nhận' ? receivedTrips : soldTrips}
+          data={
+            selectedType === 'chuyến nhận'
+              ? receivedTrips
+              : selectedType === 'chuyến bán'
+                ? soldTrips
+                : myTrips
+          }
 
           keyExtractor={(item, index) => item.id_trip ?? index.toString()}
           showsVerticalScrollIndicator={false}
           renderItem={renderItem_trip}
           ItemSeparatorComponent={() => <AppView height={scale(16)} />}
+          removeClippedSubviews
+          windowSize={10}
+          maxToRenderPerBatch={10}
+          updateCellsBatchingPeriod={50}
+          initialNumToRender={10}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -254,6 +282,11 @@ export default function ReceivingScheduleScreen() {
         mode="date"
         onConfirm={handleConfirmDate}
         onCancel={closeDatePicker}
+      />
+      <ModalEditTrip
+        visible={!!editTripItem}
+        onRequestClose={() => setEditTripItem(null)}
+        trip={editTripItem}
       />
     </AppView>
   );

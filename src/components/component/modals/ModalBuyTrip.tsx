@@ -16,7 +16,7 @@ interface ModalBuyTripProps {
   onRequestClose?: () => void;
   onApplyFilter?: (
     filters: any,
-    dateFilter?: string | null,
+    dateFilter?: { start_date: number; end_date: number } | null,
     placeStart?: string,
     placeEnd?: string) => void;
 }
@@ -29,6 +29,7 @@ export default function ModalBuyTrip({ visible, onRequestClose, onApplyFilter }:
   const [customDate, setCustomDate] = useState<Date | null>(null);
   const [placeStart, setPlaceStart] = useState('');
   const [placeEnd, setPlaceEnd] = useState('');
+  const [sortNewest, setSortNewest] = useState<boolean>(false);
 
   const dateValue = useMemo(() => {
     const vietnamNow = moment().tz('Asia/Ho_Chi_Minh');
@@ -75,6 +76,7 @@ export default function ModalBuyTrip({ visible, onRequestClose, onApplyFilter }:
     setCustomDate(null);
     setPlaceStart("");
     setPlaceEnd("");
+    setSortNewest(false);
   };
 
   const handleOk = () => {
@@ -85,6 +87,7 @@ export default function ModalBuyTrip({ visible, onRequestClose, onApplyFilter }:
       ...(selectedTime && { time: selectedTime }),
       ...(placeStart && { place_start: placeStart }),
       ...(placeEnd && { place_end: placeEnd }),
+      ...(sortNewest && { sort: 'newest' }),
     };
     console.log('handleApplyFilter selectedTime: ', selectedTime)
 
@@ -141,7 +144,24 @@ export default function ModalBuyTrip({ visible, onRequestClose, onApplyFilter }:
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 16 }}
           >
-
+  <AppView marginTop={16}>
+              <AppView
+                paddingVertical={12}
+                paddingHorizontal={10}
+                borderBottomWidth={1}
+                borderBottomColor={ColorsGlobal.borderColor}
+              >
+                <AppText color={ColorsGlobal.main} fontWeight={700}>
+                  {'Sắp xếp'}
+                </AppText>
+              </AppView>
+              <AppView paddingHorizontal={10}>
+                <AppButton onPress={() => setSortNewest(prev => !prev)} row justifyContent="space-between" paddingVertical={12}>
+                  <AppText color={ColorsGlobal.textDark} fontWeight={500}>Chuyến mới nhất</AppText>
+                  {sortNewest && <IconTick />}
+                </AppButton>
+              </AppView>
+            </AppView>
             <AppView>
               <AppView
                 paddingVertical={12}
@@ -172,7 +192,7 @@ export default function ModalBuyTrip({ visible, onRequestClose, onApplyFilter }:
               </AppView>
             </AppView>
 
-       
+
             <AppView marginTop={16}>
               <AppView
                 paddingVertical={12}
@@ -220,9 +240,11 @@ export default function ModalBuyTrip({ visible, onRequestClose, onApplyFilter }:
                 <AppInput value={placeEnd} onChangeText={(text) => setPlaceEnd(text)} type={'select'} placeholder='Điểm trả' />
               </AppView>
             </AppView>
+
+          
           </ScrollView>
 
-      
+
           <ButtonSubmit title="OK" onPress={handleOk} />
         </AppView>
       </AppView>

@@ -1,5 +1,5 @@
 import { Alert, Linking, StyleSheet, Text, View } from 'react-native'
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import AppView from '../common/AppView';
 import { ColorsGlobal } from '../base/Colors/ColorsGlobal';
 import AppText from '../common/AppText';
@@ -8,33 +8,55 @@ import moment from 'moment';
 import ArrowRight from '../../assets/icons/ArrowRight';
 import AppButton from '../common/AppButton';
 import IconNote from '../../assets/icons/IconNote';
-import { NumberFormat, scale } from '../../utils/Helper';
+import { NumberFormat, scale, getTripDisplayStatus } from '../../utils/Helper';
 import { useNavigation } from '@react-navigation/native';
 import { useAppContext } from '../../context/AppContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function TripHistory(props) {
-    
+    const [driver, setDriver] = useState<any>(null);
     const navigation = useNavigation();
     const { currentDriver } = useAppContext()
+
+    useEffect(() => {
+        const fetchDriver = async () => {
+            const driverString = await AsyncStorage.getItem("driver");
+            if (driverString) {
+                setDriver(JSON.parse(driverString));
+            } else {
+                setDriver(null); // ✅ reset khi logout
+            }
+        };
+        fetchDriver();
+    }, [currentDriver]);
     const isSold = props.data.is_sold;
+    const canEdit =
+        !!props?.onEdit &&
+        ((props?.data?.display_status === 'selling') ||
+            (props?.data?.is_sold === 0 && props?.data?.status === 1));
     const gotoDetailTripHistory = () => {
         navigation.navigate('DetailTripHistory', { data: props.data })
     }
-    const isOwner = props?.data?.id_driver_sell === currentDriver?.id
-    let status_ = '';
 
-    if (isSold === 1) {
-        status_ = 'Đã bán';
-    } else if (isSold === 2 && props?.data?.status === 0) {
-        status_ = 'Đã huỷ';
-    } else {
-        status_ = 'Không bán được';
-    }
+    const isOwner = props?.data?.id_driver_sell === (currentDriver?.id || driver?.id)
+    const statusKey =
+        props?.data?.display_status
+            ? String(props.data.display_status)
+            : (props?.data?.is_sold === 1 ? 'sold' : (props?.data?.status === 2 ? 'cancelled' : 'selling'));
+    const statusInfo = getTripDisplayStatus(statusKey);
+
+    // if (isSold === 1) {
+    //     status_ = 'Đã bán';
+    // } else if (isSold === 2 && props?.data?.status === 0) {
+    //     status_ = 'Đã huỷ';
+    // } else {
+    //     status_ = 'Không bán được';
+    // }
 
     return (
         <AppButton onPress={gotoDetailTripHistory} gap={4} radius={12} borderWidth={1} padding={0}
             borderColor={ColorsGlobal.borderColorDark}
-            
+
             backgroundColor={ColorsGlobal.backgroundTrip}
             row>
             <AppView gap={4} flex={1} padding={12}  >
@@ -58,18 +80,28 @@ export default function TripHistory(props) {
                     </AppView>
 
                     <AppView row gap={8}>
-                        {props.data.time_receive ?
+                        {props.data.time_receive ? (
                             <AppText fontWeight={600}>
                                 {typeof props.data.time_receive === 'number' || /^\d+$/.test(props.data.time_receive)
                                     ? moment.unix(Number(props.data.time_receive)).format('DD-MM-YYYY HH:mm')
                                     : moment(props.data.time_receive).format('DD-MM-YYYY HH:mm')}
                             </AppText>
-                            :
-                            <AppView backgroundColor='#FFEBEB' radius={999} paddingHorizontal={10} alignItems='center' justifyContent='center'>
-                                <AppText fontSize={12} color={isSold === 1 ? 'green' : 'red'}>{status_}</AppText>
+                        ) : (
+                            <AppView backgroundColor={statusInfo.background} radius={999} paddingHorizontal={10} alignItems='center' justifyContent='center'>
+                                <AppText fontSize={12} color={statusInfo.color}>{statusInfo.label}</AppText>
                             </AppView>
-
-                        }
+                        )}
+                        {canEdit && (
+                            <AppButton
+                                onPress={() => props.onEdit && props.onEdit(props.data)}
+                                paddingHorizontal={10}
+                                paddingVertical={4}
+                                radius={999}
+                                backgroundColor={'#FFF0E6'}
+                            >
+                                <AppText fontSize={12} color={ColorsGlobal.main}>{'Sửa'}</AppText>
+                            </AppButton>
+                        )}
                     </AppView>
                 </AppView>
                 <AppView row gap={8} >
@@ -100,8 +132,8 @@ export default function TripHistory(props) {
             </AppView>
             {(isSold === 1 && isOwner) && (
                 <AppView borderLeftColor={'#949494'} borderLeftWidth={1}  >
-                    <AppView marginTop={10} backgroundColor='#C8E6C9' radius={999} paddingVertical={2} marginHorizontal={15} >
-                        <AppText fontSize={11} textAlign='center' color={isSold === 1 && 'green'}>{isSold === 1 && status_}</AppText>
+                    <AppView marginTop={10} backgroundColor={statusInfo.background} radius={999} paddingVertical={2} marginHorizontal={15} >
+                        <AppText fontSize={11} textAlign='center' color={statusInfo.color}>{statusInfo.label}</AppText>
                     </AppView>
                     {isSold === 1 &&
                         <AppView justifyContent='center' alignItems='center' padding={8} gap={4}>
@@ -116,5 +148,3 @@ export default function TripHistory(props) {
         </AppButton>
     )
 }
-
-

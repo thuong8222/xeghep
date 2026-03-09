@@ -26,11 +26,16 @@ export type BuyTripStackParamList = {
   }
   SaleTrip: {
     id_area: string;
-    ereaData?: string;
+    ereaData?: {
+      nameGroup: string;
+      countMember: number;
+      isJoin?: string;
+    };
   };
   InfoGroup: {
     nameGroup: string;
     countMember: number;
+    isJoin?: string;
   }
   GroupRules: {
     id_area?: string;

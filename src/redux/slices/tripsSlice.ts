@@ -9,6 +9,11 @@ export interface Trip {
   driver_sell: string;
   direction: number;
   is_sold: number;
+  display_status?: 'selling' | 'sold' | 'cancelled' | 'unsellable' | 'received';
+  is_expired?: boolean;
+  is_mine?: boolean;
+  is_new?: boolean;
+  is_unsellable?: boolean;
   guests: number;
   time_start: string;
   price_sell: number;
@@ -43,6 +48,7 @@ interface TripsState {
   driver_areas: DriverArea[];
   receivedTrips: Trip[];
   soldTrips: Trip[];
+  myTrips: Trip[];
   input_area_id?: string;
   trips_count: number;
   loading: boolean;
@@ -51,6 +57,9 @@ interface TripsState {
   buyTripLoading?: boolean;
   buyTripError?: string | null;
   buyTripSuccess?: boolean;
+  editTripLoading?: boolean;
+  editTripError?: string | null;
+  editTripSuccess?: boolean;
 }
 
 const initialState: TripsState = {
@@ -58,17 +67,22 @@ const initialState: TripsState = {
   driver_areas: [],
   receivedTrips: [],
   soldTrips: [],
+  myTrips: [],
   input_area_id: undefined,
   trips_count: 0,
   loading: false,
   error: null,
   successMessage: null,
+  editTripLoading: false,
+  editTripError: null,
+  editTripSuccess: false,
 };
 
 export const api = axios.create({
   baseURL: AppConfig.BASE_URL,
   headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
 });
+
 export interface CreateTripPayload {
   direction: number;
   guests: number;
@@ -83,6 +97,23 @@ export interface CreateTripPayload {
   cover_car?: number;
   time_receive?: string | null;
   phone_number_guest: string;
+}
+
+// ✅ Payload cho chỉnh sửa chuyến đang bán
+// Chỉ các trường được phép sửa, tất cả đều optional
+export interface EditTripPayload {
+  tripId: string;
+  direction?: number;
+  guests?: number;
+  time_start?: string | number;
+  price_sell?: number;
+  place_start?: string;
+  place_end?: string;
+  point?: number;
+  note?: string;
+  type_car?: string;
+  cover_car?: number;
+  phone_number_guest?: string;
 }
 
 api.interceptors.request.use(async config => {
@@ -100,6 +131,7 @@ export interface FetchTripsPayload {
   direction: number;
   pick_up: string;
   drop_off: string;
+  sort?: 'default' | 'newest';
 }
 
 export const fetchTrips = createAsyncThunk<
@@ -116,20 +148,11 @@ export const fetchTrips = createAsyncThunk<
         direction: payload.direction,
         pick_up: payload.pick_up,
         drop_off: payload.drop_off,
+        sort: payload.sort ?? 'default',
       },
     });
-    // console.log('modal truyen vao: ', {
-    //   area_id: payload.area_id,
-    //   start_date: payload.start_date,
-    //   end_date: payload.end_date,
-    //   direction: payload.direction,
-    //   pick_up: payload.pick_up,
-    //   drop_off: payload.drop_off,
-    // });
-    // console.log('fetchTrips res ', response);
     return {
       trips: response.data.data,
-
       successMessage: response.data,
     };
   } catch (err: any) {
@@ -139,6 +162,7 @@ export const fetchTrips = createAsyncThunk<
     );
   }
 });
+
 export interface FetchReceivedTripsParams {
   start_date?: number;
   end_date?: number;
@@ -150,31 +174,41 @@ export const fetchReceivedTrips = createAsyncThunk<
   { rejectValue: string }
 >('trips/fetchReceivedTrips', async (params, { rejectWithValue }) => {
   try {
-    console.log('params chuyeesn nhajn slice: ', params);
     const response = await api.get('api/trips/received', { params });
-
     return response.data.data;
   } catch (err: any) {
-    console.log('err chuyen nhan: ', err);
     return rejectWithValue(
       err.response?.data?.message || 'Lấy chuyến thất bại',
     );
   }
 });
+
 export const fetchSoldTrips = createAsyncThunk<
   Trip[],
   FetchReceivedTripsParams,
   { rejectValue: string }
 >('trips/fetchSoldTrips', async (params, { rejectWithValue }) => {
   try {
-    console.log('params chuyen ban slice: ', params);
     const response = await api.get('api/trips/sold', { params });
-    console.log('fetchSoldTrips response:', response);
     return response.data.data;
   } catch (err: any) {
-    console.log('err chuyen ban: ', err);
     return rejectWithValue(
       err.response?.data?.message || 'Lấy chuyến thất bại',
+    );
+  }
+});
+
+export const fetchMyTrips = createAsyncThunk<
+  Trip[],
+  FetchReceivedTripsParams & { status?: 'selling' | 'sold' | 'cancelled' },
+  { rejectValue: string }
+>('trips/fetchMyTrips', async (params, { rejectWithValue }) => {
+  try {
+    const response = await api.get('api/trips/my', { params });
+    return response.data.data;
+  } catch (err: any) {
+    return rejectWithValue(
+      err.response?.data?.message || 'Lấy chuyến của tôi thất bại',
     );
   }
 });
@@ -194,15 +228,32 @@ export const createTrip = createAsyncThunk<
     );
   }
 });
+
+// ✅ Chỉnh sửa chuyến đang bán (chỉ khi is_sold=0, status=1)
+export const editTrip = createAsyncThunk<
+  Trip,
+  EditTripPayload,
+  { rejectValue: string }
+>('trips/editTrip', async ({ tripId, ...fields }, { rejectWithValue }) => {
+  try {
+    const response = await api.post(`api/trips/${tripId}/update`, fields);
+    console.log('editTrip response: ',response);
+    return response.data.data || response.data;
+  } catch (err: any) {
+    console.log('err editTrip: ', err);
+    return rejectWithValue(
+      err.response?.data?.message || 'Chỉnh sửa chuyến thất bại',
+    );
+  }
+});
+
 export const cancelTrip = createAsyncThunk<
   string,
   string,
   { rejectValue: string }
 >('trips/cancelTrip', async (tripId, { rejectWithValue }) => {
   try {
-    console.log('HỦY CHUYẾN: ', tripId);
-    const response = await api.delete(`/api/trips/${tripId}`);
-    console.log('response:  huyr chuyen: ', response);
+    await api.delete(`/api/trips/${tripId}`);
     return tripId;
   } catch (err: any) {
     return rejectWithValue(
@@ -210,6 +261,7 @@ export const cancelTrip = createAsyncThunk<
     );
   }
 });
+
 export interface BuyTripPayload {
   tripId: string;
 }
@@ -220,12 +272,9 @@ export const buyTrip = createAsyncThunk<
   { rejectValue: string }
 >('trips/buyTrip', async ({ tripId }, { rejectWithValue }) => {
   try {
-    console.log('mua chueyesn : ', tripId);
     const response = await api.post(`/api/trips/${tripId}/buy`);
-    console.log('trips/buyTrip: ', response);
     return response.data;
   } catch (err: any) {
-    console.log('mua chueyesn err: ', err);
     return rejectWithValue(
       err.response?.data?.message || 'Mua chuyến thất bại',
     );
@@ -246,12 +295,17 @@ const tripsSlice = createSlice({
     },
 
     updateTrip: (state, action: PayloadAction<Trip>) => {
-      const index = state.trips.findIndex(
+      // Cập nhật trong danh sách sàn
+      const idx = state.trips.findIndex(
         t => t.id_trip === action.payload.id_trip,
       );
-      if (index !== -1) {
-        state.trips[index] = action.payload;
-      }
+      if (idx !== -1) state.trips[idx] = action.payload;
+
+      // Cập nhật trong myTrips nếu có
+      const myIdx = state.myTrips.findIndex(
+        t => t.id_trip === action.payload.id_trip,
+      );
+      if (myIdx !== -1) state.myTrips[myIdx] = action.payload;
     },
 
     removeTrip: (state, action: PayloadAction<string>) => {
@@ -275,13 +329,22 @@ const tripsSlice = createSlice({
         state.receivedTrips[index] = action.payload;
       }
     },
+
     clearTripsMessages: state => {
       state.error = null;
       state.successMessage = null;
     },
+
+    // ✅ Reset trạng thái edit sau khi dùng xong
+    resetEditTrip: state => {
+      state.editTripLoading = false;
+      state.editTripError = null;
+      state.editTripSuccess = false;
+    },
   },
   extraReducers: builder => {
     builder
+      // ── fetchTrips ────────────────────────────────────────────
       .addCase(fetchTrips.pending, state => {
         state.loading = true;
         state.error = null;
@@ -303,6 +366,7 @@ const tripsSlice = createSlice({
         state.error = action.payload || 'Lấy danh sách trips thất bại';
       })
 
+      // ── createTrip ────────────────────────────────────────────
       .addCase(createTrip.pending, state => {
         state.loading = true;
         state.error = null;
@@ -310,19 +374,55 @@ const tripsSlice = createSlice({
       })
       .addCase(createTrip.fulfilled, (state, action: PayloadAction<Trip>) => {
         state.loading = false;
-
         state.successMessage = 'Tạo chuyến thành công';
+        // Thêm vào myTrips ngay sau khi tạo
+        state.myTrips.unshift(action.payload);
       })
       .addCase(createTrip.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Tạo chuyến thất bại';
       })
+
+      // ── editTrip ──────────────────────────────────────────────
+      .addCase(editTrip.pending, state => {
+        state.editTripLoading = true;
+        state.editTripError = null;
+        state.editTripSuccess = false;
+      })
+      .addCase(editTrip.fulfilled, (state, action: PayloadAction<Trip>) => {
+        state.editTripLoading = false;
+        state.editTripSuccess = true;
+        state.editTripError = null;
+
+        // ✅ Cập nhật trong myTrips
+        const myIdx = state.myTrips.findIndex(
+          t => t.id_trip === action.payload.id_trip,
+        );
+        if (myIdx !== -1) {
+          state.myTrips[myIdx] = action.payload;
+        }
+
+        // ✅ Cập nhật trong danh sách sàn nếu có
+        const tripIdx = state.trips.findIndex(
+          t => t.id_trip === action.payload.id_trip,
+        );
+        if (tripIdx !== -1) {
+          state.trips[tripIdx] = action.payload;
+        }
+      })
+      .addCase(editTrip.rejected, (state, action) => {
+        state.editTripLoading = false;
+        state.editTripSuccess = false;
+        state.editTripError = action.payload || 'Chỉnh sửa chuyến thất bại';
+      })
+
+      // ── buyTrip ───────────────────────────────────────────────
       .addCase(buyTrip.pending, state => {
         state.buyTripLoading = true;
         state.buyTripError = null;
         state.buyTripSuccess = false;
       })
-      .addCase(buyTrip.fulfilled, (state, action) => {
+      .addCase(buyTrip.fulfilled, state => {
         state.buyTripLoading = false;
         state.buyTripSuccess = true;
       })
@@ -332,6 +432,7 @@ const tripsSlice = createSlice({
         state.buyTripSuccess = false;
       })
 
+      // ── fetchReceivedTrips ────────────────────────────────────
       .addCase(fetchReceivedTrips.pending, state => {
         state.loading = true;
         state.error = null;
@@ -348,6 +449,7 @@ const tripsSlice = createSlice({
         state.error = action.payload || 'Lấy chuyến đã nhận thất bại';
       })
 
+      // ── fetchSoldTrips ────────────────────────────────────────
       .addCase(fetchSoldTrips.pending, state => {
         state.loading = true;
         state.error = null;
@@ -361,24 +463,53 @@ const tripsSlice = createSlice({
       )
       .addCase(fetchSoldTrips.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || 'Lấy chuyến đã nhận thất bại';
+        state.error = action.payload || 'Lấy chuyến đã bán thất bại';
       })
+
+      // ── fetchMyTrips ──────────────────────────────────────────
+      .addCase(fetchMyTrips.pending, state => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        fetchMyTrips.fulfilled,
+        (state, action: PayloadAction<Trip[]>) => {
+          state.loading = false;
+          state.myTrips = action.payload;
+        },
+      )
+      .addCase(fetchMyTrips.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Lấy chuyến của tôi thất bại';
+      })
+
+      // ── cancelTrip ────────────────────────────────────────────
       .addCase(cancelTrip.pending, state => {
         state.loading = true;
         state.error = null;
       })
       .addCase(cancelTrip.fulfilled, (state, action: PayloadAction<string>) => {
         state.loading = false;
-
+        // Xóa khỏi danh sách sàn
         state.trips = state.trips.filter(t => t.id_trip !== action.payload);
-
         state.receivedTrips = state.receivedTrips.filter(
           t => t.id_trip !== action.payload,
         );
-
         state.soldTrips = state.soldTrips.filter(
           t => t.id_trip !== action.payload,
         );
+        // Cập nhật display_status trong myTrips thành cancelled thay vì xóa
+        const myIdx = state.myTrips.findIndex(
+          t => t.id_trip === action.payload,
+        );
+        if (myIdx !== -1) {
+          state.myTrips[myIdx] = {
+            ...state.myTrips[myIdx],
+            display_status: 'cancelled',
+            is_sold: 2,
+            status: 0,
+          };
+        }
         state.successMessage = 'Hủy chuyến thành công';
       })
       .addCase(cancelTrip.rejected, (state, action) => {
@@ -391,10 +522,11 @@ const tripsSlice = createSlice({
 export const {
   addTrip,
   updateTrip,
-
   removeTrip,
   addReceivedTrip,
   updateReceivedTrip,
   clearTripsMessages,
+  resetEditTrip,
 } = tripsSlice.actions;
+
 export default tripsSlice.reducer;

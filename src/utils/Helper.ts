@@ -114,46 +114,49 @@ export const CONSTANT = {
     0: 'chưa bán',
     2: 'đã huỷ chuyến',
   },
-  STATUS_POINT : {
+  STATUS_POINT: {
     pending_payment: {
       label: 'Chờ thanh toán',
-      color: '#7F8C8D',          // chữ xám
-      background: '#F2F3F4',     // nền cam nhạt
+      color: '#7F8C8D', // chữ xám
+      background: '#F2F3F4', // nền cam nhạt
     },
     available: {
       label: 'Đang bán',
-      color: '#27AE60',          // chữ xanh lá
-      background: '#E9F7EF',     // nền xanh lá nhạt
+      color: '#27AE60', // chữ xanh lá
+      background: '#E9F7EF', // nền xanh lá nhạt
     },
     completed: {
       label: 'Đã bán',
-      color: '#2980B9',          // chữ xanh dương
-      background: '#EBF5FB',     // nền xanh dương nhạt
+      color: '#2980B9', // chữ xanh dương
+      background: '#EBF5FB', // nền xanh dương nhạt
     },
     paused: {
       label: 'Tạm dừng bán',
-   
-      color: '#F39C12',          // chữ cam
-      background: '#FEF5E7', 
+
+      color: '#F39C12', // chữ cam
+      background: '#FEF5E7',
     },
     cancelled: {
       label: 'Huỷ bán',
-      color: '#E74C3C',          // chữ đỏ
-      background: '#FDEDEC',     // nền đỏ nhạt
+      color: '#E74C3C', // chữ đỏ
+      background: '#FDEDEC', // nền đỏ nhạt
     },
   },
-  STATUS_STYLE :{
-    0: { // đang chờ
+  STATUS_STYLE: {
+    0: {
+      // đang chờ
       text: 'Đang chờ',
       color: '#F39C12',
       bg: '#FFF3E0',
     },
-    1: { // đã mua
+    1: {
+      // đã mua
       text: 'Đã mua',
       color: '#27AE60',
       bg: '#E9F7EF',
     },
-    2: { // đã huỷ
+    2: {
+      // đã huỷ
       text: 'Đã huỷ',
       color: '#C0392B',
       bg: '#FDEDEC',
@@ -587,4 +590,17 @@ export const parseTime = value => {
   }
 
   return moment(value);
+};
+
+export const TRIP_DISPLAY_STATUS = {
+  selling: { label: 'Đang bán', color: '#F39C12', background: '#FFF3E0' },
+  sold: { label: 'Đã bán', color: '#27AE60', background: '#E9F7EF' },
+  cancelled: { label: 'Đã huỷ', color: '#C0392B', background: '#FDEDEC' },
+} as const;
+
+export type TripDisplayStatusKey = keyof typeof TRIP_DISPLAY_STATUS;
+
+export const getTripDisplayStatus = (key?: string) => {
+  const k = (key || 'selling') as TripDisplayStatusKey;
+  return TRIP_DISPLAY_STATUS[k] || TRIP_DISPLAY_STATUS.selling;
 };

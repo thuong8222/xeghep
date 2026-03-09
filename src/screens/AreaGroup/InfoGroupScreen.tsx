@@ -1,5 +1,5 @@
 import { Alert, StyleSheet, Text, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useLayoutEffect, useState } from 'react'
 import AppView from '../../components/common/AppView'
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal'
 import AppText from '../../components/common/AppText';
@@ -8,11 +8,13 @@ import IconArowDown from '../../assets/icons/IconArowDown';
 import ModalRequestJoinGroup from '../../components/component/modals/ModalRequestJoinGroup';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { BuyTripStackParamList } from '../../navigation/menuBottomTabs/BuyTripTabs';
+import { HeaderBackButton } from '@react-navigation/elements';
 
 
 type BuyTripProps = NativeStackNavigationProp<BuyTripStackParamList>;
 interface Props {
     navigation: BuyTripProps;
+    route: any;
 }
 
 export default function InfoGroupScreen({ route, navigation }: Props) {
@@ -26,6 +28,16 @@ export default function InfoGroupScreen({ route, navigation }: Props) {
     const gotoGroupRules = () => {
         navigation.navigate('GroupRules')
     }
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerLeft: () => (
+                <HeaderBackButton onPress={() => {
+                    if (navigation.canGoBack()) navigation.goBack();
+                    else navigation.navigate('GroupArea' as never);
+                }} />
+            ),
+        });
+    }, [navigation]);
     return (
         <AppView padding={20} flex={1} backgroundColor={ColorsGlobal.backgroundWhite}>
             <AppView alignItems='center' padding={12}>

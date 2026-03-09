@@ -44,8 +44,7 @@ export default function MainNavigator() {
     };
     fetchDriver();
   }, [currentDriver]); // ✅ chạy lại khi currentDriver thay đổi
-  console.log('driver in MainNavigator: ', driver)
-  console.log('currentDriver?.id || driver?.id: ', currentDriver?.id || driver?.id)
+
   useEffect(() => {
     if (!socket || !isConnected || !currentDriver?.id || !driver?.id) return;
     socket.emit("register_user", currentDriver.id || driver?.id);

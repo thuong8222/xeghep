@@ -5,7 +5,7 @@ import AppView from '../../components/common/AppView'
 import AppButton from '../../components/common/AppButton'
 import AppText from '../../components/common/AppText'
 import { ColorsGlobal } from '../../components/base/Colors/ColorsGlobal'
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import ModalBuyTrip from '../../components/component/modals/ModalBuyTrip'
 
@@ -49,11 +49,24 @@ export default function BuyTripScreen({ navigation, route }: Props) {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isModalConfirmBuyTrip, setIsModalConfirmBuyTrip] = useState(false);
     const [filters, setFilters] = useState<{ direction: string; time: string } | null>(null);
+    const [sortNewest, setSortNewest] = useState<boolean>(false);
     const [boughtTrip, setBoughtTrip] = useState();
     const [tripToCancel, setTripToCancel] = useState(null);
     const [showConfirmCancel, setShowConfirmCancel] = useState(false);
     const [isSaleTripLoading, setIsSaleTripLoading] = useState(false);
+    const [driver, setDriver] = useState<any>(null);
 
+    useEffect(() => {
+        const fetchDriver = async () => {
+            const driverString = await AsyncStorage.getItem("driver");
+            if (driverString) {
+                setDriver(JSON.parse(driverString));
+            } else {
+                setDriver(null); // ✅ reset khi logout
+            }
+        };
+        fetchDriver();
+    }, [currentDriver]);
     const gotoInfoGroup = () => {
 
         setIdArea(id_area)
@@ -175,14 +188,21 @@ export default function BuyTripScreen({ navigation, route }: Props) {
         setIsSaleTripLoading(true);
         // Simulate a small delay or just wait for navigation if needed
         await new Promise(resolve => setTimeout(resolve, 100));
-        navigation.navigate('SaleTrip', { id_area: id_area, })
+        navigation.navigate('SaleTrip', {
+            id_area: id_area,
+            ereaData: {
+                nameGroup,
+                countMember,
+                isJoin
+            }
+        })
         setIsSaleTripLoading(false);
     }
 
     const renderHiddenItem = (data, rowMap) => {
         if (data.item.is_sold === 1) return null;
         const seller_ = data?.item?.id_driver_sell || data?.item?.driver_sell?.id_driver
-        const isOnwer = seller_ === currentDriver?.id
+        const isOnwer = seller_ === (currentDriver?.id || driver?.id)
 
         return (
 
@@ -206,7 +226,7 @@ export default function BuyTripScreen({ navigation, route }: Props) {
     };
 
 
-    const handleApplyFilter = async (filters: any, dateFilter?: string | null) => {
+    const handleApplyFilter = async (filters: any, dateFilter?: any, placeStart?: string, placeEnd?: string) => {
         console.log("handleApplyFilter", filters, dateFilter);
 
         if (!id_area) return;
@@ -225,6 +245,13 @@ export default function BuyTripScreen({ navigation, route }: Props) {
             model.direction = filters.direction;
         }
 
+        // Nhận sắp xếp mới nhất từ modal → đẩy thẳng lên BE
+        if (filters.sort === 'newest') {
+            model.sort = 'newest';
+            setSortNewest(true);
+        } else {
+            setSortNewest(false);
+        }
 
         if (filters.place_start) model.place_start = filters.place_start;
         if (filters.place_end) model.place_end = filters.place_end;
@@ -236,7 +263,13 @@ export default function BuyTripScreen({ navigation, route }: Props) {
     };
 
     return (
-        <AppView flex={1} backgroundColor='#fff' padding={scale(16)} position='relative'>
+        <AppView
+            flex={1}
+            backgroundColor='#fff'
+            paddingHorizontal={scale(16)}
+            paddingTop={scale(16)}
+            position='relative'
+        >
             <SwipeListView
                 refreshing={refreshing}
                 data={trips}
@@ -245,6 +278,8 @@ export default function BuyTripScreen({ navigation, route }: Props) {
                 renderItem={renderItem_trip}
                 ItemSeparatorComponent={() => <AppView height={scale(16)} />}
                 renderHiddenItem={renderHiddenItem}
+                contentContainerStyle={{ paddingBottom: scale(72) }}
+                ListFooterComponent={<AppView height={scale(8)} />}
                 rightOpenValue={-116}
                 leftOpenValue={0}
                 disableRightSwipe={true}
@@ -261,7 +296,6 @@ export default function BuyTripScreen({ navigation, route }: Props) {
 
                 // ✅ Thêm các props này để fix touch conflict
                 useNativeDriver={false}
-                stopLeftSwipe={0}
                 closeOnRowPress={true}          // đóng row khi bấm vào item
                 closeOnScroll={true}            // đóng row khi scroll
                 closeOnRowBeginSwipe={true}

@@ -32,13 +32,12 @@ export default function ModalSelectLocationByArea({
   areaId,
   locationType = null, defaultSelected, editData, parentIds
 }: Props) {
-  console.log('defaultSelected', defaultSelected);
 
   const [locations, setLocations] = useState<any[]>([]);
   const [selected, setSelected] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const { currentArea, currentAreaAutoTrip } = useAppContext();
-  console.log('currentArea: ', currentArea)
+
   useEffect(() => {
     if (isVisible) {
       setSelected(defaultSelected || []);

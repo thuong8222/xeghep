@@ -142,7 +142,17 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
 
       setNoteOptions("");
       Alert.alert('Thành công', 'Tạo chuyến thành công!');
-      navigation.goBack()
+      const info = route?.params?.ereaData;
+      if (info?.nameGroup && info?.countMember) {
+        navigation.navigate('BuyTrip', {
+          nameGroup: info.nameGroup,
+          countMember: info.countMember,
+          id_area: id_area,
+          isJoin: info?.isJoin
+        });
+      } else {
+        navigation.goBack();
+      }
     } catch (err) {
       Alert.alert('Lỗi tạo chuyến', JSON.stringify(err, null, 2));
       console.log('Lỗi tạo chuyến:', JSON.stringify(err, null, 2));
