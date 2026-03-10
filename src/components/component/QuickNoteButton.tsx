@@ -4,11 +4,14 @@ import AppText from '../common/AppText';
 import { ColorsGlobal } from '../base/Colors/ColorsGlobal';
 import AppView from '../common/AppView';
 
+import { ActivityIndicator } from 'react-native';
+
 type QuickNoteButtonProps = {
     label: string;
     isActive: boolean;
     onPress: () => void;
     fontStyle?: 'normal' | 'italic';
+    loading?: boolean;
 };
 
 const QuickNoteButton: React.FC<QuickNoteButtonProps> = ({
@@ -16,6 +19,7 @@ const QuickNoteButton: React.FC<QuickNoteButtonProps> = ({
     isActive,
     onPress,
     fontStyle = 'italic',
+    loading = false,
 }) => {
     return (
         <AppView>
@@ -29,17 +33,30 @@ const QuickNoteButton: React.FC<QuickNoteButtonProps> = ({
             paddingVertical={4}
             paddingHorizontal={12}
             radius={99}
-
             justifyContent='center'
+            disabled={loading}
         >
-            <AppText
-                fontStyle={fontStyle}
-                color={isActive ? ColorsGlobal.main : ColorsGlobal.textLight}
-                fontSize={14} lineHeight={24} textAlign='center' 
+            {loading && isActive ? (
+                <AppView row alignItems="center" gap={4}>
+                     <ActivityIndicator size="small" color={ColorsGlobal.main} />
+                     <AppText
+                        fontStyle={fontStyle}
+                        color={isActive ? ColorsGlobal.main : ColorsGlobal.textLight}
+                        fontSize={14} lineHeight={24} textAlign='center' 
+                    >
+                        {label}
+                    </AppText>
+                </AppView>
+            ) : (
+                <AppText
+                    fontStyle={fontStyle}
+                    color={isActive ? ColorsGlobal.main : ColorsGlobal.textLight}
+                    fontSize={14} lineHeight={24} textAlign='center' 
 
-            >
-                {label}
-            </AppText>
+                >
+                    {label}
+                </AppText>
+            )}
         </AppButton>
         </AppView>
     );

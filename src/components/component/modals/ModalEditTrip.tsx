@@ -85,10 +85,10 @@ export default function ModalEditTrip({ visible, onRequestClose, trip }: Props) 
 
     dispatch(editTrip({
       tripId,
-      ...(price   ? { price_sell: Number(price) }   : {}),
-      ...(points  ? { point: Number(points) }        : {}),
-      ...(guests  ? { guests: Number(guests) }       : {}),
-      ...(note !== undefined ? { note }              : {}),
+      ...(price ? { price_sell: Number(price) } : {}),
+      ...(points ? { point: Number(points) } : {}),
+      ...(guests ? { guests: Number(guests) } : {}),
+      ...(note !== undefined ? { note } : {}),
       ...(timeStartSec ? { time_start: timeStartSec } : {}),
     }));
   };
@@ -110,7 +110,7 @@ export default function ModalEditTrip({ visible, onRequestClose, trip }: Props) 
           </AppView>
 
           <AppView gap={12}>
-            <AppButton onPress={() => setShowPicker(true)}  padding={12} radius={8}>
+            <AppButton onPress={() => setShowPicker(true)} padding={12} radius={8}>
               <AppView gap={4}>
                 <AppText color={ColorsGlobal.textLight}>Giờ xuất phát</AppText>
                 <AppText>{formattedTime}</AppText>
@@ -150,6 +150,7 @@ export default function ModalEditTrip({ visible, onRequestClose, trip }: Props) 
             <ButtonSubmit
               title="Lưu thay đổi"
               onPress={onSubmit}
+              isLoading={editTripLoading}
               disabled={editTripLoading}
             />
           </AppView>

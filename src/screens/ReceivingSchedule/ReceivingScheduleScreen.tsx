@@ -1,7 +1,6 @@
-import { StyleSheet, View, FlatList, RefreshControl, ActivityIndicator } from 'react-native';
-import React, { useEffect, useState, useCallback } from 'react';
+import { FlatList, RefreshControl, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import AppView from '../../components/common/AppView';
-
 import TripHistory from '../../components/component/TripHistory';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import AppButton from '../../components/common/AppButton';
@@ -9,203 +8,152 @@ import AppInput from '../../components/common/AppInput';
 import AppText from '../../components/common/AppText';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/data/store';
-import { fetchReceivedTrips, FetchReceivedTripsParams, fetchSoldTrips, fetchMyTrips, Trip } from '../../redux/slices/tripsSlice';
+import {
+  fetchReceivedTrips,
+  FetchReceivedTripsParams,
+  fetchSoldTrips,
+  fetchMyTrips,
+  Trip,
+} from '../../redux/slices/tripsSlice';
 import { useAppContext } from '../../context/AppContext';
 import moment from 'moment';
 import TypeFilterBar from '../../components/component/TypeFilterBar';
 import { scale } from '../../utils/Helper';
 import ModalEditTrip from '../../components/component/modals/ModalEditTrip';
-import { ACCESSIBLE } from 'react-native-keychain';
+
+const TYPES = ['chuyến nhận', 'chuyến bán', 'chuyến của tôi'];
 
 export default function ReceivingScheduleScreen() {
-
   const dispatch = useDispatch<AppDispatch>();
   const { updateTrips } = useAppContext();
-  const { receivedTrips, soldTrips, myTrips, loading, error } = useSelector((state: RootState) => state.trips);
+  const { receivedTrips, soldTrips, myTrips, loading, error } = useSelector(
+    (state: RootState) => state.trips,
+  );
 
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
-  const [fromDate, setFromDate] = useState('');
-  const [toDate, setToDate] = useState('');
+  const [fromDate, setFromDate] = useState('');  // DD/MM/YYYY
+  const [toDate, setToDate] = useState('');      // DD/MM/YYYY
   const [selectedDateType, setSelectedDateType] = useState<'from' | 'to' | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedType, setSelectedType] = useState<string | null>('chuyến nhận');
-  const types = ['chuyến nhận', 'chuyến bán', 'chuyến của tôi']
+  const [selectedType, setSelectedType] = useState<string>('chuyến nhận');
   const [editTripItem, setEditTripItem] = useState<any | null>(null);
 
+  const toggleFilter = (type: string) => setSelectedType(type);
 
-  const toggleFilter = (type: string) => {
-    setSelectedType(prev => {
-      if (prev === type) {
+  // ✅ Ref để tránh stale closure trong loadTrips
+  const fromDateRef = useRef(fromDate);
+  const toDateRef   = useRef(toDate);
+  const typeRef     = useRef(selectedType);
 
-        return types.find(t => t !== type) || type;
-      }
-      return type;
-    });
+  useEffect(() => { fromDateRef.current = fromDate; }, [fromDate]);
+  useEffect(() => { toDateRef.current   = toDate;   }, [toDate]);
+  useEffect(() => { typeRef.current     = selectedType; }, [selectedType]);
+
+  // ✅ Build params: start = startOfDay, end = endOfDay
+  const buildParams = (from: string, to: string): FetchReceivedTripsParams => {
+    const params: FetchReceivedTripsParams = {};
+    if (from) params.start_date = moment(from, 'DD/MM/YYYY').startOf('day').unix();
+    if (to)   params.end_date   = moment(to,   'DD/MM/YYYY').endOf('day').unix();
+    return params;
   };
 
-  const formatDate = useCallback((date: Date) => {
-    return moment(date).format('DD/MM/YYYY');
-  }, []);
+  const dispatchFetch = useCallback((type: string, params: FetchReceivedTripsParams) => {
+    console.log('FETCH:', type, params);
+    if (type === 'chuyến nhận') return dispatch(fetchReceivedTrips(params));
+    if (type === 'chuyến bán')  return dispatch(fetchSoldTrips(params));
+    return dispatch(fetchMyTrips(params));
+  }, [dispatch]);
 
-
-  const parseDate = useCallback((dateString: string): moment.Moment | null => {
-    if (!dateString) return null;
-    const parsed = moment(dateString, 'DD/MM/YYYY', true);
-    return parsed.isValid() ? parsed : null;
-  }, []);
-
-
-  const dateToTimestamp = useCallback((dateString: string): number | null => {
-    if (!dateString) return null;
-    return moment(dateString, 'DD/MM/YYYY').startOf('day').unix();
-  }, []);
-
-
-  const loadTrips = useCallback(() => {
-    const start_date = dateToTimestamp(fromDate);
-    const end_date = dateToTimestamp(toDate);
-
-    const params: FetchReceivedTripsParams = {};
-    if (start_date) params.start_date = start_date;
-    if (end_date) params.end_date = end_date;
-    console.log('FETCH PARAMS:', selectedType, params);
-
-
-    if (selectedType == 'chuyến nhận') {
-      console.log('chuyến nhận fetchReceivedTrips')
-      return dispatch(fetchReceivedTrips(params));
-    } else if (selectedType == 'chuyến bán') {
-      console.log('chuyến nhận fetchSoldTrips')
-
-      return dispatch(fetchSoldTrips(params));
-    } else {
-      console.log('chuyến của tôi fetchMyTrips')
-      return dispatch(fetchMyTrips(params));
-    }
-
-  }, [dispatch, fromDate, toDate, dateToTimestamp, selectedType]);
-
-
+  // Load khi đổi tab
   useEffect(() => {
-    if (selectedType)
-      loadTrips();
-  }, [loadTrips]);
+    dispatchFetch(selectedType, buildParams(fromDateRef.current, toDateRef.current));
+  }, [selectedType, updateTrips]);
 
+  // ✅ Load ngay khi chọn xong ngày (fromDate hoặc toDate thay đổi)
+  useEffect(() => {
+    if (fromDate || toDate) {
+      dispatchFetch(typeRef.current, buildParams(fromDate, toDate));
+    }
+  }, [fromDate, toDate]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     setFromDate('');
     setToDate('');
     setErrorMessage('');
+    await dispatchFetch(typeRef.current, {});
+    setRefreshing(false);
+  }, [dispatchFetch]);
 
-    if (selectedType == 'chuyến nhận') {
-      await dispatch(fetchReceivedTrips({}));
-    } else if (selectedType == 'chuyến bán') {
-      await dispatch(fetchSoldTrips({}));
+  const handleConfirmDate = useCallback((selectedDate: Date) => {
+    const formatted = moment(selectedDate).format('DD/MM/YYYY');
+    const selected  = moment(selectedDate);
+
+    if (selectedDateType === 'from') {
+      if (toDate) {
+        const toMoment = moment(toDate, 'DD/MM/YYYY');
+        if (toMoment.isValid() && selected.isAfter(toMoment, 'day')) {
+          setErrorMessage('Ngày bắt đầu không thể sau ngày kết thúc.');
+          setIsDatePickerVisible(false);
+          setSelectedDateType(null);
+          return;
+        }
+      }
+      setFromDate(formatted);
+      setErrorMessage('');
     } else {
-      await dispatch(fetchMyTrips({}));
+      if (fromDate) {
+        const fromMoment = moment(fromDate, 'DD/MM/YYYY');
+        if (fromMoment.isValid() && selected.isBefore(fromMoment, 'day')) {
+          setErrorMessage('Ngày kết thúc không thể trước ngày bắt đầu.');
+          setIsDatePickerVisible(false);
+          setSelectedDateType(null);
+          return;
+        }
+      }
+      setToDate(formatted);
+      setErrorMessage('');
     }
 
-    setRefreshing(false);
-  }, [dispatch, selectedType]);
-
-
-
-  const renderItem_trip = useCallback(
-    ({ item }: { item: Trip }) => (
-      <TripHistory
-        data={item}
-        onEdit={
-          selectedType === 'chuyến của tôi'
-            ? (trip: any) => setEditTripItem(trip)
-            : undefined
-        }
-      />
-    ),
-    [selectedType]
-  );
-
-
-  const handleConfirmDate = useCallback(
-    (selectedDate: Date) => {
-      const formattedDate = formatDate(selectedDate);
-      const selectedMoment = moment(selectedDate);
-
-      if (selectedDateType === 'from') {
-        if (toDate) {
-          const toDateObj = parseDate(toDate);
-          if (toDateObj && selectedMoment.isAfter(toDateObj, 'day')) {
-            setErrorMessage('Ngày bắt đầu không thể sau ngày kết thúc.');
-            setIsDatePickerVisible(false);
-            setSelectedDateType(null);
-            return;
-          }
-        }
-        setFromDate(formattedDate);
-        setErrorMessage('');
-      } else if (selectedDateType === 'to') {
-        if (fromDate) {
-          const fromDateObj = parseDate(fromDate);
-          if (fromDateObj && selectedMoment.isBefore(fromDateObj, 'day')) {
-            setErrorMessage('Ngày kết thúc không thể trước ngày bắt đầu.');
-            setIsDatePickerVisible(false);
-            setSelectedDateType(null);
-            return;
-          }
-        }
-        setToDate(formattedDate);
-        setErrorMessage('');
-      }
-
-      setIsDatePickerVisible(false);
-      setSelectedDateType(null);
-    },
-    [selectedDateType, toDate, fromDate, formatDate, parseDate]
-  );
-
-
-  const openSelectFromDate = useCallback(() => {
-    setSelectedDateType('from');
-    setIsDatePickerVisible(true);
-  }, []);
-
-  const openSelectFromTo = useCallback(() => {
-    setSelectedDateType('to');
-    setIsDatePickerVisible(true);
-  }, []);
-
-  const closeDatePicker = useCallback(() => {
     setIsDatePickerVisible(false);
     setSelectedDateType(null);
-  }, []);
+  }, [selectedDateType, fromDate, toDate]);
 
+  const renderItem = useCallback(({ item }: { item: Trip }) => (
+    <TripHistory
+      data={item}
+      onEdit={
+        selectedType === 'chuyến của tôi'
+          ? (trip: any) => setEditTripItem(trip)
+          : undefined
+      }
+    />
+  ), [selectedType]);
 
-  const renderEmptyComponent = useCallback(() => {
+  const renderEmpty = useCallback(() => {
     if (loading && !refreshing) {
-      return (
-        <AppView paddingTop={32} alignItems="center">
-          <ActivityIndicator />
-        </AppView>
-      );
+      return <AppView paddingTop={32} alignItems="center"><ActivityIndicator /></AppView>;
     }
-    return (
-      <AppView paddingTop={32} alignItems="center">
-        <AppText title="Không có dữ liệu" />
-      </AppView>
-    );
+    return <AppView paddingTop={32} alignItems="center"><AppText title="Không có dữ liệu" /></AppView>;
   }, [loading, refreshing]);
+
+  const currentData =
+    selectedType === 'chuyến nhận' ? receivedTrips :
+    selectedType === 'chuyến bán'  ? soldTrips :
+    myTrips;
 
   return (
     <AppView flex={1} backgroundColor="#fff" padding={16} position="relative" gap={8}>
-      {error && (
+      {!!error && (
         <AppView paddingBottom={8}>
           <AppText color="red">{error}</AppText>
         </AppView>
       )}
 
-      <AppView row justifyContent={'space-between'} gap={12} >
-        <AppButton flex={1} onPress={openSelectFromDate}>
+      {/* ── Bộ lọc ngày ── */}
+      <AppView row justifyContent="space-between" gap={12}>
+        <AppButton flex={1} onPress={() => { setSelectedDateType('from'); setIsDatePickerVisible(true); }}>
           <AppInput
             keyboardType="numeric"
             maxLength={10}
@@ -215,11 +163,11 @@ export default function ReceivingScheduleScreen() {
             label="Từ ngày"
             placeholder="Chọn ngày"
             type="calendar"
-            onCalendarPress={openSelectFromDate}
+            onCalendarPress={() => { setSelectedDateType('from'); setIsDatePickerVisible(true); }}
           />
         </AppButton>
 
-        <AppButton flex={1} onPress={openSelectFromTo}>
+        <AppButton flex={1} onPress={() => { setSelectedDateType('to'); setIsDatePickerVisible(true); }}>
           <AppInput
             keyboardType="numeric"
             maxLength={10}
@@ -229,60 +177,53 @@ export default function ReceivingScheduleScreen() {
             label="Đến ngày"
             placeholder="Chọn ngày"
             type="calendar"
-            onCalendarPress={openSelectFromTo}
+            onCalendarPress={() => { setSelectedDateType('to'); setIsDatePickerVisible(true); }}
           />
         </AppButton>
       </AppView>
 
-      {errorMessage ? (
-        <AppText
-          fontStyle="italic"
-          fontSize={14}
-          style={{ color: 'red', marginBottom: 8 }}
-        >
+      {!!errorMessage && (
+        <AppText fontStyle="italic" fontSize={14} style={{ color: 'red', marginBottom: 8 }}>
           {'! ' + errorMessage}
         </AppText>
-      ) : null}
-      <AppView>
-        <TypeFilterBar
-          types={types}
-          selectedType={selectedType}
-          toggleFilter={toggleFilter}
-        />
-      </AppView>
-
+      )}
+<AppView>
+      {/* ── Tab lọc loại ── */}
+      <TypeFilterBar
+        types={TYPES}
+        selectedType={selectedType}
+        toggleFilter={toggleFilter}
+        loading={loading && !refreshing}
+      />
+</AppView>
+      {/* ── Danh sách ── */}
       <AppView flex={1}>
         <FlatList
-          data={
-            selectedType === 'chuyến nhận'
-              ? receivedTrips
-              : selectedType === 'chuyến bán'
-                ? soldTrips
-                : myTrips
-          }
-
-          keyExtractor={(item, index) => item.id_trip ?? index.toString()}
+          data={currentData}
+          keyExtractor={(item, index) => {
+            const id = item.id_trip ?? (item as any).id;
+            return id ? `${id}_${index}` : String(index);
+          }}
           showsVerticalScrollIndicator={false}
-          renderItem={renderItem_trip}
+          renderItem={renderItem}
           ItemSeparatorComponent={() => <AppView height={scale(16)} />}
           removeClippedSubviews
           windowSize={10}
           maxToRenderPerBatch={10}
           updateCellsBatchingPeriod={50}
           initialNumToRender={10}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-          ListEmptyComponent={renderEmptyComponent}
-
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          ListEmptyComponent={renderEmpty}
         />
       </AppView>
+
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"
         onConfirm={handleConfirmDate}
-        onCancel={closeDatePicker}
+        onCancel={() => { setIsDatePickerVisible(false); setSelectedDateType(null); }}
       />
+
       <ModalEditTrip
         visible={!!editTripItem}
         onRequestClose={() => setEditTripItem(null)}

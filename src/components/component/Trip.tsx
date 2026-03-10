@@ -11,7 +11,7 @@ import { Text } from 'react-native';
 import { useCountdown } from '../../hooks/useCountdown';
 import CountdownStyled from './CountdownStyled';
 
-export default function Trip(props) {
+export default function Trip(props: any) {
     const guests = props.data?.guests;
     const time_start_sec = props.data?.time_start;
     const isSold = props.data?.is_sold === 1;
@@ -23,11 +23,11 @@ export default function Trip(props) {
         ? time.format("HH:mm")
         : time.format("DD/MM/YYYY HH:mm");
     let displayTime = formatted;
-    if (time_created_sec_raw) {
+    if (time_created_sec_raw && minutes_added && Number(minutes_added) > 0) {
         const num = typeof time_created_sec_raw === 'string' ? Number(time_created_sec_raw) : time_created_sec_raw;
         if (!isNaN(num as number)) {
             const base = moment.unix(num as number).format("HH:mm");
-            displayTime = minutes_added && Number(minutes_added) > 0 ? `${base} + ${minutes_added}'` : base;
+            displayTime = `${base} + ${minutes_added}'`;
         }
     }
     // console.log('minutes_added time_created_sec_raw:', minutes_added, time_created_sec_raw)
@@ -99,6 +99,18 @@ export default function Trip(props) {
 
                         {/* ✅ Đếm ngược chỉ hiện khi còn <= 15 phút */}
                         {/* {showCountdown && <CountdownStyled seconds={countdown} />} */}
+
+                        {/* ✅ Badge "Mới" */}
+                        {props.data?.is_new && !isSold && !isPast && (
+                            <AppView
+                                backgroundColor="red"
+                                paddingHorizontal={6}
+                                paddingVertical={2}
+                                radius={99}
+                            >
+                                <AppText fontSize={10} color="#FFFFFF" fontWeight={700}>Mới</AppText>
+                            </AppView>
+                        )}
 
                         {/* ✅ Badge "Đã qua" khi isPast và chưa bán */}
                         {isPast && !isSold && (
