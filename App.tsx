@@ -40,9 +40,7 @@ const App = () => {
       // // 4️⃣ Lắng nghe notification khi app đang foreground
       listenForForegroundMessages();
       // // ⭐ Setup notification listeners với navigation
-      if (navigationRef.current) {
-        setupNotificationListeners(navigationRef.current);
-      }
+      setupNotificationListeners();
     };
 
     initNotifications();
@@ -52,17 +50,16 @@ const App = () => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Provider store={store}>
-        <SocketProvider>
-          <ContextProvider>
+        <ContextProvider>
+          <SocketProvider>
             <NavigationContainer ref={navigationRef}>
               <MainNavigator />
             </NavigationContainer>
-          </ContextProvider>
-        </SocketProvider>
+          </SocketProvider>
+        </ContextProvider>
       </Provider>
     </GestureHandlerRootView>
   );
 };
 
 export default App;
-

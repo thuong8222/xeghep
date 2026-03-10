@@ -592,15 +592,20 @@ export const parseTime = value => {
   return moment(value);
 };
 
+// ✅ Thay thế đoạn TRIP_DISPLAY_STATUS trong Helper.ts bằng đoạn này
+
 export const TRIP_DISPLAY_STATUS = {
-  selling: { label: 'Đang bán', color: '#F39C12', background: '#FFF3E0' },
-  sold: { label: 'Đã bán', color: '#27AE60', background: '#E9F7EF' },
-  cancelled: { label: 'Đã huỷ', color: '#C0392B', background: '#FDEDEC' },
+  selling:    { label: 'Đang bán',      color: '#F39C12', background: '#FFF3E0' },
+  sold:       { label: 'Đã bán',        color: '#27AE60', background: '#E9F7EF' },
+  cancelled:  { label: 'Đã huỷ',        color: '#C0392B', background: '#FDEDEC' },
+  // ✅ Thêm 2 trạng thái còn thiếu
+  unsellable: { label: 'Quá giờ bán',   color: '#888888', background: '#F0F0F0' },
+  received:   { label: 'Đã nhận',       color: '#2980B9', background: '#EBF5FB' },
 } as const;
 
 export type TripDisplayStatusKey = keyof typeof TRIP_DISPLAY_STATUS;
 
 export const getTripDisplayStatus = (key?: string) => {
-  const k = (key || 'selling') as TripDisplayStatusKey;
+  const k = key as TripDisplayStatusKey;
   return TRIP_DISPLAY_STATUS[k] || TRIP_DISPLAY_STATUS.selling;
 };

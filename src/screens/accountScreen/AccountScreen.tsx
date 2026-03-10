@@ -22,6 +22,7 @@ import { AppDispatch } from '../../redux/data/store'
 import { NumberFormat } from '../../utils/Helper'
 import { useSocket } from '../../context/SocketContext'
 import AppButton from '../../components/common/AppButton'
+import { resetDriverState } from '../../redux/slices/driverSlice'
 
 type AccountScreenNavProp = NativeStackNavigationProp<RootParamList>;
 
@@ -31,20 +32,35 @@ interface Props {
 export default function AccountScreen({ navigation }: Props) {
   const dispatch = useDispatch<AppDispatch>();
   const { driver, loading, error, successMessage, getDriver, clear } = useDriverApi();
-  const { setCurrentDriver } = useAppContext();
+  const { currentDriver, setCurrentDriver } = useAppContext();
 
   const { isConnected } = useSocket();
   const [isModalChangePw, setIsModalChangePw] = useState(false);
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
+  console.log('driver', driver);
+
 
 
   useEffect(() => {
-    if (!driver) {
-      getDriver().catch(err => {
+    const syncDriver = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        if (!token) return; // Không gọi API nếu đã logout
+
+        const currentId = (currentDriver as any)?.id;
+        if (currentId && driver?.id && driver.id !== currentId) {
+          await getDriver();
+          return;
+        }
+        if (!driver) {
+          await getDriver();
+        }
+      } catch (err) {
         console.log('Lỗi lấy thông tin driver:', err);
-      });
-    }
-  }, [driver]);
+      }
+    };
+    syncDriver();
+  }, [driver, currentDriver, getDriver]);
 
 
   useEffect(() => {
@@ -68,6 +84,7 @@ export default function AccountScreen({ navigation }: Props) {
               const result = await dispatch(logoutAccount()).unwrap();
               await AsyncStorage.removeItem('token');
               await AsyncStorage.removeItem("driver");
+              dispatch(resetDriverState());
               setCurrentDriver(null); // ✅ thêm lại
             } catch (error) {
               console.error('❌ Lỗi khi đăng xuất:', error);
@@ -76,6 +93,7 @@ export default function AccountScreen({ navigation }: Props) {
               await AsyncStorage.removeItem("driver");
               // await AsyncStorage.removeItem('biometric_phone');   // ✅
               // await AsyncStorage.removeItem('biometric_password'); // ✅
+              dispatch(resetDriverState());
               setCurrentDriver(null);
             }
           }
@@ -89,7 +107,8 @@ export default function AccountScreen({ navigation }: Props) {
         const result = await dispatch(deleteAccount()).unwrap();
         await AsyncStorage.removeItem('token');
         await AsyncStorage.removeItem('driver');
-        setCurrentDriver('');
+        dispatch(resetDriverState());
+        setCurrentDriver(null);
         navigation.reset({
           index: 0,
           routes: [{ name: 'LoginScreen' }],
@@ -255,4 +274,3 @@ export default function AccountScreen({ navigation }: Props) {
     </ScrollView>
   )
 }
-

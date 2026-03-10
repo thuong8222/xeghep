@@ -1,32 +1,30 @@
-
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 import AppConfig from '../../services/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface Driver {
-    id: string;               
-    full_name: string;
-    image_avatar:string;
-    phone: string;
-    address?: string;
-    birth_date?: string | null;
-    gender?: string | null;
-    email?: string | null;
-    experience_years?: number | null;
-    is_active: boolean;
-    created_at: string;
-    updated_at: string;
-    type_car: string;
-    status_car: number;
-    license_number?: string | null;
-    color_car?: string | null;
-    model_car?: string | null;
-    name_car?: string | null;
-    image_car?: string | null;
-    year_car?: string | null;
-  }
-  
+  id: string;
+  full_name: string;
+  image_avatar: string;
+  phone: string;
+  address?: string;
+  birth_date?: string | null;
+  gender?: string | null;
+  email?: string | null;
+  experience_years?: number | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  type_car: string;
+  status_car: number;
+  license_number?: string | null;
+  color_car?: string | null;
+  model_car?: string | null;
+  name_car?: string | null;
+  image_car?: string | null;
+  year_car?: string | null;
+}
 
 interface DriverState {
   driver: Driver | null;
@@ -43,117 +41,130 @@ const initialState: DriverState = {
 };
 
 export const api = axios.create({
-    baseURL: AppConfig.BASE_URL,
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-  });
-  
-  
-  api.interceptors.request.use(async (config) => {
-    const token = await AsyncStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  });
-  
+  baseURL: AppConfig.BASE_URL,
+  headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+});
 
-
-
-export const fetchDriver = createAsyncThunk<Driver, void, { rejectValue: string }>(
-  'driver/fetchDriver',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await api.get('api/auth/me');
-
-      return response.data.data;
-    } catch (err: any) {
-        console.log('driverSlice err: ',err)
-      return rejectWithValue(err.response?.data?.message || 'Lấy thông tin driver thất bại');
-    }
+api.interceptors.request.use(async config => {
+  const token = await AsyncStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-);
+  return config;
+});
 
-
-export const updateDriver = createAsyncThunk<Driver, Partial<Driver>, { rejectValue: string }>(
-  'driver/updateDriver',
-  async (payload, { rejectWithValue }) => {
-    try {
-      const response = await api.put('api/auth/me', payload);
-      return response.data.data.driver;
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || 'Cập nhật thông tin thất bại');
-    }
+export const fetchDriver = createAsyncThunk<
+  Driver,
+  void,
+  { rejectValue: string }
+>('driver/fetchDriver', async (_, { rejectWithValue }) => {
+  try {
+    const response = await api.get('api/auth/me');
+    console.log('response fetchDriver data: ', response);
+    return response.data.data;
+  } catch (err: any) {
+    console.log('driverSlice err: ', err);
+    return rejectWithValue(
+      err.response?.data?.message || 'Lấy thông tin driver thất bại',
+    );
   }
-);
+});
+
+export const updateDriver = createAsyncThunk<
+  Driver,
+  Partial<Driver>,
+  { rejectValue: string }
+>('driver/updateDriver', async (payload, { rejectWithValue }) => {
+  try {
+    const response = await api.put('api/auth/me', payload);
+    return response.data.data.driver;
+  } catch (err: any) {
+    return rejectWithValue(
+      err.response?.data?.message || 'Cập nhật thông tin thất bại',
+    );
+  }
+});
 
 export const changeDriverPassword = createAsyncThunk<
-  string, 
-  { current_password: string; password: string; confirm_password: string }, 
+  string,
+  { current_password: string; password: string; confirm_password: string },
   { rejectValue: string }
->(
-  'driver/changeDriverPassword',
-  async (payload, { rejectWithValue }) => {
-    try {
-      const response = await api.post('api/auth/password/change', payload);
-      
-      return response.data.message || 'Thay đổi mật khẩu thành công';
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || 'Thay đổi mật khẩu thất bại');
-    }
+>('driver/changeDriverPassword', async (payload, { rejectWithValue }) => {
+  try {
+    const response = await api.post('api/auth/password/change', payload);
+
+    return response.data.message || 'Thay đổi mật khẩu thành công';
+  } catch (err: any) {
+    return rejectWithValue(
+      err.response?.data?.message || 'Thay đổi mật khẩu thất bại',
+    );
   }
-);
+});
 const driverSlice = createSlice({
   name: 'driver',
   initialState,
   reducers: {
-    clearDriverMessages: (state) => {
+    clearDriverMessages: state => {
+      state.error = null;
+      state.successMessage = null;
+    },
+    resetDriverState: state => {
+      state.driver = null;
+      state.loading = false;
       state.error = null;
       state.successMessage = null;
     },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder
-      
-      .addCase(fetchDriver.pending, (state) => {
+
+      .addCase(fetchDriver.pending, state => {
         state.loading = true;
         state.error = null;
         state.successMessage = null;
       })
-      .addCase(fetchDriver.fulfilled, (state, action: PayloadAction<Driver>) => {
-        state.loading = false;
-        state.driver = action.payload;
-      })
+      .addCase(
+        fetchDriver.fulfilled,
+        (state, action: PayloadAction<Driver>) => {
+          state.loading = false;
+          state.driver = action.payload;
+        },
+      )
       .addCase(fetchDriver.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Lấy thông tin thất bại';
       })
 
-      
-      .addCase(updateDriver.pending, (state) => {
+      .addCase(updateDriver.pending, state => {
         state.loading = true;
         state.error = null;
         state.successMessage = null;
       })
-      .addCase(updateDriver.fulfilled, (state, action: PayloadAction<Driver>) => {
-        state.loading = false;
-        state.driver = action.payload;
-        state.successMessage = 'Cập nhật thành công';
-      })
+      .addCase(
+        updateDriver.fulfilled,
+        (state, action: PayloadAction<Driver>) => {
+          state.loading = false;
+          state.driver = action.payload;
+          state.successMessage = 'Cập nhật thành công';
+        },
+      )
       .addCase(updateDriver.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Cập nhật thất bại';
       })
 
-      
-      .addCase(changeDriverPassword.pending, (state) => {
+      .addCase(changeDriverPassword.pending, state => {
         state.loading = true;
         state.error = null;
         state.successMessage = null;
       })
-      .addCase(changeDriverPassword.fulfilled, (state, action: PayloadAction<string>) => {
-        state.loading = false;
-        state.successMessage = action.payload; 
-      })
+      .addCase(
+        changeDriverPassword.fulfilled,
+        (state, action: PayloadAction<string>) => {
+          state.loading = false;
+          state.successMessage = action.payload;
+        },
+      )
       .addCase(changeDriverPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Thay đổi mật khẩu thất bại';
@@ -161,5 +172,5 @@ const driverSlice = createSlice({
   },
 });
 
-export const { clearDriverMessages } = driverSlice.actions;
+export const { clearDriverMessages, resetDriverState } = driverSlice.actions;
 export default driverSlice.reducer;

@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { io, Socket } from "socket.io-client";
 import AppConfig from "../services/config";
+import { useAppContext } from "./AppContext";
 
 interface SocketContextType {
   socket: Socket | null;
@@ -18,6 +19,7 @@ export const useSocket = () => useContext(SocketContext);
 export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const { currentDriver } = useAppContext();
 
   useEffect(() => {
     const newSocket = io(AppConfig.SOCKET_URL, {
@@ -64,6 +66,19 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       newSocket.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    if (!socket) return;
+    const id = (currentDriver as any)?.id;
+    if (!isConnected) {
+      try {
+        socket.connect();
+      } catch { }
+    }
+    if (id && socket.connected) {
+      socket.emit("register_user", id);
+    }
+  }, [socket, isConnected, (currentDriver as any)?.id]);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>

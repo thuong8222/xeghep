@@ -6,8 +6,8 @@ import RootNavigator, { RootStackParamList } from './RootNavigator';
 import AuthNavigator, { AuthStackParamList } from './AuthNavigator';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 export type RootParamList = {
-  RootNavigator: NavigatorScreenParams<RootStackParamList>
-  Auth: NavigatorScreenParams<AuthStackParamList>;
+  RootNavigator: NavigatorScreenParams<RootStackParamList> | undefined;
+  Auth: NavigatorScreenParams<AuthStackParamList> | undefined;
   Chat: { username: string };
 };
 import CustomSplash from '../screens/Splash';

@@ -15,7 +15,7 @@ import { ColorsGlobal } from "../../components/base/Colors/ColorsGlobal";
 
 import IconTouch from "../../assets/icons/IconTouch";
 import ReactNativeBiometrics from 'react-native-biometrics'
-import { RootParamList } from "../../../App";
+import { RootParamList } from "../../navigation/MainNavigator";
 import ModalForgetPassword from "../../components/component/modals/ModalForgetPassword";
 import { validatePassword, validatePhoneNumber } from "../../utils/Helper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -25,6 +25,9 @@ import { useSocket } from "../../context/SocketContext";
 import { useAppContext } from "../../context/AppContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getBiometricCredentials, saveBiometricCredentials } from "../../utils/storage";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../redux/data/store";
+import { fetchDriver, resetDriverState } from "../../redux/slices/driverSlice";
 
 type LoginParamList = NativeStackNavigationProp<RootParamList>;
 
@@ -33,6 +36,7 @@ interface Props {
 }
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
+  const dispatch = useDispatch<AppDispatch>();
   const { login, token, loading, error, successMessage, clear } = useAuthApi();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
@@ -67,6 +71,8 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     try {
       await login({ phone: phoneNumber, password });
       setCurrentDriver(JSON.parse((await AsyncStorage.getItem("driver")) || 'null'));
+      dispatch(resetDriverState());
+      dispatch(fetchDriver());
 
       // ✅ Thay Keychain bằng AsyncStorage
       await saveBiometricCredentials(phoneNumber, password);
@@ -101,6 +107,8 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           password: savedCredentials.password
         });
         setCurrentDriver(JSON.parse((await AsyncStorage.getItem("driver")) || 'null'));
+        dispatch(resetDriverState());
+        dispatch(fetchDriver());
       } else {
         Alert.alert('Xác thực thất bại hoặc bị hủy');
       }
