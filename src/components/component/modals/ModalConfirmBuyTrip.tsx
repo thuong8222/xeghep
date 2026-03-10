@@ -20,10 +20,14 @@ export default function ModalConfirmBuyTrip({
   onRequestClose,
   data
 }: ModalConfirmBuyTripProps) {
-const navigation = useNavigation()
+  const navigation = useNavigation<any>()
   const handleOk = () => {
     onRequestClose?.();
-    navigation.navigate('ReceivingScheduleTabs',{screen:'DetailTripHistory', params:{data:data}})
+    const detailData = { ...data, is_sold: 1, display_status: 'sold' };
+    navigation.navigate('ReceivingScheduleTabs');
+    setTimeout(() => {
+      navigation.navigate('ReceivingScheduleTabs', { screen: 'DetailTripHistory', params: { data: detailData } });
+    }, 0);
   };
 
 

@@ -13,8 +13,9 @@ export const useTripBuyerNotifications = (buyerId?: string) => {
 
     const handleConfirmation = async (data: any) => {
       Alert.alert(
-        '✅ Mua chuyến thành công!',
-        data.message || `Bạn đã mua chuyến từ ${data.trip.seller.full_name}`,
+        'Mua chuyến thành công!',
+        data.message ||
+          `Bạn đã mua được chuyến của ${data.trip.seller.full_name}`,
         [{ text: 'OK' }],
       );
 
