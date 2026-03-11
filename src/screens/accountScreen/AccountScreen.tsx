@@ -8,7 +8,7 @@ import AppText from '../../components/common/AppText'
 import ModalUploadCarImage from '../../components/component/modals/ModalUploadCarImage'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 
-import { RootParamList } from '../../../App'
+import { RootParamList } from '../../navigation/MainNavigator'
 import ModalChangePassword from '../../components/component/modals/ModalChangePassword'
 
 import FunctionSection from '../../components/component/FunctionSection'
@@ -85,7 +85,7 @@ export default function AccountScreen({ navigation }: Props) {
               await AsyncStorage.removeItem('token');
               await AsyncStorage.removeItem("driver");
               dispatch(resetDriverState());
-              setCurrentDriver(null); // ✅ thêm lại
+              setCurrentDriver(null as any); // ✅ thêm lại
             } catch (error) {
               console.error('❌ Lỗi khi đăng xuất:', error);
               // ✅ Dù lỗi API vẫn xoá local và chuyển màn hình
@@ -94,7 +94,7 @@ export default function AccountScreen({ navigation }: Props) {
               // await AsyncStorage.removeItem('biometric_phone');   // ✅
               // await AsyncStorage.removeItem('biometric_password'); // ✅
               dispatch(resetDriverState());
-              setCurrentDriver(null);
+              setCurrentDriver(null as any);
             }
           }
         }
@@ -104,15 +104,11 @@ export default function AccountScreen({ navigation }: Props) {
   const DeleteAccount = () => {
     const handleDelete = async () => {
       try {
-        const result = await dispatch(deleteAccount()).unwrap();
+        await dispatch(deleteAccount()).unwrap();
         await AsyncStorage.removeItem('token');
         await AsyncStorage.removeItem('driver');
         dispatch(resetDriverState());
-        setCurrentDriver(null);
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'LoginScreen' }],
-        });
+        setCurrentDriver(null as any);
       } catch (error) {
         console.error('Lỗi xoá tài khoản:', error);
       }
@@ -130,7 +126,7 @@ export default function AccountScreen({ navigation }: Props) {
   //gotoBankStatementBuySalePoint
   const gotoBankStatementBuySalePoint = async () => {
     setLoadingAction('BankStatementBuySalePoint');
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise<void>(resolve => setTimeout(() => resolve(), 100));
     navigation.navigate('RootNavigator', {
       screen: 'BottomTabs',
       params: {
@@ -144,7 +140,7 @@ export default function AccountScreen({ navigation }: Props) {
   }
   const gotoHistoryBuySalePoint = async () => {
     setLoadingAction('HistoryBuySalePoint');
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise<void>(resolve => setTimeout(() => resolve(), 100));
     navigation.navigate('RootNavigator', {
       screen: 'BottomTabs',
       params: {
@@ -158,7 +154,7 @@ export default function AccountScreen({ navigation }: Props) {
   }
   const gotoInfoAccount = async () => {
     setLoadingAction('AccountInfoScreen');
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise<void>(resolve => setTimeout(() => resolve(), 100));
     navigation.navigate('RootNavigator', {
       screen: 'BottomTabs',
       params: {
@@ -166,7 +162,7 @@ export default function AccountScreen({ navigation }: Props) {
         params: {
           screen: 'AccountInfoScreen',
           params: {
-            data: driver,
+            data: driver as any,
           },
         },
       },
@@ -175,7 +171,7 @@ export default function AccountScreen({ navigation }: Props) {
   }
   const gotoInfoCar = async () => {
     setLoadingAction('CarInfoScreen');
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise<void>(resolve => setTimeout(() => resolve(), 100));
     navigation.navigate('RootNavigator', {
       screen: 'BottomTabs',
       params: {
@@ -183,7 +179,7 @@ export default function AccountScreen({ navigation }: Props) {
         params: {
           screen: 'CarInfoScreen',
           params: {
-            data: driver,
+            data: driver as any,
           },
         }
       }
@@ -192,7 +188,7 @@ export default function AccountScreen({ navigation }: Props) {
   }
   const gotoNotification = async () => {
     setLoadingAction('Notification');
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise<void>(resolve => setTimeout(() => resolve(), 100));
     navigation.navigate('RootNavigator', {
       screen: 'BottomTabs',
       params: {
@@ -208,8 +204,11 @@ export default function AccountScreen({ navigation }: Props) {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: ColorsGlobal.backgroundWhite }}>
       <AppView flex={1} backgroundColor={ColorsGlobal.backgroundWhite} padding={16} gap={12}>
-        <AppView justifyContent='center' alignItems='center' paddingBottom={10} gap={8} >
-          {/* {driver?.image_car ?
+        {(() => {
+          const d: any = driver;
+          return (
+            <AppView justifyContent='center' alignItems='center' paddingBottom={10} gap={8} >
+              {/* {driver?.image_car ?
             <Image
               source={{ uri: driver?.image_car }}
               style={{
@@ -220,36 +219,38 @@ export default function AccountScreen({ navigation }: Props) {
               resizeMode="cover"
             />
             : */}
-          <AppView backgroundColor={ColorsGlobal.backgroundGray} radius={999} padding={20}>
-            <IconUser size={100} />
-          </AppView>
-          {/* } */}
-          <AppView alignItems='center' gap={10}>
-            <AppView>
-              <AppText textAlign='center' bold color={ColorsGlobal.main}>{driver?.full_name}</AppText>
-              <AppText textAlign='center' fontSize={14} color={ColorsGlobal.main2}>{isConnected ? 'Đang hoạt động' : 'Offline'}</AppText>
-            </AppView>
-
-            <AppView row justifyContent={'space-around'} width={'100%'}>
-              <AppButton onPress={gotoHistoryBuySalePoint} alignItems='center' backgroundColor={ColorsGlobal.backgroundGray} padding={10} radius={10} gap={10}>
-                <AppText fontSize={14}>{`Điểm`}</AppText>
-                <AppText bold color={ColorsGlobal.main2}>{NumberFormat(driver?.current_points)}</AppText>
-              </AppButton>
-              <AppView alignItems='center' backgroundColor={ColorsGlobal.backgroundGray} padding={10} radius={10} gap={10}>
-                <AppText fontSize={14}>{`Chuyến nhận`}</AppText>
-                <AppText bold color={ColorsGlobal.main2}>{NumberFormat(driver?.total_trips_received)}</AppText>
+              <AppView backgroundColor={ColorsGlobal.backgroundGray} radius={999} padding={20}>
+                <IconUser size={100} />
               </AppView>
-              <AppView alignItems='center' backgroundColor={ColorsGlobal.backgroundGray} padding={10} radius={10} gap={10}>
-                <AppText fontSize={14}>{`Chuyến bán`}</AppText>
-                <AppText bold color={ColorsGlobal.main2}>{NumberFormat(driver?.total_trips_sold)}</AppText>
-              </AppView>
-            </AppView>
-          </AppView>
+              {/* } */}
+              <AppView alignItems='center' gap={10}>
+                <AppView>
+                  <AppText textAlign='center' bold color={ColorsGlobal.main}>{driver?.full_name}</AppText>
+                  <AppText textAlign='center' fontSize={14} color={ColorsGlobal.main2}>{isConnected ? 'Đang hoạt động' : 'Offline'}</AppText>
+                </AppView>
 
-        </AppView>
+                <AppView row justifyContent={'space-around'} width={'100%'}>
+                  <AppButton onPress={gotoHistoryBuySalePoint} alignItems='center' backgroundColor={ColorsGlobal.backgroundGray} padding={10} radius={10} gap={10}>
+                    <AppText fontSize={14}>{`Điểm`}</AppText>
+                    <AppText bold color={ColorsGlobal.main2}>{NumberFormat(d?.current_points)}</AppText>
+                  </AppButton>
+                  <AppView alignItems='center' backgroundColor={ColorsGlobal.backgroundGray} padding={10} radius={10} gap={10}>
+                    <AppText fontSize={14}>{`Chuyến nhận`}</AppText>
+                    <AppText bold color={ColorsGlobal.main2}>{NumberFormat(d?.total_trips_received)}</AppText>
+                  </AppView>
+                  <AppView alignItems='center' backgroundColor={ColorsGlobal.backgroundGray} padding={10} radius={10} gap={10}>
+                    <AppText fontSize={14}>{`Chuyến bán`}</AppText>
+                    <AppText bold color={ColorsGlobal.main2}>{NumberFormat(d?.total_trips_sold)}</AppText>
+                  </AppView>
+                </AppView>
+              </AppView>
+
+            </AppView>
+          );
+        })()}
         <AppView gap={6} height={'auto'} >
           <AppText fontSize={14} lineHeight={20} fontWeight={700}>{'Tài khoản'}</AppText>
-          <FunctionSection label='Thông tin cá nhân' onPress={gotoInfoAccount} data={driver} loading={loadingAction === 'AccountInfoScreen'} />
+          <FunctionSection label='Thông tin cá nhân' onPress={gotoInfoAccount} loading={loadingAction === 'AccountInfoScreen'} />
           <FunctionSection label='Thông tin xe' onPress={gotoInfoCar} loading={loadingAction === 'CarInfoScreen'} />
         </AppView>
 
@@ -262,7 +263,7 @@ export default function AccountScreen({ navigation }: Props) {
             <FunctionSection label='Lịch sử mua bán điểm' onPress={gotoHistoryBuySalePoint} loading={loadingAction === 'HistoryBuySalePoint'} />
             <FunctionSection label='Thông báo hệ thống' onPress={gotoNotification} loading={loadingAction === 'Notification'} />
 
-            {/* <FunctionSection label='Xoá tài khoản' onPress={DeleteAccount} /> */}
+            <FunctionSection label='Xoá tài khoản' onPress={DeleteAccount} />
             <FunctionSection label='Đăng xuất' onPress={handleLogout} />
           </AppView>
 
