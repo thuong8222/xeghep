@@ -15,13 +15,13 @@ export const useTripSellerNotifications = (sellerId?: string) => {
 
     const handleNotification = async (data: any) => {
       Alert.alert(
-        '🚗 Chuyến đã được mua!',
+        'Bán chuyến thành công',
         data.message || `${data.data.buyer.full_name} đã mua chuyến của bạn`,
         [{ text: 'OK' }],
       );
 
       await displayNotification(
-        'Chuyến đã được mua!',
+        'Bán chuyến thành công',
         data.message || 'Bạn có người mua chuyến mới',
         {
           screen: 'RootNavigator',
