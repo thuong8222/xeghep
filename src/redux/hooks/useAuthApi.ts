@@ -2,27 +2,40 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useCallback } from 'react';
 
-import { loginUser, registerUser, forgotPassword, clearMessages } from '../slices/ authSlice';
+import {
+  loginUser,
+  registerUser,
+  forgotPassword,
+  clearMessages,
+} from '../slices/ authSlice';
 import { AppDispatch, RootState } from '../data/store';
 
 export const useAuthApi = () => {
-    const dispatch = useDispatch<AppDispatch>();
-  const { loading, error, successMessage, token } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading, error, successMessage, token } = useSelector(
+    (state: RootState) => state.auth,
+  );
 
   // login với unwrap trực tiếp
   const login = useCallback(
     async (payload: { phone: string; password: string }) => {
       return dispatch(loginUser(payload)).unwrap(); // <- dùng dispatch ở đây
     },
-    [dispatch]
+    [dispatch],
   );
 
   const register = useCallback(
-    async (payload: { full_name: string; phone: string; password: string; confirm_password: string; area: string }) => {
+    async (payload: {
+      full_name: string;
+      phone: string;
+      password: string;
+      confirm_password: string;
+      area?: string;
+    }) => {
       const resultAction = await dispatch(registerUser(payload));
       return resultAction;
     },
-    [dispatch]
+    [dispatch],
   );
 
   const forgot = useCallback(
@@ -30,7 +43,7 @@ export const useAuthApi = () => {
       const resultAction = await dispatch(forgotPassword(payload));
       return resultAction;
     },
-    [dispatch]
+    [dispatch],
   );
 
   const clear = useCallback(() => {

@@ -51,10 +51,10 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
       phone: phoneNumber,
       password: password,
       confirm_password: confirmPassword,
-      area: selectedProvince
+      // area: selectedProvince
     };
     console.log('first model: ', model)
-    if (!phoneNumber || !password || !confirmPassword || !selectedProvince || phoneNumberError || confirmPasswordError || passwordError) {
+    if (!phoneNumber || !password || !confirmPassword || phoneNumberError || confirmPasswordError || passwordError) {
       Alert.alert('Vui lòng nhập đầy đủ thông tin hợp lệ');
       return;
     }
@@ -66,7 +66,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
         phone: phoneNumber,
         password: password,
         confirm_password: confirmPassword,
-        area: selectedProvince
+        // area: selectedProvince
       }
 
       console.log('model: ', model);
@@ -121,7 +121,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   return (
 
     <ScrollView style={{ flexGrow: 1, backgroundColor: ColorsGlobal.backgroundWhite }} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', }} showsVerticalScrollIndicator={false}>
-     <Container  loading={loading}>
+      <Container loading={loading}>
         <AppView flex={1} justifyContent="center" >
 
           <AppView justifyContent="center" alignItems="center" gap={16}>
@@ -223,7 +223,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             </AppText>
           </AppButton>
         </AppView>
-        </Container>
+      </Container>
       <ModalOnlySelectProvince
         isVisible={isOpenModal}
         onClose={() => setIsOpenModal(false)}
