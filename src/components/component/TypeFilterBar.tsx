@@ -29,9 +29,8 @@ export default function TypeFilterBar({
   const itemRefs = useRef<Record<string, View | null>>({});
 
   const handlePress = (type: string) => {
-    if (selectedType !== type) {
-      toggleFilter?.(type);
-    }
+    // Luôn gọi toggleFilter để cho phép hủy chọn khi bấm lại
+    toggleFilter?.(type);
 
     // Đảm bảo item tồn tại trước khi scroll
     const item = itemRefs.current[type];
@@ -44,7 +43,7 @@ export default function TypeFilterBar({
         UIManager.measureLayout(
           itemNode,
           scrollViewNode,
-          (error) => console.log("❌ measureLayout error:", error),
+          () => { },
           (x, _y, width) => {
             const scrollToX = x - screenWidth / 2 + width / 2;
             scrollRef.current?.scrollTo({ x: scrollToX, animated: true });
@@ -75,7 +74,12 @@ export default function TypeFilterBar({
         const isActive = selectedType === type;
 
         return (
-          <View key={index} ref={(el) => (itemRefs.current[type] = el)}>
+          <View
+            key={index}
+            ref={(el) => {
+              itemRefs.current[type] = el;
+            }}
+          >
             <QuickNoteButton
               label={label}
               isActive={isActive}

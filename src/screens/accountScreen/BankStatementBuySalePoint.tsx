@@ -14,7 +14,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/data/store';
 import { FetchHistoryPointParams, fetchPointHistory } from '../../redux/slices/pointSlice';
 import { useTransactionHistoryRealtime } from '../../hooks/useTransactionHistoryRealtime';
-import { useAppContext } from '../../context/AppContext';
+
 import { useAppDispatch } from '../../redux/hooks/useAppDispatch';
 import moment from 'moment';
 import TypeFilterBar from '../../components/component/TypeFilterBar';
