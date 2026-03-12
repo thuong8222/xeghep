@@ -12,7 +12,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import Container from '../../components/common/Container';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/data/store';
-import { FetchHistoryPointParams, fetchPointHistory, historyPoint, resumeSalePoint } from '../../redux/slices/pointSlice';
+import { FetchHistoryPointParams, historyPoint, resumeSalePoint } from '../../redux/slices/pointSlice';
 import { useTransactionHistoryRealtime } from '../../hooks/useTransactionHistoryRealtime';
 import { useAppContext } from '../../context/AppContext';
 import { useAppDispatch } from '../../redux/hooks/useAppDispatch';
@@ -42,18 +42,23 @@ export default function HistoryBuySalePoint() {
     };
     fetchDriver();
   }, []);
-
+  console.log('history: ', history);
   useTransactionHistoryRealtime(driver?.id);
 
+  // ✅ FIX 1: Dùng fetchPointHistory thay vì historyPoint để filter hoạt động
   useEffect(() => {
     if (!driver?.id) return;
 
-    const start_date = fromDate ? dateToTimestamp(fromDate, false) : undefined;
-    const end_date = toDate ? dateToTimestamp(toDate, true) : undefined;
-
     const params: FetchHistoryPointParams = { page: 1 };
-    if (start_date) params.start_date = start_date;
-    if (end_date) params.end_date = end_date;
+
+    if (fromDate) {
+      const start = dateToTimestamp(fromDate, false);
+      if (start) params.start_date = start;
+    }
+    if (toDate) {
+      const end = dateToTimestamp(toDate, true);
+      if (end) params.end_date = end;
+    }
     if (selectedType) params.related_type = selectedType;
 
     dispatch(historyPoint(params));
@@ -66,7 +71,6 @@ export default function HistoryBuySalePoint() {
     return endOfDay ? momentDate.endOf('day').unix() : momentDate.startOf('day').unix();
   }, []);
 
-
   const formatDate = useCallback((date: Date) => {
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -74,23 +78,16 @@ export default function HistoryBuySalePoint() {
     return `${day}/${month}/${year}`;
   }, []);
 
-
   const parseDate = useCallback((dateString: string): Date | null => {
     if (!dateString) return null;
     const [day, month, year] = dateString.split('/');
     return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
   }, []);
 
-
-
-
-
+  // ✅ FIX 2: Bỏ setTimeout, cập nhật state rồi để useEffect tự dispatch
   const handleConfirmDate = useCallback(
     (selectedDate: Date) => {
-      const vnDate = moment(selectedDate).utcOffset(7);
-
-      const formattedDate = vnDate.format("DD/MM/YYYY");
-
+      const formattedDate = moment(selectedDate).utcOffset(7).format("DD/MM/YYYY");
       const selectedMoment = moment(selectedDate);
 
       if (selectedDateType === 'from') {
@@ -103,7 +100,7 @@ export default function HistoryBuySalePoint() {
             return;
           }
         }
-        setFromDate(formattedDate);
+        setFromDate(formattedDate); // ✅ useEffect sẽ tự trigger
         setErrorMessage('');
       } else if (selectedDateType === 'to') {
         if (fromDate) {
@@ -115,60 +112,43 @@ export default function HistoryBuySalePoint() {
             return;
           }
         }
-        setToDate(formattedDate);
+        setToDate(formattedDate); // ✅ useEffect sẽ tự trigger
         setErrorMessage('');
       }
 
       setIsDatePickerVisible(false);
       setSelectedDateType(null);
-
-
-      setTimeout(() => {
-        const start = selectedDateType === 'from'
-          ? moment(selectedDate).startOf('day').unix()
-          : fromDate ? dateToTimestamp(fromDate, false) : null;
-
-        const end = selectedDateType === 'to'
-          ? moment(selectedDate).endOf('day').unix()
-          : toDate ? dateToTimestamp(toDate, true) : null;
-
-        const params: FetchHistoryPointParams = { page: 1 };
-        if (start) params.start_date = start;
-        if (end) params.end_date = end;
-        if (selectedType) params.type = selectedType;
-
-
-        dispatch(fetchPointHistory(params));
-      }, 100);
     },
-    [selectedDateType, toDate, fromDate, formatDate, parseDate, selectedType, dateToTimestamp, dispatch]
+    [selectedDateType, toDate, fromDate, parseDate]
   );
 
   const openSelectFromDate = () => {
-
     setSelectedDateType('from');
     setIsDatePickerVisible(true);
   }
 
   const openSelectFromTo = () => {
-
     setSelectedDateType('to');
     setIsDatePickerVisible(true);
   }
 
+  // ✅ FIX 3: Dùng lastPage từ Redux thay vì local state
+  const { page: reduxPage, lastPage: reduxLastPage } = useSelector((state: RootState) => state.point);
 
   const loadMore = () => {
-    if (page >= lastPage || loading) return;
+    if (reduxPage >= reduxLastPage || loading) return;
+
+    const params: FetchHistoryPointParams = { page: reduxPage + 1 };
 
     const start_date = dateToTimestamp(fromDate, false);
     const end_date = dateToTimestamp(toDate, true);
-
-    const params: FetchHistoryPointParams = { page: page + 1 };
     if (start_date) params.start_date = start_date;
     if (end_date) params.end_date = end_date;
-    if (selectedType) params.type = selectedType;
-    dispatch(fetchPointHistory(params));
+    if (selectedType) params.related_type = selectedType; // ✅ đúng key
+
+    dispatch(historyPoint(params));
   };
+
   const sellPointContinute = (id: string) => {
     Alert.alert(
       'Xe ghép',
@@ -180,21 +160,17 @@ export default function HistoryBuySalePoint() {
           onPress: () => {
             dispatch(resumeSalePoint({ id }))
               .unwrap()
-              .then(() => {
-                Alert.alert('Thành công', 'Đã tiếp tục bán điểm');
-              })
-              .catch(msg => {
-                Alert.alert('Lỗi', msg || 'Tiếp tục bán thất bại');
-              });
+              .then(() => Alert.alert('Thành công', 'Đã tiếp tục bán điểm'))
+              .catch(msg => Alert.alert('Lỗi', msg || 'Tiếp tục bán thất bại'));
           },
         },
       ]
     );
   };
 
-  const renderItem_trip = ({ item }) => {
-    return <PointHis props={item} resume={sellPointContinute} />;
-  };
+  const renderItem_trip = ({ item }) => (
+    <PointHis props={item} resume={sellPointContinute} />
+  );
 
   const SkeletonItem = () => (
     <View style={{ flexDirection: 'row', padding: 12, gap: 10 }}>
@@ -210,14 +186,10 @@ export default function HistoryBuySalePoint() {
 
   return (
     <Container ignoreBottomInset style={{ gap: 6 }} loading={loading}>
-      {error && (
-        <AppText color="red">{error}</AppText>
-      )}
-      <AppView row justifyContent={'space-between'} gap={12} alignItems={'center'} >
-        <AppButton
-          flex={1}
-          onPress={openSelectFromDate}
-        >
+      {error && <AppText color="red">{error}</AppText>}
+
+      <AppView row justifyContent={'space-between'} gap={12} alignItems={'center'}>
+        <AppButton flex={1} onPress={openSelectFromDate}>
           <AppInput
             keyboardType='numeric'
             maxLength={10}
@@ -231,10 +203,7 @@ export default function HistoryBuySalePoint() {
           />
         </AppButton>
 
-        <AppButton
-          flex={1}
-          onPress={openSelectFromTo}
-        >
+        <AppButton flex={1} onPress={openSelectFromTo}>
           <AppInput
             keyboardType='numeric'
             maxLength={10}
@@ -250,16 +219,12 @@ export default function HistoryBuySalePoint() {
       </AppView>
 
       {errorMessage && (
-        <AppText
-          fontStyle='italic'
-          fontSize={14}
-          style={{ color: 'red', marginBottom: 8 }}
-        >
+        <AppText fontStyle='italic' fontSize={14} style={{ color: 'red', marginBottom: 8 }}>
           {"! " + errorMessage}
         </AppText>
       )}
 
-      <AppView flex={1} >
+      <AppView flex={1}>
         <FlatList
           data={history}
           keyExtractor={(item) => item.id.toString()}
@@ -268,10 +233,22 @@ export default function HistoryBuySalePoint() {
           ItemSeparatorComponent={() => <AppView height={scale(6)} />}
           onEndReached={loadMore}
           onEndReachedThreshold={0.3}
-          ListFooterComponent={() => loading && <SkeletonItem />}
+          ListFooterComponent={() => loading ? <SkeletonItem /> : null}
           refreshing={loading}
-          onRefresh={() => dispatch(fetchPointHistory({ page: 1 }))}
-          ListEmptyComponent={() => !loading ? <AppView alignItems='center' justifyContent='center'><AppText>{'Chưa có lịch sử mua/bán điểm'}</AppText></AppView> : null}
+          // ✅ FIX 4: onRefresh reset về page 1, xóa filter
+          onRefresh={() => {
+            setFromDate('');
+            setToDate('');
+            setSelectedType(null);
+            dispatch(fetchPointHistory({ page: 1 }));
+          }}
+          ListEmptyComponent={() =>
+            !loading
+              ? <AppView alignItems='center' justifyContent='center'>
+                <AppText>{'Chưa có lịch sử mua/bán điểm'}</AppText>
+              </AppView>
+              : null
+          }
         />
       </AppView>
 

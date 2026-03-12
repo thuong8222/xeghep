@@ -70,7 +70,12 @@ interface CreateSalePayload {
   price_per_point: number;
   bank_info: BankInfo;
 }
-
+export interface FetchHistoryPointParams {
+  start_date?: number;
+  end_date?: number;
+  page?: number;
+  related_type?: string;
+}
 // ---- AXIOS INSTANCE ----
 export const api = axios.create({
   baseURL: AppConfig.BASE_URL,
@@ -131,13 +136,13 @@ export const buyPointAction = createAsyncThunk<
 });
 //historyPointAPI
 export const historyPoint = createAsyncThunk<
-  Point[],
-  void,
+  any[],
+  FetchHistoryPointParams, // ← đổi từ void sang có params
   { rejectValue: string }
->('point/historyPoint', async (_, { rejectWithValue }) => {
+>('point/historyPoint', async (params, { rejectWithValue }) => {
   try {
     // const response = await api.get('api/points');
-    const response = await historyPointAPI();
+    const response = await historyPointAPI(params);
     console.log(
       'historyPoint response: ',
       response?.data?.status === 1 || response?.status === 200,

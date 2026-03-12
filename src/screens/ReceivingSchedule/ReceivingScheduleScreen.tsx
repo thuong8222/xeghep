@@ -43,25 +43,25 @@ export default function ReceivingScheduleScreen() {
 
   // ✅ Ref để tránh stale closure trong loadTrips
   const fromDateRef = useRef(fromDate);
-  const toDateRef   = useRef(toDate);
-  const typeRef     = useRef(selectedType);
+  const toDateRef = useRef(toDate);
+  const typeRef = useRef(selectedType);
 
   useEffect(() => { fromDateRef.current = fromDate; }, [fromDate]);
-  useEffect(() => { toDateRef.current   = toDate;   }, [toDate]);
-  useEffect(() => { typeRef.current     = selectedType; }, [selectedType]);
+  useEffect(() => { toDateRef.current = toDate; }, [toDate]);
+  useEffect(() => { typeRef.current = selectedType; }, [selectedType]);
 
   // ✅ Build params: start = startOfDay, end = endOfDay
   const buildParams = (from: string, to: string): FetchReceivedTripsParams => {
     const params: FetchReceivedTripsParams = {};
     if (from) params.start_date = moment(from, 'DD/MM/YYYY').startOf('day').unix();
-    if (to)   params.end_date   = moment(to,   'DD/MM/YYYY').endOf('day').unix();
+    if (to) params.end_date = moment(to, 'DD/MM/YYYY').endOf('day').unix();
     return params;
   };
 
   const dispatchFetch = useCallback((type: string, params: FetchReceivedTripsParams) => {
     console.log('FETCH:', type, params);
     if (type === 'chuyến nhận') return dispatch(fetchReceivedTrips(params));
-    if (type === 'chuyến bán')  return dispatch(fetchSoldTrips(params));
+    if (type === 'chuyến bán') return dispatch(fetchSoldTrips(params));
     return dispatch(fetchMyTrips(params));
   }, [dispatch]);
 
@@ -88,7 +88,7 @@ export default function ReceivingScheduleScreen() {
 
   const handleConfirmDate = useCallback((selectedDate: Date) => {
     const formatted = moment(selectedDate).format('DD/MM/YYYY');
-    const selected  = moment(selectedDate);
+    const selected = moment(selectedDate);
 
     if (selectedDateType === 'from') {
       if (toDate) {
@@ -140,8 +140,8 @@ export default function ReceivingScheduleScreen() {
 
   const currentData =
     selectedType === 'chuyến nhận' ? receivedTrips :
-    selectedType === 'chuyến bán'  ? soldTrips :
-    myTrips;
+      selectedType === 'chuyến bán' ? soldTrips :
+        myTrips;
 
   return (
     <AppView flex={1} backgroundColor="#fff" padding={16} position="relative" gap={8}>
@@ -187,15 +187,15 @@ export default function ReceivingScheduleScreen() {
           {'! ' + errorMessage}
         </AppText>
       )}
-<AppView>
-      {/* ── Tab lọc loại ── */}
-      <TypeFilterBar
-        types={TYPES}
-        selectedType={selectedType}
-        toggleFilter={toggleFilter}
-        loading={loading && !refreshing}
-      />
-</AppView>
+      <AppView>
+        {/* ── Tab lọc loại ── */}
+        <TypeFilterBar
+          types={TYPES}
+          selectedType={selectedType}
+          toggleFilter={toggleFilter}
+          loading={loading && !refreshing}
+        />
+      </AppView>
       {/* ── Danh sách ── */}
       <AppView flex={1}>
         <FlatList

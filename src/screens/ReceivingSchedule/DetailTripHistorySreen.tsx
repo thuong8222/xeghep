@@ -139,7 +139,7 @@ export default function DetailTripHistorySreen({ route, navigation }: any) {
     const gotoChat = () => {
         const buyerId = trip?.buyer_id ?? trip?.id_driver_receive ?? driverReceive?.id ?? (!isSeller ? currentUserId : undefined);
         const sellerIdValue = trip?.seller_id ?? trip?.id_driver_sell ?? driverSell?.id_driver ?? (isSeller ? currentUserId : undefined);
-        navigation.push('ChatScreen', { data: { ...trip, buyer_id: buyerId, seller_id: sellerIdValue } })
+        navigation.push('ChatScreen', { data: { ...trip, buyer_id: buyerId, seller_id: sellerIdValue, }, screen: 'DetailTripHistory' })
     }
     return (
         <AppView style={styles.container}>

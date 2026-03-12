@@ -37,14 +37,13 @@ interface Props {
 const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
   const { socket } = useSocket();
   const dispatch = useDispatch<AppDispatch>();
-  const { data } = route?.params;
+  const { data, screen } = route?.params;
   const { currentDriver, setCurrentDriver } = useAppContext();
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDriver = async () => {
       const driverString = await AsyncStorage.getItem("driver");
-
       if (driverString) setCurrentDriver(JSON.parse(driverString));
     };
     fetchDriver();
@@ -375,7 +374,7 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
       Alert.alert("Lỗi", "Đã xảy ra lỗi không mong muốn");
     }
   };
-
+  console.log(`messages: `, messages)
   const ListHeaderComponent = () => {
     return (
       <AppView radius={16} padding={16} gap={6} backgroundColor={ColorsGlobal.backgroundGray}>
@@ -422,16 +421,17 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
             <Text style={{ fontSize: 30, color: "white" }}>✕</Text>
           </TouchableOpacity>
 
-          <Image
+          <FastImage
             source={{ uri: previewImage }}
-            style={{ width: "90%", height: "70%", resizeMode: "contain" }}
+            style={{ width: "90%", height: "70%", }}
+            resizeMode="contain"
           />
         </View>
       )}
 
 
       <Container padding={0}>
-        {isOnwer && <ListHeaderComponent />}
+        {(isOnwer && screen !== 'DetailTripHistory') && <ListHeaderComponent />}
         <FlatList
           data={messages}
           keyExtractor={(item, i) => item.id || i.toString()}

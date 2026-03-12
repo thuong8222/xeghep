@@ -35,7 +35,7 @@ export const api_hastoken = axios.create({
 });
 
 // Thêm interceptor
-api_hastoken.interceptors.request.use(async (config) => {
+api_hastoken.interceptors.request.use(async config => {
   const token = await AsyncStorage.getItem('token');
   console.log('token in api_hastoken:', token);
   if (token) {
@@ -54,7 +54,9 @@ interface PointHistoryParams {
   end_date: number;
 }
 
-export const getHistoryTrandsactionPoints = async (params: PointHistoryParams) => {
+export const getHistoryTrandsactionPoints = async (
+  params: PointHistoryParams,
+) => {
   return api.get('api/points/history_transaction', { params });
 };
 export const createSale = async (data: any) => {
@@ -64,8 +66,12 @@ export const createSale = async (data: any) => {
 export const buyPoint = async (id: string, data: any) => {
   return api.post(`api/points/${id}/buy`, data);
 };
-export const historyPointAPI = async () => {
-  return api.get(`api/points/historyPoint`);
+// ✅ Thêm params để truyền filter date
+export const historyPointAPI = async (params?: {
+  start_date?: number;
+  end_date?: number;
+}) => {
+  return api.get(`api/points/historyPoint`, { params });
 };
 export const cancelSalePointAPI = async (id: string) => {
   return api.post(`api/points/${id}/cancel`);

@@ -16,7 +16,7 @@ import AppView from '../components/common/AppView';
 
 export type RootStackParamList = {
   BottomTabs: NavigatorScreenParams<BottomTabParamList>;
-  ChatScreen: { data: any };
+  ChatScreen: { data: any, screen?: string };
 
 };
 const Stack = createNativeStackNavigator<RootStackParamList>();
