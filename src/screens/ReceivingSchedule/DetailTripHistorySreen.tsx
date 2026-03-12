@@ -1,4 +1,4 @@
-import { ActivityIndicator, Linking, StyleSheet, View } from 'react-native'
+import { ActivityIndicator, Linking, ScrollView, StyleSheet, View } from 'react-native'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import AppView from '../../components/common/AppView';
 import AppText from '../../components/common/AppText';
@@ -17,14 +17,16 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/data/store';
 import { fetchMyTrips, fetchReceivedTrips, fetchSoldTrips } from '../../redux/slices/tripsSlice';
 import { useFocusEffect } from '@react-navigation/native';
+import IconChevronLeftDouble from '../../assets/icons/IconChevronLeftDouble';
 
 export default function DetailTripHistorySreen({ route, navigation }: any) {
     const data = route?.params?.data;
+    const paramTripId = route?.params?.tripId;
     // console.log('data DetailTripHistorySreen: ', data)
     const dispatch = useDispatch<AppDispatch>();
     const tripsState = useSelector((state: RootState) => state.trips) as any;
     const { receivedTrips = [], soldTrips = [], myTrips = [], loading } = tripsState;
-    const [trip, setTrip] = useState<any>(data ?? null);
+    const [trip, setTrip] = useState<any>(data ?? (paramTripId ? { id: paramTripId } : null));
     const [driver, setDriver] = useState<any>(null);
     useEffect(() => {
         const fetchDriver = async () => {
@@ -36,14 +38,14 @@ export default function DetailTripHistorySreen({ route, navigation }: any) {
     const { currentDriver } = useAppContext();
 
     useEffect(() => {
-        setTrip(data ?? null);
-    }, [data]);
+        setTrip(data ?? (paramTripId ? { id: paramTripId } : null));
+    }, [data, paramTripId]);
 
     const currentDriverObj: any = currentDriver as any;
     const currentUserId = currentDriverObj?.id || driver?.id || currentDriver;
     const tripId = useMemo(() => {
-        return trip?.id ?? trip?.id_trip ?? data?.id ?? data?.id_trip;
-    }, [trip?.id, trip?.id_trip, data?.id, data?.id_trip]);
+        return trip?.id ?? trip?.id_trip ?? data?.id ?? data?.id_trip ?? paramTripId;
+    }, [trip?.id, trip?.id_trip, data?.id, data?.id_trip, paramTripId]);
 
     const sellerId = useMemo(() => {
         return trip?.id_driver_sell ?? trip?.driver_sell?.id_driver ?? trip?.seller_id ?? trip?.driver_sell_id ?? trip?.driver_sell?.id;
@@ -98,12 +100,9 @@ export default function DetailTripHistorySreen({ route, navigation }: any) {
     useFocusEffect(
         useCallback(() => {
             if (!tripId) return;
-            if (isSeller) {
-                dispatch(fetchSoldTrips({}));
-                dispatch(fetchMyTrips({}));
-            } else {
-                dispatch(fetchReceivedTrips({}));
-            }
+            dispatch(fetchReceivedTrips({}));
+            dispatch(fetchSoldTrips({}));
+            dispatch(fetchMyTrips({}));
         }, [dispatch, tripId, isSeller]),
     );
 
@@ -143,130 +142,132 @@ export default function DetailTripHistorySreen({ route, navigation }: any) {
     }
     return (
         <AppView style={styles.container}>
-            <AppView padding={16} marginBottom={16} borderWidth={1} borderColor={statusInfo.color} backgroundColor={statusInfo.background} radius={999} row justifyContent={'space-between'}>
-                <AppText  >{'Trạng thái: '}</AppText>
-                <AppText textAlign={'right'} color={statusInfo.color}>{statusInfo.label}</AppText>
-            </AppView>
-            {!!loading && (
-                <AppView paddingBottom={10} alignItems="center">
-                    <ActivityIndicator />
+            <ScrollView showsVerticalScrollIndicator={false}>
+                <AppView padding={16} marginBottom={16} borderWidth={1} borderColor={statusInfo.color} backgroundColor={statusInfo.background} radius={999} row justifyContent={'space-between'}>
+                    <AppText  >{'Trạng thái: '}</AppText>
+                    <AppText textAlign={'right'} color={statusInfo.color}>{statusInfo.label}</AppText>
                 </AppView>
-            )}
-            {/* --- Header tài xế bán chuyến --- */}
-            {isSold &&
-                <View style={styles.section}>
-
-                    <AppView>
-
-
-                        <AppText style={styles.sectionTitle}>{isSeller ? 'Tài xế nhận chuyến' : 'Tài xế bán chuyến: '}</AppText>
-                        {isSeller ?
-                            <View style={styles.row}>
-                                <IconUser size={22} />
-                                <AppText style={styles.value}>
-                                    {driverReceive?.full_name} ({driverReceive?.phone || driverReceive?.phone_number})
-                                </AppText>
-                            </View> :
-                            <View style={styles.row}>
-                                <IconUser size={22} />
-                                <AppText style={styles.value}>
-                                    {driverSell?.full_name} ({driverSell?.phone || driverSell?.phone_number})
-                                </AppText>
-                            </View>
-                        }
+                {!!loading && (
+                    <AppView paddingBottom={10} alignItems="center">
+                        <ActivityIndicator />
                     </AppView>
+                )}
+                {/* --- Header tài xế bán chuyến --- */}
+                {isSold &&
+                    <View style={styles.section}>
 
-                    <AppView row justifyContent={'space-between'} alignItems={'center'}>
-                        <AppButton
-                            row gap={6}
-                            onPress={gotoChat}
-                        >
-                            <IconComment color={ColorsGlobal.main} />
-                            <AppText color={ColorsGlobal.main}>{isSeller ? 'Chat với lái xe nhận' : 'Chat với lái xe bán'}</AppText>
-                        </AppButton>
-                        <AppButton
+                        <AppView>
 
-                            onPress={() => {
-                                if (callPhone) Linking.openURL(`tel:${callPhone}`);
-                            }}
-                            style={styles.callBtn}
-                            row gap={8} alignItems='center'
-                        >
-                            <IconPhone />
-                            <AppText color={ColorsGlobal.main2}>{'Gọi'}</AppText>
 
-                        </AppButton>
-                    </AppView>
-                </View>
-            }
-            {/* --- Thông tin hành trình --- */}
-            <View style={styles.section}>
-                <AppText style={styles.sectionTitle}>Thông tin chuyến</AppText>
+                            <AppText style={styles.sectionTitle}>{isSeller ? 'Tài xế nhận chuyến' : 'Tài xế bán chuyến: '}</AppText>
+                            {isSeller ?
+                                <View style={styles.row}>
+                                    <IconUser size={22} />
+                                    <AppText style={styles.value}>
+                                        {driverReceive?.full_name} ({driverReceive?.phone || driverReceive?.phone_number})
+                                    </AppText>
+                                </View> :
+                                <View style={styles.row}>
+                                    <IconUser size={22} />
+                                    <AppText style={styles.value}>
+                                        {driverSell?.full_name} ({driverSell?.phone || driverSell?.phone_number})
+                                    </AppText>
+                                </View>
+                            }
+                        </AppView>
 
-                <View style={styles.row}>
-                    <IconLocation />
-                    <AppText style={styles.label}>Điểm đi:</AppText>
-                    <AppText style={styles.value}>{trip?.place_start}</AppText>
-                </View>
+                        <AppView row justifyContent={'space-between'} alignItems={'center'}>
+                            <AppButton
+                                row gap={6}
+                                onPress={gotoChat}
+                            >
+                                <IconComment color={ColorsGlobal.main} />
+                                <AppText color={ColorsGlobal.main}>{isSeller ? 'Chat với lái xe nhận' : 'Chat với lái xe bán'}</AppText>
+                            </AppButton>
+                            <AppButton
 
-                <View style={styles.row}>
-                    <IconLocation />
-                    <AppText style={styles.label}>Điểm đến:</AppText>
-                    <AppText style={styles.value}>{trip?.place_end}</AppText>
-                </View>
+                                onPress={() => {
+                                    if (callPhone) Linking.openURL(`tel:${callPhone}`);
+                                }}
+                                style={styles.callBtn}
+                                row gap={8} alignItems='center'
+                            >
+                                <IconPhone />
+                                <AppText color={ColorsGlobal.main2}>{'Gọi'}</AppText>
 
-                <View style={styles.row}>
-                    <IconUser />
-                    <AppText style={styles.label}>Số khách:</AppText>
-                    <AppText style={styles.value}>{trip?.guests}</AppText>
-                </View>
-
-                <View style={styles.row}>
-                    <IconClock />
-                    <AppText style={styles.label}>Giờ xuất phát:</AppText>
-                    <AppText style={styles.value}>
-                        {formatTime(trip?.time_start)}
-                    </AppText>
-                </View>
-
-                <View style={styles.row}>
-                    <IconClock />
-                    <AppText style={styles.label}>Giờ nhận chuyến:</AppText>
-                    <AppText style={styles.value} color={ColorsGlobal.main2}>
-                        {formatTime(trip?.time_receive)}
-                    </AppText>
-                </View>
-
-            </View>
-
-            {/* --- Giá – Point --- */}
-            <View style={styles.section}>
-                <AppText style={styles.sectionTitle}>Thanh toán & Điểm</AppText>
-
-                <View style={styles.row}>
-                    <AppText style={styles.label}>Điểm chuyến:</AppText>
-                    <AppText style={styles.value}>{'-' + trip?.point + ' điểm'}</AppText>
-                </View>
-
-                <View style={styles.row}>
-                    <AppText style={styles.label}>Thu khách:</AppText>
-                    <AppText style={styles.price}>{trip?.price_sell}K</AppText>
-                </View>
-            </View>
-
-            {/* --- Ghi chú --- */}
-            {trip?.note ? (
+                            </AppButton>
+                        </AppView>
+                    </View>
+                }
+                {/* --- Thông tin hành trình --- */}
                 <View style={styles.section}>
-                    <AppText style={styles.sectionTitle}>Ghi chú</AppText>
-                    <AppText style={styles.note}>{trip?.note}</AppText>
+                    <AppText style={styles.sectionTitle}>Thông tin chuyến</AppText>
+
+                    <View style={styles.row}>
+                        <IconLocation />
+                        <AppText style={styles.label}>Điểm đi:</AppText>
+                        <AppText style={styles.value}>{trip?.place_start}</AppText>
+                    </View>
+
+                    <View style={styles.row}>
+                        <IconLocation />
+                        <AppText style={styles.label}>Điểm đến:</AppText>
+                        <AppText style={styles.value}>{trip?.place_end}</AppText>
+                    </View>
+
+                    <View style={styles.row}>
+                        <IconUser />
+                        <AppText style={styles.label}>Số khách:</AppText>
+                        <AppText style={styles.value}>{trip?.guests}</AppText>
+                    </View>
+
+                    <View style={styles.row}>
+                        <IconClock />
+                        <AppText style={styles.label}>Giờ xuất phát:</AppText>
+                        <AppText style={styles.value}>
+                            {formatTime(trip?.time_start)}
+                        </AppText>
+                    </View>
+
+                    <View style={styles.row}>
+                        <IconClock />
+                        <AppText style={styles.label}>Giờ nhận chuyến:</AppText>
+                        <AppText style={styles.value} color={ColorsGlobal.main2}>
+                            {formatTime(trip?.time_receive)}
+                        </AppText>
+                    </View>
+
                 </View>
-            ) : null}
 
-            {/* --- Nút quay lại --- */}
-            <AppButton onPress={() => navigation.goBack()} style={styles.backBtn} alignItems="center">
-                <AppText>{'Quay lại'}</AppText>
-            </AppButton>
+                {/* --- Giá – Point --- */}
+                <View style={styles.section}>
+                    <AppText style={styles.sectionTitle}>Thanh toán & Điểm</AppText>
 
+                    <View style={styles.row}>
+                        <AppText style={styles.label}>Điểm chuyến:</AppText>
+                        <AppText style={styles.value}>{'-' + trip?.point + ' điểm'}</AppText>
+                    </View>
+
+                    <View style={styles.row}>
+                        <AppText style={styles.label}>Thu khách:</AppText>
+                        <AppText style={styles.price}>{trip?.price_sell}K</AppText>
+                    </View>
+                </View>
+
+                {/* --- Ghi chú --- */}
+                {trip?.note ? (
+                    <View style={styles.section}>
+                        <AppText style={styles.sectionTitle}>Ghi chú</AppText>
+                        <AppText style={styles.note}>{trip?.note}</AppText>
+                    </View>
+                ) : null}
+
+                {/* --- Nút quay lại --- */}
+                <AppButton onPress={() => navigation.replace('ReceivingScheduleScreen')} style={styles.backBtn} row gap={6} alignItems='center' backgroundColor={ColorsGlobal.main + '15'} paddingVertical={10} width={100} paddingHorizontal={5} borderTopEndRadius={10}>
+                    <IconChevronLeftDouble />
+                    <AppText>{'Quay lại'}</AppText>
+                </AppButton>
+            </ScrollView>
         </AppView>
     );
 };
@@ -274,7 +275,7 @@ export default function DetailTripHistorySreen({ route, navigation }: any) {
 
 const styles = StyleSheet.create({
     container: {
-        padding: 16,
+        padding: 16, flex: 1,
     },
     section: {
         backgroundColor: '#fff',

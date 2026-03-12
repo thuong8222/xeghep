@@ -16,7 +16,7 @@ import { fetchAutoBuyList } from '../redux/slices/requestAutoBuyTrip';
  */
 export const useAutoBuySuccessNotifications = (buyerId?: string) => {
   const { socket, isConnected } = useSocket();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -26,18 +26,26 @@ export const useAutoBuySuccessNotifications = (buyerId?: string) => {
 
     const handleAutoBuySuccess = async (data: any) => {
       const { trip, message, notification } = data;
-
+      console.log('Mua chuyến tự động thành công trip: ', trip);
       // Hiển thị Alert
       Alert.alert(
         '🎉 Mua chuyến tự động thành công!',
-        `${trip.place_start} → ${trip.place_end}\n${trip.points} điểm - ${trip.price_sell}K`,
+        `${trip.place_start} → ${trip.place_end}\n${
+          trip.point || trip.points
+        } điểm - ${trip.price_sell}K`,
         [
           {
             text: 'Xem chi tiết',
             onPress: () => {
               navigation.navigate('RootNavigator', {
-                screen: 'TripDetailScreen',
-                params: { tripId: trip.id, isReceived: true },
+                screen: 'BottomTabs',
+                params: {
+                  screen: 'ReceivingScheduleTabs',
+                  params: {
+                    screen: 'DetailTripHistory',
+                    params: { tripId: trip.id, isReceived: true },
+                  },
+                },
               });
             },
           },
@@ -76,7 +84,7 @@ export const useAutoBuySuccessNotifications = (buyerId?: string) => {
  */
 export const useAutoBuySoldNotifications = (sellerId?: string) => {
   const { socket, isConnected } = useSocket();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   useEffect(() => {
     if (!socket || !isConnected || !sellerId) {
@@ -85,20 +93,26 @@ export const useAutoBuySoldNotifications = (sellerId?: string) => {
 
     const handleTripSoldAuto = async (data: any) => {
       const { trip, message, notification } = data;
-
+      console.log('Chuyến đã được mua tự động! trip: ', trip);
       // Hiển thị Alert
       Alert.alert(
         '💰 Chuyến đã được mua tự động!',
         `${trip.buyer?.full_name || 'Khách hàng'} mua:\n${trip.place_start} → ${
           trip.place_end
-        }\n${trip.point} điểm - ${trip.price_sell}K`,
+        }\n${trip.point || trip.points} điểm - ${trip.price_sell}K`,
         [
           {
             text: 'Xem chi tiết',
             onPress: () => {
               navigation.navigate('RootNavigator', {
-                screen: 'TripDetailScreen',
-                params: { tripId: trip.id, isSold: true },
+                screen: 'BottomTabs',
+                params: {
+                  screen: 'ReceivingScheduleTabs',
+                  params: {
+                    screen: 'DetailTripHistory',
+                    params: { tripId: trip.id, isSold: true },
+                  },
+                },
               });
             },
           },
@@ -134,7 +148,7 @@ export const useAutoBuySoldNotifications = (sellerId?: string) => {
  */
 export const useAutoBuyMatchFoundNotifications = (buyerId?: string) => {
   const { socket, isConnected } = useSocket();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   useEffect(() => {
     if (!socket || !isConnected || !buyerId) {
@@ -153,8 +167,14 @@ export const useAutoBuyMatchFoundNotifications = (buyerId?: string) => {
             text: 'Xem ngay',
             onPress: () => {
               navigation.navigate('RootNavigator', {
-                screen: 'TripDetailScreen',
-                params: { tripId: trip.id },
+                screen: 'BottomTabs',
+                params: {
+                  screen: 'ReceivingScheduleTabs',
+                  params: {
+                    screen: 'DetailTripHistory',
+                    params: { tripId: trip.id },
+                  },
+                },
               });
             },
           },

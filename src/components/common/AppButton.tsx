@@ -4,7 +4,7 @@ import { CustomButtonProps } from '../base/types/baseViewProps';
 import { scale } from '../../utils/Helper';
 
 const AppButton: React.FC<CustomButtonProps> = ({
-  justifyContent,
+  justifyContent, borderBottomEndRadius,
   alignItems,
   backgroundColor,
   height,
@@ -63,6 +63,7 @@ const AppButton: React.FC<CustomButtonProps> = ({
     marginRight: typeof marginRight === 'number' ? scale(marginRight) : marginRight,
     paddingLeft: typeof paddingLeft === 'number' ? scale(paddingLeft) : paddingLeft,
     borderRadius: radius,
+    borderBottomEndRadius,
     borderTopEndRadius,
     borderTopLeftRadius,
     gap,
@@ -84,7 +85,7 @@ const AppButton: React.FC<CustomButtonProps> = ({
     left,
     right,
     position,
-    ...(row && { flexDirection: 'row' }),  
+    ...(row && { flexDirection: 'row' }),
   };
 
   const renderChildren = React.Children.map(children, (child) => {
@@ -96,10 +97,10 @@ const AppButton: React.FC<CustomButtonProps> = ({
 
   return (
     <TouchableOpacity
-      style={[viewStyle, style]}  
+      style={[viewStyle, style]}
       onPress={onPress}
       disabled={disabled}
-      activeOpacity={activeOpacity || 0.7}  
+      activeOpacity={activeOpacity || 0.7}
     >
       {renderChildren}
     </TouchableOpacity>

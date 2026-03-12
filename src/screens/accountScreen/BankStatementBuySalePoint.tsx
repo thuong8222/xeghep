@@ -188,7 +188,7 @@ export default function BankStatementBuySalePoint() {
   if (!history) return null;
 
   return (
-    <Container ignoreBottomInset style={{ gap: 6 }} loading={loading}>
+    <Container ignoreBottomInset loading={loading}>
       {error && (
         <AppText color="red">{error}</AppText>
       )}
@@ -237,7 +237,7 @@ export default function BankStatementBuySalePoint() {
           {"! " + errorMessage}
         </AppText>
       )}
-      <AppView >
+      <AppView paddingBottom={12} >
         <TypeFilterBar
           types={types}
           selectedType={selectedType}

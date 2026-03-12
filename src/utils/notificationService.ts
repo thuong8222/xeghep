@@ -58,11 +58,14 @@ export async function getFcmToken() {
 export function listenForForegroundMessages() {
   messaging().onMessage(async remoteMessage => {
     console.log('📩 Foreground message received:', remoteMessage);
+    const title =
+      remoteMessage?.notification?.title ?? remoteMessage?.data?.title;
+    const body = remoteMessage?.notification?.body ?? remoteMessage?.data?.body;
     await displayNotification(
-      remoteMessage?.notification?.title || remoteMessage?.data?.title,
-      remoteMessage.notification?.body || remoteMessage.data?.body,
+      typeof title === 'string' ? title : undefined,
+      typeof body === 'string' ? body : undefined,
       remoteMessage.data?.navData
-        ? JSON.parse(remoteMessage.data.navData)
+        ? JSON.parse(String(remoteMessage.data.navData))
         : undefined,
     );
   });
@@ -74,11 +77,14 @@ export function listenForForegroundMessages() {
  */
 export function registerBackgroundHandler() {
   messaging().setBackgroundMessageHandler(async remoteMessage => {
+    const title =
+      remoteMessage?.notification?.title ?? remoteMessage?.data?.title;
+    const body = remoteMessage?.notification?.body ?? remoteMessage?.data?.body;
     await displayNotification(
-      remoteMessage.notification?.title || remoteMessage.data?.title,
-      remoteMessage.notification?.body || remoteMessage.data?.body,
+      typeof title === 'string' ? title : undefined,
+      typeof body === 'string' ? body : undefined,
       remoteMessage.data?.navData
-        ? JSON.parse(remoteMessage.data.navData)
+        ? JSON.parse(String(remoteMessage.data.navData))
         : undefined,
     );
   });
@@ -175,11 +181,35 @@ export function handleNotificationNavigation(data: any) {
 
     console.log('🧭 Navigating via nested params:', navData);
 
+    const normalizeNavData = (input: any) => {
+      if (input?.screen === 'TripDetailScreen') {
+        const tripId = input?.params?.tripId;
+        const isSold = !!input?.params?.isSold;
+        const isReceived = !!input?.params?.isReceived;
+        return {
+          screen: 'RootNavigator',
+          params: {
+            screen: 'BottomTabs',
+            params: {
+              screen: 'ReceivingScheduleTabs',
+              params: {
+                screen: 'DetailTripHistory',
+                params: { tripId, isSold, isReceived },
+              },
+            },
+          },
+        };
+      }
+      return input;
+    };
+
+    const normalized = normalizeNavData(navData);
+
     // Dùng navigationRef để navigate qua nested navigator
     navigationRef.dispatch(
       CommonActions.navigate({
-        name: navData.screen, // RootNavigator
-        params: navData.params, // params: { screen: 'BottomTabs', params: { ... } }
+        name: normalized.screen,
+        params: normalized.params,
       }),
     );
   } catch (error) {
