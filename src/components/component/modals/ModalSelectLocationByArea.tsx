@@ -61,7 +61,7 @@ export default function ModalSelectLocationByArea({
   useEffect(() => {
     const ids = parentIds || parent_id;
     if (isVisible && areaId && ids) {
-      console.log('ids, locationType: ', ids, locationType);
+
       fetchLocations(ids, locationType);
     }
   }, [isVisible, areaId, parentIds, locationType]);
@@ -86,8 +86,7 @@ export default function ModalSelectLocationByArea({
       if (locationType) {
         params.location_type = locationType;
       }
-      console.log('before fetch loation params: ', params)
-      console.log('before fetch areaId: ', areaId)
+
       const areaId_ = areaId || currentArea?.id;
       const res = await axios.get(
         `https://app.xeghepnd.com/api/areas/${areaId_}/locations`,

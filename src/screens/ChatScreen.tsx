@@ -25,10 +25,7 @@ import AppConfig from "../services/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import FastImage from "react-native-fast-image";
 
-
-
 type ChatRouteProp = RouteProp<RootStackParamList, 'ChatScreen'>;
-
 interface Props {
   route: ChatRouteProp;
   navigation: any;
@@ -122,7 +119,7 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
     });
 
     const handleLoadMessages = (msgs: Message[]) => {
-      console.log("📜 Loaded messages:", msgs.length);
+
       setMessages(msgs);
     };
 
@@ -203,11 +200,12 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
         image_url: imageUrl, // ⭐ Image có thể null nếu chỉ gửi text
       };
 
-      console.log("📤 Sending message:", payload);
+
 
       socket.emit("send_message", payload, (response: any) => {
-        console.log("✅ Server response:", response);
+
         if (response?.error) {
+          console.log('Server loi: ', response)
           Alert.alert("Lỗi", response.error);
         }
       });
@@ -236,8 +234,6 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
         name: `chat_${Date.now()}.jpg`,
       } as any);
 
-      console.log("📤 Uploading image to:", `${AppConfig.SOCKET_URL}/api/upload/chat-image`);
-      console.log("📦 Image URI:", imageUri);
 
       const uploadResponse = await fetch(`${AppConfig.SOCKET_URL}/api/upload/chat-image`, {
         method: 'POST',
@@ -247,7 +243,7 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
         },
       });
 
-      console.log("📥 Upload response status:", uploadResponse.status);
+
 
       if (!uploadResponse.ok) {
         const errorText = await uploadResponse.text();
@@ -256,13 +252,13 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
       }
 
       const uploadResult = await uploadResponse.json();
-      console.log("✅ Upload result:", uploadResult);
+
 
       if (!uploadResult.success || !uploadResult.url) {
         throw new Error(uploadResult.error || 'No URL returned');
       }
 
-      console.log("✅ Image uploaded:", uploadResult.url);
+
       return uploadResult.url;
 
     } catch (error: any) {
@@ -374,7 +370,7 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
       Alert.alert("Lỗi", "Đã xảy ra lỗi không mong muốn");
     }
   };
-  console.log(`messages: `, messages)
+
   const ListHeaderComponent = () => {
     return (
       <AppView radius={16} padding={16} gap={6} backgroundColor={ColorsGlobal.backgroundGray}>

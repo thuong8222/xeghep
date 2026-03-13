@@ -60,7 +60,7 @@ export const fetchDriver = createAsyncThunk<
 >('driver/fetchDriver', async (_, { rejectWithValue }) => {
   try {
     const response = await api.get('api/auth/me');
-    console.log('response fetchDriver data: ', response);
+   
     return response.data.data;
   } catch (err: any) {
     console.log('driverSlice err: ', err);

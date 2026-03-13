@@ -37,9 +37,6 @@ export default function AccountScreen({ navigation }: Props) {
   const { isConnected } = useSocket();
   const [isModalChangePw, setIsModalChangePw] = useState(false);
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
-  console.log('driver', driver);
-
-
 
   useEffect(() => {
     const syncDriver = async () => {

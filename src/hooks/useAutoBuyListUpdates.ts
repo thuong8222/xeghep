@@ -26,7 +26,7 @@ export const useAutoBuyListUpdates = (userId?: string) => {
       // Hiển thị notification tùy theo action
       if (action === 'deleted' && reason === 'purchased') {
         await displayNotification(
-          '✅ Yêu cầu đã hoàn thành',
+          'Yêu cầu mua chuyến tự động',
           'Đã tự động mua chuyến thành công',
           {
             screen: 'ListPriorityPurchaseScreen',

@@ -59,7 +59,7 @@ export default function PriorityPurchaseScreen() {
     const [dropoffParentIds, setDropoffParentIds] = useState<any>(null);
     // Trong handleChangeDirection, thêm swap:
 
-    console.log('selectedDirection: ', selectedDirection)
+
     const isReturn = selectedDirection === 1;
     useEffect(() => {
         if (editData) {
@@ -260,7 +260,7 @@ export default function PriorityPurchaseScreen() {
         setDropoffParentIds(area?.level1_dropoff_ids || null);
         setIsOpenModalSelectArea(false);
     }, []);
-    console.log('editData: ', editData)
+
 
     return (
         <ScrollView style={{ flex: 1, gap: 8, backgroundColor: "#fff" }} contentContainerStyle={{ flex: 1 }}>

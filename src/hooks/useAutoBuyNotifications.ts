@@ -26,7 +26,7 @@ export const useAutoBuySuccessNotifications = (buyerId?: string) => {
 
     const handleAutoBuySuccess = async (data: any) => {
       const { trip, message, notification } = data;
-      console.log('Mua chuyến tự động thành công trip: ', trip);
+  
       // Hiển thị Alert
       Alert.alert(
         '🎉 Mua chuyến tự động thành công!',

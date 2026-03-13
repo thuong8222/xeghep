@@ -107,10 +107,6 @@ export default function SaleTripsScreen({ route, navigation }: Props) {
       phone_number_guest: '',
     };
 
-    console.log('CreateTrip payload:', {
-      time_start: payload.time_start,
-      minutes_added: payload.minutes_added,
-    });
 
     try {
       await dispatch(createTrip(payload) as any).unwrap();

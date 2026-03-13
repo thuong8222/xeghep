@@ -263,9 +263,9 @@ export default function DetailTripHistorySreen({ route, navigation }: any) {
                 ) : null}
 
                 {/* --- Nút quay lại --- */}
-                <AppButton onPress={() => navigation.replace('ReceivingScheduleScreen')} style={styles.backBtn} row gap={6} alignItems='center' backgroundColor={ColorsGlobal.main + '15'} paddingVertical={10} width={100} paddingHorizontal={5} borderTopEndRadius={10}>
+                <AppButton onPress={() => navigation.replace('ReceivingScheduleScreen')} style={styles.backBtn} row gap={6} alignItems='center' backgroundColor={ColorsGlobal.main + '15'} paddingVertical={10} width={120} paddingHorizontal={5} borderTopEndRadius={10} style={{borderBottomEndRadius:10, }}>
                     <IconChevronLeftDouble />
-                    <AppText>{'Quay lại'}</AppText>
+                    <AppText color={ColorsGlobal.main}>{'Quay lại'}</AppText>
                 </AppButton>
             </ScrollView>
         </AppView>
