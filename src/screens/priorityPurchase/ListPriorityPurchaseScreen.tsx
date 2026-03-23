@@ -71,7 +71,7 @@ export default function ListPriorityPurchaseScreen() {
     };
 
     const goToEdit = (item: any) => {
-        console.log('goToEdit item: ', item)
+
         setCurrentAreaAutoTrip(item)
         if (item.status !== 0) {
             Alert.alert('Không thể sửa yêu cầu đã hoàn thành hoặc đã hủy');
@@ -181,7 +181,7 @@ export default function ListPriorityPurchaseScreen() {
                             ⏰ {moment(item.time_receive_start).format('HH:mm DD/MM')} — {moment(item.time_receive_end).format('HH:mm DD/MM')}
                         </AppText>
                         <AppText bold color={ColorsGlobal.main}>
-                            [{item.maximum_point} điểm — {NumberFormat(parseInt(item.desired_price))}K]
+                            [{item.maximum_point} điểm — {NumberFormat((item.desired_price))}K]
                         </AppText>
                     </AppView>
 
