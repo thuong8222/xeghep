@@ -84,37 +84,55 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleLoginWithBiometric = async () => {
     try {
-      // ✅ Thay Keychain bằng AsyncStorage
       const savedCredentials = await getBiometricCredentials();
       if (!savedCredentials) {
         Alert.alert('Thông báo', 'Vui lòng đăng nhập bằng mật khẩu lần đầu để kích hoạt tính năng này');
         return;
       }
 
-      const { available } = await rnBiometrics.isSensorAvailable();
+      // ✅ Kiểm tra sensor trước
+      const { available, biometryType } = await rnBiometrics.isSensorAvailable();
+      console.log('Biometric available:', available, 'type:', biometryType);
+
       if (!available) {
-        Alert.alert('Không hỗ trợ biometric trên thiết bị này');
+        Alert.alert('Thông báo', 'Thiết bị không hỗ trợ xác thực sinh trắc học');
         return;
       }
 
-      const { success } = await rnBiometrics.simplePrompt({
-        promptMessage: 'Xác thực để đăng nhập',
-      });
+      // ✅ iOS cần wrap simplePrompt trong try-catch riêng
+      let result;
+      try {
+        result = await rnBiometrics.simplePrompt({
+          promptMessage: 'Xác thực để đăng nhập',
+          cancelButtonText: 'Hủy', // ✅ iOS cần có cancelButtonText
+        });
+      } catch (promptError: any) {
+        console.log('simplePrompt error:', promptError);
+        // ✅ Không throw, chỉ return — tránh văng app
+        if (promptError?.message?.includes('cancelled') ||
+          promptError?.message?.includes('canceled') ||
+          promptError?.code === 'UserCancel') {
+          return; // User tự hủy, không cần alert
+        }
+        Alert.alert('Xác thực thất bại', promptError?.message || 'Không thể xác thực');
+        return;
+      }
 
-      if (success) {
+      if (result?.success) {
         await login({
           phone: savedCredentials.username,
-          password: savedCredentials.password
+          password: savedCredentials.password,
         });
-        setCurrentDriver(JSON.parse((await AsyncStorage.getItem("driver")) || 'null'));
+        setCurrentDriver(JSON.parse((await AsyncStorage.getItem('driver')) || 'null'));
         dispatch(resetDriverState());
         dispatch(fetchDriver());
       } else {
-        Alert.alert('Xác thực thất bại hoặc bị hủy');
+        // ✅ result.success = false nhưng không throw (user nhấn Cancel)
+        console.log('Biometric not success, error:', result?.error);
       }
     } catch (e: any) {
-      console.log('handleLoginWithBiometric error:', e);
-      Alert.alert('Lỗi khi xác thực biometric', e?.message || String(e));
+      console.log('handleLoginWithBiometric outer error:', e);
+      Alert.alert('Lỗi', e?.message || String(e));
     }
   };
 
