@@ -107,15 +107,15 @@ export default function AccountInfoScreen({ navigation }: Props) {
             {/* Info */}
             <AppView gap={16} borderWidth={1} borderColor={ColorsGlobal.borderColorDark} radius={10} padding={16}>
 
-                <Item label="Tên hiển thị" value={driverPre.full_name} row />
-                <Item label="Số điện thoại" value={driverPre.phone} row />
-                <Item label="Địa chỉ" value={driverPre.address || 'Chưa cập nhật'}  row />
+                <Item label="Tên hiển thị" value={driverPre?.full_name} row />
+                <Item label="Số điện thoại" value={driverPre?.phone} row />
+                <Item label="Địa chỉ" value={driverPre?.address || 'Chưa cập nhật'}  row />
                 <Item label="Năm kinh nghiệm" value={experienceYears} row />
 
                 <AppView row gap={10}>
-                    <Item label="Điểm hiện tại" value={String(NumberFormat(driverPre.current_points))} flex={1} />
-                    <Item label="Chuyến nhận" value={String(NumberFormat(driverPre.total_trips_received))} flex={1} />
-                    <Item label="Chuyến bán" value={String(NumberFormat(driverPre.total_trips_sold))} flex={1} />
+                    <Item label="Điểm hiện tại" value={String(NumberFormat(driverPre?.current_points))} flex={1} />
+                    <Item label="Chuyến nhận" value={String(NumberFormat(driverPre?.total_trips_received))} flex={1} />
+                    <Item label="Chuyến bán" value={String(NumberFormat(driverPre?.total_trips_sold))} flex={1} />
                 </AppView>
 
             </AppView>

@@ -28,6 +28,7 @@ export default function AppModal({
     <Modal
       isVisible={isVisible}
       onBackdropPress={onClose}
+      onBackButtonPress={onClose}
       swipeDirection="down"
       onSwipeComplete={onClose}
       propagateSwipe

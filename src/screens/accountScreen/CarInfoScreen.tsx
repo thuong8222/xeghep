@@ -39,7 +39,7 @@ export default function CarInfoScreen() {
             {/* ====== ẢNH XE ====== */}
             <AppView justifyContent="center" alignItems="center">
                 <View>
-                    {driverPre.image_car ? (
+                    {driverPre?.image_car ? (
                         <Image
                             source={{ uri: driverPre.image_car }}
                             style={styles.image}
@@ -59,14 +59,14 @@ export default function CarInfoScreen() {
 
             {/* ====== THÔNG TIN XE ====== */}
             <AppView gap={16} borderWidth={1} padding={16} radius={8} borderColor={ColorsGlobal.borderColorDark} >
-                <InfoRow label="Tên xe" value={driverPre.name_car} />
-                <InfoRow label="Dòng xe" value={driverPre.model_car} />
-                <InfoRow label="Màu xe" value={driverPre.color_car} />
-                <InfoRow label="Loại xe" value={driverPre.type_car} />
-                <InfoRow label="Biển số xe" value={driverPre.license_number} />
+                <InfoRow label="Tên xe" value={driverPre?.name_car} />
+                <InfoRow label="Dòng xe" value={driverPre?.model_car} />
+                <InfoRow label="Màu xe" value={driverPre?.color_car} />
+                <InfoRow label="Loại xe" value={driverPre?.type_car} />
+                <InfoRow label="Biển số xe" value={driverPre?.license_number} />
                 <InfoRow
                     label="Trạng thái xe"
-                    value={DRIVER_STATUS_LABELS[driverPre.status_car]}
+                    value={driverPre ? DRIVER_STATUS_LABELS[driverPre.status_car] : undefined}
                 />
             </AppView>
         </AppView>
