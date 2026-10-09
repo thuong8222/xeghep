@@ -10,16 +10,16 @@ def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
 android {
     ndkVersion "27.1.12297006"
-    buildToolsVersion "35.0.0"
-    compileSdk 35
+    buildToolsVersion "36.0.0"
+    compileSdk 36
 
     namespace "com.xeghep"
     defaultConfig {
         applicationId "com.xeghep"
         minSdkVersion 24
-        targetSdkVersion 35
-        versionCode 9
-        versionName "0.0.9"
+        targetSdkVersion 36
+        versionCode 10
+        versionName "0.0.10"
         ndk {
             abiFilters "arm64-v8a", "x86_64"
         }
